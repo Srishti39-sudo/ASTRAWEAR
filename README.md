@@ -29,12 +29,17 @@ Single-prompt AI tends to produce generic recommendations. By separating reasoni
 
 **Backend:** Node.js, Express.js, Axios, CORS, dotenv
 
-**AI/ML:** Meta Llama 3 8B Instruct via Hugging Face Router API, prompt engineering with structured JSON outputs, temperature tuning per use case
+**Database:** MongoDB Atlas with Mongoose ODM — stores user profiles, avatar history, astro history, and stylist history with timestamps
+
+**Authentication:** Firebase Authentication (Email/Password + Google Sign-In)
+
+**AI/ML:** Meta Llama 3 8B Instruct via Hugging Face Router API, prompt engineering with structured JSON outputs, temperature tuning per use case, Pollinations AI for image generation pipeline
 
 **External APIs:**
 - FreeAstroAPI (Vedic astrology, Lahiri ayanamsha, whole sign house system)
 - Geoapify (location autocomplete with timezone resolution)
 - Hugging Face (LLM inference)
+- Pollinations AI (text-to-image generation for avatar visualization)
 
 ## How It Works
 
@@ -52,13 +57,15 @@ Backend engineers prompt and calls Llama 3
 Response parsed as structured JSON (with raw-text fallback)
       ↓
 Frontend renders AI output with loading states
+      ↓
+Results saved to MongoDB Atlas (per-user history)
 ```
 
 ## Running Locally
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR-USERNAME/ASTRAWEAR.git
+git clone https://github.com/Srishti39-sudo/ASTRAWEAR.git
 cd ASTRAWEAR/backend
 
 # Install dependencies
@@ -80,6 +87,8 @@ You'll need free accounts for:
 - [Hugging Face](https://huggingface.co) — LLM access
 - [Geoapify](https://www.geoapify.com) — location autocomplete
 - [FreeAstroAPI](https://freeastroapi.com) — Vedic astrology calculations
+- [MongoDB Atlas](https://www.mongodb.com/atlas) — cloud database
+- [Firebase](https://firebase.google.com) — authentication
 
 ## Project Structure
 
@@ -87,6 +96,8 @@ You'll need free accounts for:
 ASTRAWEAR/
 ├── backend/
 │   ├── index.js            # Express server + all API endpoints
+│   ├── models/
+│   │   └── User.js         # Mongoose schema (user profiles + history)
 │   ├── .env.example        # Environment variable template
 │   └── package.json
 ├── frontend/
@@ -114,6 +125,9 @@ ASTRAWEAR/
 | `/generate-astro-style` | POST | AI-generated style guide from astro signs |
 | `/analyze-occasion` | POST | Stage 1: LLM occasion analysis |
 | `/generate-outfit` | POST | Stage 2: Wardrobe-constrained outfit recommendation |
+| `/generate-avatar-image` | POST | Generate AI avatar image from text prompt |
+| `/save-result` | POST | Save feature result to user's MongoDB history |
+| `/get-history` | POST | Retrieve user's past results from MongoDB |
 
 ## What I Learned
 
@@ -121,11 +135,12 @@ Building this project taught me how to integrate real-world APIs with unpredicta
 
 ## Roadmap
 
-- [ ] MongoDB Atlas for persistent user data and saved wardrobes
-- [ ] Firebase Authentication for user accounts
-- [ ] Stable Diffusion integration for Create Avatar — turn the text description into an actual generated image
+- [x] MongoDB Atlas for persistent user data and saved wardrobes
+- [x] Firebase Authentication for user accounts
+- [x] Image generation pipeline (Pollinations AI) for Create Avatar
 - [ ] Deployment (Vercel + Render)
 - [ ] React migration for the frontend
+- [ ] User dashboard with history view
 
 ## Author
 
