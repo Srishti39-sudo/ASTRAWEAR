@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ASTRAWEAR</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand">ASTRAWEAR</div>
+    <a class="btn" href="user.html">Create Avatar</a>
+  </nav>
+
+  <section class="center">
+    <h1>Your AI Stylist, Written in the Stars ✨</h1>
+    <p>Visualize outfits on a body shaped like yours.</p>
+    
+    <div class="circle-wrap">
+        <a href="stylist-input.html" class="circle-card link-card">
+          <h3>Your<br>Personal Stylist</h3>
+        </a>
+      
+        <a href="astro-input.html" class="circle-card link-card">
+          <h3>Your<br>Astro Stylist</h3>
+      </a>
+      
+      </div>
+      <button class="btn reset-btn" onclick="resetApp()">Reset</button>
+
+      
+  </section>
+  <script>
+    function resetApp() {
+      window.location.href = "index.html";
+    }
+  </script>
+  
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Stylist | AstraWear</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="stylist.css">
+</head>
+<body class="stylist-bg">
+
+  <div class="stylist-input-wrapper">
+    <div class="stylist-card">
+
+      <div class="stylist-top-nav">
+        <a href="index.html" class="back-link">← Back Home</a>
+      </div>
+
+      <h1 class="stylist-title">Personal Stylist</h1>
+      <p class="stylist-subtitle">
+        Tell us the occasion, your wardrobe, and your vibe — we'll pick the perfect outfit from your closet.
+      </p>
+
+      <form id="stylistForm" class="stylist-form">
+
+        <!-- GENDER -->
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="gender" required>
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- OCCASION -->
+        <div class="form-group">
+          <label>What's the occasion?</label>
+          <input
+            type="text"
+            id="occasion"
+            placeholder="e.g. Monday board meeting with investors, first day at new startup..."
+            required
+          />
+          <span class="input-hint">Be specific — the more detail, the smarter the AI gets</span>
+        </div>
+
+        <!-- WARDROBE -->
+        <div class="form-group">
+          <label>What clothes do you own?</label>
+          <textarea
+            id="wardrobe"
+            rows="5"
+            placeholder="e.g. black blazer, white button-down shirt, grey trousers, navy turtleneck, beige chinos, brown loafers, white sneakers, silver watch..."
+            required
+          ></textarea>
+          <span class="input-hint">List everything — tops, bottoms, shoes, accessories</span>
+        </div>
+
+        <!-- STYLE VIBE -->
+        <div class="form-group">
+          <label>What vibe are you going for?</label>
+          <input
+            type="text"
+            id="styleVibe"
+            placeholder="e.g. old money, minimalist, dark academia, streetwear-meets-corporate..."
+            required
+          />
+        </div>
+
+        <!-- EXTRA CONTEXT (optional) -->
+        <div class="form-group">
+          <label>Anything else? <span class="optional">(optional)</span></label>
+          <input
+            type="text"
+            id="extraContext"
+            placeholder="e.g. it's hot outside, my company is strict about dress code, I want to stand out..."
+          />
+        </div>
+
+        <button type="submit" class="stylist-btn">
+          BUILD MY OUTFIT
+        </button>
+
+        <p id="formMessage" class="form-message"></p>
+
+      </form>
+
+    </div>
+  </div>
+
+  <script src="stylist-input.js"></script>
+</body>
+</html>

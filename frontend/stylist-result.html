@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Outfit | AstraWear</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="stylist.css">
+</head>
+<body class="stylist-bg">
+
+  <div class="stylist-result-wrapper">
+
+    <!-- HEADER -->
+    <div class="stylist-result-header">
+      <a href="stylist-input.html" class="back-link">← Try Another Outfit</a>
+      <h1 class="stylist-result-title">Your Styled Outfit</h1>
+      <p class="stylist-result-sub" id="occasionText"></p>
+    </div>
+
+    <!-- STAGE 1: OCCASION ANALYSIS -->
+    <div id="stage1Loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Analyzing your occasion...</p>
+      <p class="loading-sub">Understanding the dress code and impression goals</p>
+    </div>
+
+    <div id="stage1Results" class="stage-section" style="display: none;">
+      <div class="stage-label">Stage 1 — Occasion Analysis</div>
+
+      <!-- FORMALITY BAR -->
+      <div class="result-card" id="formalityCard"></div>
+
+      <!-- IMPRESSION GOAL -->
+      <div class="result-card" id="impressionCard"></div>
+
+      <!-- DO'S AND DON'TS -->
+      <div class="result-columns">
+        <div class="result-card do-card" id="dosCard"></div>
+        <div class="result-card dont-card" id="dontsCard"></div>
+      </div>
+    </div>
+
+    <!-- STAGE 2: OUTFIT RECOMMENDATION -->
+    <div id="stage2Loading" class="loading-container" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Building your outfit...</p>
+      <p class="loading-sub">Picking pieces from your wardrobe that match the occasion</p>
+    </div>
+
+    <div id="stage2Results" class="stage-section" style="display: none;">
+      <div class="stage-label">Stage 2 — Your Outfit</div>
+
+      <!-- OUTFIT PIECES -->
+      <div class="result-card" id="outfitCard"></div>
+
+      <!-- STYLING TIPS -->
+      <div class="result-card" id="tipsCard"></div>
+
+      <!-- CONFIDENCE SCORE -->
+      <div class="result-card" id="confidenceCard"></div>
+
+      <!-- MISSING PIECES -->
+      <div class="result-card missing-card" id="missingCard" style="display: none;"></div>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="errorState" style="display: none;" class="error-container">
+      <p>Something went wrong. Let's try again!</p>
+      <button onclick="window.location.href='stylist-input.html'" class="stylist-btn">Try Again</button>
+    </div>
+
+    <!-- RAW FALLBACK -->
+    <div id="rawResults" style="display: none;"></div>
+
+    <div class="result-actions">
+      <button onclick="window.location.href='stylist-input.html'" class="stylist-btn outline-btn">
+        Try Different Occasion
+      </button>
+      <button onclick="window.location.href='index.html'" class="stylist-btn ghost-btn">
+        Back to Home
+      </button>
+    </div>
+
+  </div>
+
+  <script src="stylist-result.js"></script>
+</body>
+</html>

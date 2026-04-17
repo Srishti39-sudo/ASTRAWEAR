@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Astro Style | AstraWear</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="astro.css">
+</head>
+<body class="astro-bg">
+
+    <div class="result-wrapper">
+
+        <!-- HEADER -->
+        <div class="result-header">
+            <a href="index.html" class="back-link">← Back Home</a>
+            <h1 class="result-title">Your Astro Style Blueprint</h1>
+            <p class="result-name" id="userName"></p>
+        </div>
+
+        <!-- SIGN BADGES -->
+        <div class="sign-badges" id="signBadges"></div>
+
+        <!-- LOADING STATE -->
+        <div id="loadingState" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Reading the stars...</p>
+            <p class="loading-sub">Generating your personalized style guide</p>
+        </div>
+
+        <!-- AI RESULTS (hidden until loaded) -->
+        <div id="aiResults" class="ai-results" style="display: none;">
+
+            <!-- OVERALL VIBE -->
+            <div class="result-section vibe-section" id="vibeSection"></div>
+
+            <!-- COLOR PALETTE -->
+            <div class="result-section" id="colorSection"></div>
+
+            <!-- OUTFIT STYLES -->
+            <div class="result-section" id="outfitSection"></div>
+
+            <!-- DAILY OUTFIT -->
+            <div class="result-section" id="dailySection"></div>
+
+            <!-- FABRICS + ACCESSORIES -->
+            <div class="result-columns">
+                <div class="result-section" id="fabricSection"></div>
+                <div class="result-section" id="accessorySection"></div>
+            </div>
+
+            <!-- AVOID -->
+            <div class="result-section avoid-section" id="avoidSection"></div>
+
+        </div>
+
+        <!-- FALLBACK for raw text -->
+        <div id="rawResults" style="display: none;"></div>
+
+        <!-- ERROR STATE -->
+        <div id="errorState" style="display: none;" class="error-container">
+            <p>Something cosmic went wrong. Try again!</p>
+            <button onclick="window.location.href='astro-input.html'" class="astro-btn">Try Again</button>
+        </div>
+
+        <button onclick="window.location.href='index.html'" class="astro-btn back-btn">
+            Back to Home
+        </button>
+    </div>
+
+<script src="astro-result.js"></script>
+</body>
+</html>

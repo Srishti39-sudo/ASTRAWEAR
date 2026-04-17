@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AstroStylist | AstraWear</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="astro.css">
+</head>
+
+<body class="astro-bg">
+
+  <div class="astro-input-wrapper">
+    <div class="astro-card">
+      <div class="astro-top-nav">
+        <a href="index.html" class="back-link">← Back Home</a>
+      </div>
+      <h1 class="astro-title">Enter Your Birth Details</h1>
+      <p class="astro-subtitle">
+        Get your personalized Kundli with accurate predictions.
+      </p>
+
+      <form id="astroForm" class="astro-form">
+
+        <!-- NAME + GENDER -->
+        <div class="row two-cols">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="fullName" placeholder="Your Name" required />
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="gender" required>
+              <option value="">Select Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- DATE -->
+        <div class="row three-cols">
+          <div class="form-group">
+            <label>Day</label>
+            <select id="day" required></select>
+          </div>
+
+          <div class="form-group">
+            <label>Month</label>
+            <select id="month" required></select>
+          </div>
+
+          <div class="form-group">
+            <label>Year</label>
+            <select id="year" required></select>
+          </div>
+        </div>
+
+        <!-- TIME -->
+        <div class="row two-cols">
+          <div class="form-group">
+            <label>Birth Hour</label>
+            <select id="hour" required></select>
+          </div>
+
+          <div class="form-group">
+            <label>Birth Minute</label>
+            <select id="minute" required></select>
+          </div>
+        </div>
+
+        <!-- LOCATION -->
+        <div class="form-group location-wrapper">
+          <label>Birth Place</label>
+          <input
+            type="text"
+            id="location"
+            placeholder="Start typing your city..."
+            autocomplete="off"
+            required
+          />
+          <div id="locationSuggestions" class="suggestions-box"></div>
+        </div>
+
+        <button type="submit" class="astro-btn">
+          REVEAL YOUR ASTRO STYLE
+        </button>
+
+        <p id="formMessage" class="form-message"></p>
+
+      </form>
+
+    </div>
+  </div>
+
+  <script src="astro-input.js"></script>
+</body>
+</html>
