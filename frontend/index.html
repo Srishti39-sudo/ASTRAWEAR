@@ -8,7 +8,11 @@
 <body>
   <nav class="nav">
     <div class="brand">ASTRAWEAR</div>
-    <a class="btn" href="user.html">Create Avatar</a>
+    <div class="nav-right">
+      <span id="userName" style="font-weight:600; margin-right:16px;"></span>
+      <a class="btn" href="user.html">Create Avatar</a>
+      <button class="btn reset-btn" id="logoutBtn" style="display:none; margin-left:12px;" onclick="handleLogout()">Logout</button>
+    </div>
   </nav>
 
   <section class="center">
@@ -29,11 +33,32 @@
 
       
   </section>
-  <script>
-    function resetApp() {
+  <script type="module">
+    import { auth, onAuthStateChanged } from "./firebase-config.js";
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "auth.html";
+        return;
+      }
+      document.getElementById("userName").textContent = `Hi, ${user.displayName || user.email.split("@")[0]}`;
+      document.getElementById("logoutBtn").style.display = "inline-block";
+
+      /* Store email for MongoDB saves */
+      localStorage.setItem("userEmail", user.email);
+    });
+
+    window.handleLogout = async function() {
+      await signOut(auth);
+      localStorage.removeItem("userEmail");
+      window.location.href = "auth.html";
+    };
+
+    window.resetApp = function() {
       window.location.href = "index.html";
-    }
+    };
   </script>
-  
+
 </body>
 </html>

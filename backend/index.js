@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-console.log("Astro Key:", process.env.ASTRO_API_KEY);
+console.log("Astro Key:", process.env.ASTRO_API_KEY ? "✅ Loaded" : "❌ Missing");
 
 /* ===================================================== */
 /*                FEATURE 1: AVATAR GENERATOR            */
@@ -565,6 +565,8 @@ app.post("/save-result", async (req, res) => {
       user.astroHistory.push(data);
     } else if (type === "stylist") {
       user.stylistHistory.push(data);
+    } else if (type === "auth") {
+      /* Just creating/updating user record — no history to push */
     }
 
     await user.save();

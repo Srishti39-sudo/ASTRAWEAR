@@ -17,6 +17,21 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
+  if (occasion.length < 5) {
+    message.textContent = "Please describe your occasion in more detail.";
+    return;
+  }
+
+  if (wardrobe.length < 10) {
+    message.textContent = "Please list at least a few items from your wardrobe.";
+    return;
+  }
+
+  if (wardrobe.length > 2000) {
+    message.textContent = "Wardrobe list is too long. Please keep it under 2000 characters.";
+    return;
+  }
+
   /* Save to localStorage */
   localStorage.setItem(
     "stylistData",

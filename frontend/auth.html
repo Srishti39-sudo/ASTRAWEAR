@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASTRAWEAR | Sign In</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="brand">ASTRAWEAR</div>
+  </nav>
+
+  <section class="center">
+    <div class="auth-container">
+      <h2 id="authTitle">Welcome Back</h2>
+      <p id="authSubtitle" class="auth-subtitle">Sign in to your account</p>
+
+      <!-- Error message -->
+      <div id="errorMsg" class="error-msg" style="display:none;"></div>
+
+      <!-- Email/Password Form -->
+      <div class="auth-form">
+        <input type="text" id="nameInput" placeholder="Full Name" style="display:none;" />
+        <input type="email" id="emailInput" placeholder="Email" />
+        <input type="password" id="passwordInput" placeholder="Password" />
+        <button class="btn auth-btn" id="authBtn" onclick="handleAuth()">Sign In</button>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Google Sign In -->
+      <button class="google-btn" onclick="handleGoogleSignIn()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+        Continue with Google
+      </button>
+
+      <!-- Toggle between Sign In / Sign Up -->
+      <p class="toggle-text">
+        <span id="toggleQuestion">Don't have an account?</span>
+        <a href="#" id="toggleLink" onclick="toggleMode(event)">Sign Up</a>
+      </p>
+    </div>
+  </section>
+
+  <script type="module" src="auth.js"></script>
+</body>
+</html>

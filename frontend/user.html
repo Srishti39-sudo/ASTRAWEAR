@@ -1,7 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Avatar | AstraWear</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+  <script type="module">
+    import { auth, onAuthStateChanged } from "./firebase-config.js";
+    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "auth.html"; });
+  </script>
     
  
 <form id="userForm">
@@ -24,17 +33,17 @@
     </select>
   
     <label>Height (cm)</label>
-    <input type="number" id="height" required />
-  
+    <input type="number" id="height" min="50" max="250" required />
+
     <label>Bust (cm)</label>
-    <input type="number" id="bust" required />
-  
-    <label>upper Waist (cm)</label>
-    <input type="number" id="upperWaist" required />
-    <label >lower waist (cm)</label>
-    <input type="number" id="lowerWaist" required />
+    <input type="number" id="bust" min="50" max="200" required />
+
+    <label>Upper Waist (cm)</label>
+    <input type="number" id="upperWaist" min="40" max="200" required />
+    <label>Lower Waist (cm)</label>
+    <input type="number" id="lowerWaist" min="40" max="200" required />
     <label>Hips (cm)</label>
-    <input type="number" id="hips" required />
+    <input type="number" id="hips" min="50" max="200" required />
   
     <button type="submit" class="btn">Generate Avatar</button>
   
@@ -43,4 +52,4 @@
 
     
 </body>
-  
+</html>

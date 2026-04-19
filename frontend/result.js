@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: "guest@astrawear.com",
+        email: localStorage.getItem("userEmail") || "guest@astrawear.com",
         type: "avatar",
         data: {
           measurements: userData,

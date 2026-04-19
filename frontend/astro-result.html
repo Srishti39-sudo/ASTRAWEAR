@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="astro.css">
 </head>
 <body class="astro-bg">
+    <script type="module">
+      import { auth, onAuthStateChanged } from "./firebase-config.js";
+      onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "auth.html"; });
+    </script>
 
     <div class="result-wrapper">
 

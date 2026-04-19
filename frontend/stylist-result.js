@@ -126,7 +126,7 @@ async function runStage2(occasionAnalysis) {
       document.getElementById("rawResults").innerHTML += `
         <p class="raw-text" style="margin-top: 20px;">${result.outfitData.raw}</p>
       `;
-      return;
+      return result.outfitData;
     }
 
     const o = result.outfitData;
@@ -177,10 +177,13 @@ async function runStage2(occasionAnalysis) {
       `;
     }
 
+    return o;
+
   } catch (error) {
     console.error("Stage 2 error:", error);
     loading.style.display = "none";
     document.getElementById("errorState").style.display = "block";
+    return null;
   }
 }
 
@@ -198,21 +201,21 @@ async function run() {
   await new Promise(resolve => setTimeout(resolve, 800));
 
   /* Stage 2 uses Stage 1 output */
-  await runStage2(analysis);
+  const outfitResult = await runStage2(analysis);
 
   /* SAVE TO MONGODB */
   await fetch("/save-result", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      email: "guest@astrawear.com",
+      email: localStorage.getItem("userEmail") || "guest@astrawear.com",
       type: "stylist",
       data: {
         occasion: data.occasion,
         wardrobe: data.wardrobe,
         styleVibe: data.styleVibe,
         analysis: analysis,
-        outfit: null
+        outfit: outfitResult || null
       }
     })
   });
