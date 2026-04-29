@@ -144,4 +144,4 @@ Building this project taught me how to integrate real-world APIs with unpredicta
 
 ## Author
 
-Aishwarya — 2nd year college student learning full-stack development with AI integration.
+srishti — 2nd year college student learning full-stack development with AI integration.
