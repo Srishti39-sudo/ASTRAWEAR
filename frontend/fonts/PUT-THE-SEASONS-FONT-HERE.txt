@@ -1,0 +1,10 @@
+Drop "The Seasons" font file here.
+
+- Download it (free for personal use): search "The Seasons font free download"
+- Save the file in THIS folder. Common names: theseasons.otf, TheSeasons-Regular.otf, Fontspring-DEMO-theseasons-reg.otf
+- If it comes as a .zip, unzip first and put the .otf / .ttf here.
+- If there are multiple weights (Reg / Light / Bold / Italic), drop them all.
+
+Then tell me the exact filename(s) and I'll wire it into the site as the display font.
+
+Body text pairs best with EB Garamond (loads from Google, no download) — natural and readable under The Seasons.

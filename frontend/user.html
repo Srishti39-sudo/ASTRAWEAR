@@ -1,55 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Avatar | AstraWear</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Avatar | ASTRAWEAR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="avatar.css" />
+</head>
+<body class="avatar">
+
   <script type="module">
     import { auth, onAuthStateChanged } from "./firebase-config.js";
     onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "auth.html"; });
   </script>
-    
- 
-<form id="userForm">
 
-    <label>Gender</label>
-    <select id="gender" required>
-      <option value="">Select Gender</option>
-      <option value="female">Female</option>
-      <option value="male">Male</option>
-    </select>
-  
-    <label>Aesthetic</label>
-    <select id="aesthetic" required>
-      <option value="">Select Aesthetic</option>
-      <option value="baddie">Baddie</option>
-      <option value="casual">Casual Girl/Boy</option>
-      <option value="gym">Gym Freak</option>
-      <option value="old fashion">Old Fashion</option>
-      <option value="gothic">Gothic</option>
-    </select>
-  
-    <label>Height (cm)</label>
-    <input type="number" id="height" min="50" max="250" required />
+  <nav class="a-top">
+    <a href="index.html">← Home</a>
+    <a class="a-logo" href="index.html">ASTRA</a>
+    <span></span>
+  </nav>
 
-    <label>Bust (cm)</label>
-    <input type="number" id="bust" min="50" max="200" required />
+  <div class="move-cue" id="moveCue"><span>move through</span><span class="arw">↓</span></div>
 
-    <label>Upper Waist (cm)</label>
-    <input type="number" id="upperWaist" min="40" max="200" required />
-    <label>Lower Waist (cm)</label>
-    <input type="number" id="lowerWaist" min="40" max="200" required />
-    <label>Hips (cm)</label>
-    <input type="number" id="hips" min="50" max="200" required />
-  
-    <button type="submit" class="btn">Generate Avatar</button>
-  
-  </form>
-  <script src="user.js"></script>
+  <div class="scroll-track">
+    <div class="stage">
 
-    
+      <!-- 0 · WEIGHTLESS -->
+      <div class="moment" data-i="0">
+        <img class="a-float" src="images/floating.png" alt="" onerror="this.style.display='none'">
+        <p class="eyebrow">create avatar</p>
+        <p class="m-line">Confidence comes from knowing the <em>real you</em>.</p>
+      </div>
+
+      <!-- 1 · SCAN (silent) -->
+      <div class="moment" data-i="1">
+        <p class="eyebrow">step one</p>
+        <h2 class="m-h">Show us you</h2>
+        <p class="m-sub">Add a full-body photo. We read your proportions right here — nothing leaves your device.</p>
+        <div class="scan-box">
+          <label class="scan-drop" for="scanInput">
+            <img id="scanPreview" alt="">
+            <span class="plus">+</span>
+            <p>Tap to add a photo</p>
+          </label>
+          <input type="file" id="scanInput" accept="image/*" hidden>
+          <p class="scan-status" id="scanStatus"></p>
+        </div>
+      </div>
+
+      <!-- 2 · MEASUREMENTS -->
+      <div class="moment" data-i="2">
+        <p class="eyebrow">step two</p>
+        <h2 class="m-h">The details</h2>
+        <p class="m-sub">A few measurements make it exact.</p>
+        <form class="a-form" id="avatarForm" onsubmit="return false">
+          <div><label>Height (cm)</label><input type="number" id="height" min="50" max="250"></div>
+          <div><label>Bust (cm)</label><input type="number" id="bust" min="40" max="200"></div>
+          <div><label>Upper waist (cm)</label><input type="number" id="upperWaist" min="40" max="200"></div>
+          <div><label>Lower waist (cm)</label><input type="number" id="lowerWaist" min="40" max="200"></div>
+          <div class="full"><label>Hips (cm)</label><input type="number" id="hips" min="50" max="200"></div>
+        </form>
+      </div>
+
+      <!-- 3 · AESTHETIC -->
+      <div class="moment" data-i="3">
+        <p class="eyebrow">step three</p>
+        <h2 class="m-h">Your world</h2>
+        <div class="a-form" style="max-width:360px; grid-template-columns:1fr;">
+          <div class="full"><label>Gender</label>
+            <select id="gender"><option value="">Select</option><option value="female">Female</option><option value="male">Male</option></select>
+          </div>
+        </div>
+        <div class="aes-grid" id="aesGrid">
+          <span class="aes-chip" data-val="old fashion">Old money</span>
+          <span class="aes-chip" data-val="baddie">Baddie</span>
+          <span class="aes-chip" data-val="casual">Casual</span>
+          <span class="aes-chip" data-val="gym">Gym</span>
+          <span class="aes-chip" data-val="gothic">Gothic</span>
+        </div>
+      </div>
+
+      <!-- 4 · SPOTLIGHT -->
+      <div class="moment spotlight" data-i="4">
+        <div class="spot-beam"></div>
+        <div class="spot-floor"></div>
+        <p class="eyebrow">the reveal</p>
+        <div class="sil-wrap" id="silWrap">
+          <svg class="sil-svg" data-shape="hourglass" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M88,66 Q66,92 80,150 Q90,182 74,214 Q60,258 82,340 L118,340 Q140,258 126,214 Q110,182 120,150 Q134,92 112,66 Z"/></svg>
+          <svg class="sil-svg" data-shape="pear" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M91,66 Q78,92 84,150 Q90,182 72,214 Q54,262 80,340 L120,340 Q146,262 128,214 Q110,182 116,150 Q122,92 109,66 Z"/></svg>
+          <svg class="sil-svg" data-shape="rectangle" viewBox="0 0 200 360"><circle cx="100" cy="40" r="15"/><path d="M86,66 Q82,120 84,182 Q85,250 86,340 L114,340 Q115,250 116,182 Q118,120 114,66 Z"/></svg>
+          <svg class="sil-svg" data-shape="inverted triangle" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M84,66 Q60,92 78,150 Q92,182 84,214 Q80,262 88,340 L112,340 Q120,262 116,214 Q108,182 122,150 Q140,92 116,66 Z"/></svg>
+        </div>
+        <p class="m-line" id="revealShape">Step into the light</p>
+        <button class="a-cta" id="createBtn">Create my avatar</button>
+        <p class="finale-msg" id="finaleMsg"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- smooth scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+  <script type="module">
+    import { PoseLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+    let shape = null;                 /* recorded silently */
+    const measurements = {};
+
+    /* ---------- scroll engine (pinned stage + scrub) ---------- */
+    const moments = Array.from(document.querySelectorAll(".moment"));
+    const N = moments.length;
+    const track = document.querySelector(".scroll-track");
+    const moveCue = document.getElementById("moveCue");
+
+    const DEPTH = 900;   /* how far apart the moments sit on the camera axis */
+    function update(){
+      const total = track.offsetHeight - window.innerHeight;
+      const p = Math.min(1, Math.max(0, window.scrollY / total));
+      const scaled = p * (N - 1);
+      moments.forEach((m, i) => {
+        const diff = scaled - i;                 /* <0 = ahead (far), 0 = in focus, >0 = passed */
+        const z = diff * DEPTH;
+        const op = Math.max(0, 1 - Math.abs(diff) * 1.1);
+        m.style.transform = `translate(-50%,-50%) translateZ(${z.toFixed(0)}px)`;
+        m.style.opacity = op.toFixed(3);
+        m.style.filter = `blur(${Math.min(5, Math.abs(diff) * 3.5).toFixed(1)}px)`;
+        m.style.pointerEvents = Math.abs(diff) < 0.5 ? "auto" : "none";
+      });
+      moveCue.style.opacity = p > 0.9 ? "0" : "1";
+    }
+
+    /* Lenis smooth scroll (falls back to native) */
+    if (window.Lenis){
+      const lenis = new Lenis({ smoothWheel:true, lerp:0.09 });
+      lenis.on("scroll", update);
+      (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })();
+    }
+    window.addEventListener("scroll", update, { passive:true });
+    window.addEventListener("resize", update);
+    update();
+
+    /* ---------- silhouette helper ---------- */
+    function showShape(s){
+      shape = s;
+      document.querySelectorAll(".sil-svg").forEach(svg => svg.style.display = (svg.dataset.shape === s) ? "block" : "none");
+      document.getElementById("revealShape").textContent = "You are " + s;
+    }
+    function classify(sh, hp){
+      const r = sh / hp;
+      if (r >= 1.08) return "inverted triangle";
+      if (r <= 0.92) return "pear";
+      return "rectangle";
+    }
+
+    /* ---------- silent MediaPipe scan ---------- */
+    const input = document.getElementById("scanInput");
+    const preview = document.getElementById("scanPreview");
+    const status = document.getElementById("scanStatus");
+    let landmarker = null;
+    async function getLandmarker(){
+      if (landmarker) return landmarker;
+      status.textContent = "reading…";
+      const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+      landmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task" },
+        runningMode:"IMAGE", numPoses:1
+      });
+      return landmarker;
+    }
+    input.addEventListener("change", async (e) => {
+      const file = e.target.files[0]; if(!file) return;
+      preview.src = URL.createObjectURL(file); preview.style.display = "block";
+      document.querySelector(".scan-drop .plus").style.display = "none";
+      document.querySelector(".scan-drop p").style.display = "none";
+      await new Promise(r => preview.onload = r);
+      try{
+        const lm = await getLandmarker();
+        const res = lm.detect(preview);
+        if(!res.landmarks || !res.landmarks.length){ status.textContent = "couldn't read that — try a clearer full-length photo"; return; }
+        const p = res.landmarks[0];
+        const sh = Math.abs(p[11].x - p[12].x), hp = Math.abs(p[23].x - p[24].x);
+        showShape(classify(sh, hp));                 /* recorded silently */
+        status.textContent = "✓ your proportions are read — keep moving";
+      }catch(err){ console.error(err); status.textContent = "scan unavailable — add measurements below"; }
+    });
+
+    /* ---------- manual drives silhouette too ---------- */
+    const bust = document.getElementById("bust"), hips = document.getElementById("hips");
+    function manualShape(){
+      const b = +bust.value, h = +hips.value; if(!b||!h) return;
+      const r = b/h;
+      showShape(r>=1.08 ? "inverted triangle" : r<=0.92 ? "pear" : "rectangle");
+    }
+    bust.addEventListener("input", manualShape);
+    hips.addEventListener("input", manualShape);
+
+    /* ---------- aesthetic chips ---------- */
+    let aesthetic = "";
+    document.querySelectorAll(".aes-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll(".aes-chip").forEach(c => c.classList.remove("sel"));
+        chip.classList.add("sel"); aesthetic = chip.dataset.val;
+      });
+    });
+
+    /* ---------- create ---------- */
+    document.getElementById("createBtn").addEventListener("click", () => {
+      const gender = document.getElementById("gender").value;
+      const height = +document.getElementById("height").value;
+      const b = +bust.value, uw = +document.getElementById("upperWaist").value,
+            lw = +document.getElementById("lowerWaist").value, h = +hips.value;
+      const msg = document.getElementById("finaleMsg");
+      if(!gender || !aesthetic){ msg.textContent = "Pick your gender + vibe first ✨"; return; }
+      if(!height || !b || !uw || !lw || !h){ msg.textContent = "Add your measurements in step two ✨"; return; }
+      localStorage.setItem("astraUser", JSON.stringify({ gender, aesthetic, height, bust:b, upperWaist:uw, lowerWaist:lw, hips:h, shape }));
+      window.location.href = "result.html";
+    });
+  </script>
 </body>
 </html>

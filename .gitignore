@@ -23,3 +23,12 @@ npm-debug.log*
 # Build output
 dist/
 build/
+
+# Python / CV service (never commit venv or downloaded models — each machine builds its own)
+venv/
+cv-service/venv/
+__pycache__/
+*.pyc
+cv-service/face_landmarker.task
+cv-service/last_result.json
+*.onnx

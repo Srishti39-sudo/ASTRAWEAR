@@ -1,0 +1,7 @@
+Save your transparent floating-figure cutout in THIS folder, named exactly:
+
+    floating.png
+
+(transparent background, just the figure + her glow)
+
+The avatar panel already points at images/floating.png — drop the file in and hard refresh.

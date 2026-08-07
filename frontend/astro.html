@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astro Stylist · Dress Your Reality</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+<style>
+:root{
+  --bg:#EAE1CF; --paper:#F3ECDD; --nude:#D9C9AC; --taupe:#C7B592;
+  --sea:#6E9A94; --sea-dp:#3E635E; --ink:#2C3835; --stone:#5B655F;
+  --stone-lt:#8A938C; --line:#D6CBB4;
+  --font:'EB Garamond',Georgia,serif;
+  --ease:cubic-bezier(.16,.7,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body.astro{
+  font-family:var(--font);
+  background:linear-gradient(180deg,#F6F0E2 0%,#EFE7D6 100%); color:var(--ink);
+  -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden;
+}
+/* ---- attraction questions (airy) ---- */
+.q{ margin-bottom:28px; }
+.q-label{ display:block; font-family:var(--font); font-size:clamp(18px,2.5vw,22px); color:var(--ink); font-weight:500; margin-bottom:5px; line-height:1.25; }
+.q-label em{ font-style:italic; color:var(--sea-dp); }
+.q-sub{ font-size:13.5px; color:var(--stone-lt); font-style:italic; margin-bottom:13px; line-height:1.45; }
+.q-sub em{ color:var(--stone); }
+.q input{ background:#FBF7EC; }
+.drop{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; height:150px; border:1.5px dashed var(--taupe); border-radius:6px; background:#FBF7EC; cursor:pointer; position:relative; overflow:hidden; transition:border-color .2s var(--ease); }
+.drop:hover{ border-color:var(--sea); }
+.drop-plus{ font-size:26px; color:var(--sea-dp); line-height:1; }
+.drop-label{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--stone); }
+.drop-prev{ display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+::selection{background:var(--sea);color:var(--paper)}
+
+/* ---- screen system ---- */
+.screen{
+  min-height:100vh; width:100%;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  padding:8vh 7vw; text-align:center;
+  animation:fade .9s var(--ease);
+}
+.screen.active{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--stone-lt);margin-bottom:26px}
+.serif-xl{font-size:clamp(34px,6vw,62px);font-weight:500;line-height:1.08;letter-spacing:-.01em}
+.serif-l{font-size:clamp(26px,4vw,40px);font-weight:500;line-height:1.15}
+.italic{font-style:italic}
+.lede{font-size:clamp(17px,2.4vw,21px);line-height:1.65;color:var(--stone);max-width:560px;margin:22px auto 0}
+.hint{font-size:13.5px;color:var(--stone-lt);font-style:italic;margin-top:10px}
+
+/* ---- buttons ---- */
+.btn{
+  font-family:var(--font); font-size:14px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--paper); background:var(--ink); border:none; cursor:pointer;
+  padding:16px 40px; border-radius:2px; margin-top:40px;
+  transition:background .3s var(--ease),transform .3s var(--ease);
+}
+.btn:hover{background:var(--sea-dp);transform:translateY(-2px)}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);}
+.btn.ghost:hover{background:var(--paper);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.linkback{margin-top:26px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-lt);background:none;border:none;cursor:pointer}
+.linkback:hover{color:var(--ink)}
+
+/* ---- form ---- */
+.card{width:100%;max-width:560px;text-align:left}
+.field{margin-bottom:22px}
+.field > label{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:9px}
+input,select{
+  width:100%; font-family:var(--font); font-size:17px; color:var(--ink);
+  background:var(--paper); border:1px solid var(--line); border-radius:2px;
+  padding:13px 15px; outline:none; transition:border-color .25s var(--ease);
+}
+input:focus,select:focus{border-color:var(--sea)}
+select:disabled{opacity:.45;cursor:not-allowed}
+.checkline{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--stone);margin-top:12px;cursor:pointer}
+.checkline input{width:auto;margin:0;accent-color:var(--sea-dp)}
+.row{display:flex;gap:12px}
+.row > .field{flex:1;margin-bottom:0}
+.location-wrapper{position:relative}
+.suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--paper);border:1px solid var(--line);border-radius:2px;z-index:20;display:none;max-height:230px;overflow-y:auto}
+.suggestion-item{padding:11px 15px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--line)}
+.suggestion-item:last-child{border-bottom:none}
+.suggestion-item:hover{background:var(--nude)}
+.msg{color:#a85c4a;font-size:14px;margin-top:6px;min-height:18px;font-style:italic}
+
+/* ---- attractions ---- */
+.attr{border:1px solid var(--line);border-radius:3px;padding:18px;margin-bottom:16px;background:var(--paper)}
+.attr input{background:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{
+  font-family:var(--font);font-size:14px;color:var(--stone);
+  background:var(--bg);border:1px solid var(--line);border-radius:40px;
+  padding:7px 15px;cursor:pointer;transition:all .2s var(--ease);
+}
+.chip.on{background:var(--sea);color:var(--paper);border-color:var(--sea)}
+
+/* ---- loading ---- */
+.dot{width:9px;height:9px;border-radius:50%;background:var(--sea);display:inline-block;margin:0 4px;animation:bob 1.2s infinite var(--ease)}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bob{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-8px);opacity:1}}
+
+/* ---- reveal ---- */
+#screenReveal{justify-content:flex-start;padding-top:12vh}
+.reveal-inner{width:100%;max-width:640px;text-align:center}
+.word-eyebrow{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--stone-lt)}
+.word{font-size:clamp(48px,11vw,104px);font-weight:600;letter-spacing:.01em;line-height:1;margin:14px 0 8px;text-transform:uppercase}
+.word-underline{width:64px;height:1px;background:var(--sea);margin:6px auto 20px}
+.thread-line{font-size:clamp(22px,3.6vw,32px);font-style:italic;color:var(--ink);max-width:560px;margin:12px auto 0;line-height:1.28}
+.word-why{font-size:clamp(18px,2.6vw,23px);font-style:italic;color:var(--stone);max-width:520px;margin:0 auto}
+/* ---- the split: half you, half her, on the page ---- */
+.split{display:flex;gap:6px;max-width:520px;margin:6px auto 0;background:transparent}
+.split .half{position:relative;flex:1;aspect-ratio:3/4;background:var(--bg);overflow:hidden;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.fglow{position:absolute;border:2px solid rgba(168,206,228,.95);border-radius:10px;box-shadow:0 0 0 9999px rgba(30,42,48,.6), 0 0 24px 5px rgba(168,206,228,.6);opacity:0;transition:opacity .4s var(--ease), left .45s var(--ease), top .45s var(--ease), width .45s var(--ease), height .45s var(--ease);pointer-events:none;z-index:2}
+.fglow.on{opacity:1}
+.hl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.hl{font-size:13px;color:var(--sea-dp);background:var(--paper);border:1px solid var(--line);border-radius:40px;padding:6px 15px;letter-spacing:.02em}
+.split .half img{width:100%;height:100%;object-fit:cover}
+.split .half .ref-name{font-style:italic;font-size:18px;color:var(--stone);padding:0 12px;text-align:center}
+.split-cap{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:13px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone-lt)}
+.split-cap .dot-sep{color:var(--sea)}
+/* ---- wow opener + the teaching pills ---- */
+.opener{font-size:clamp(19px,2.8vw,25px);font-style:italic;color:var(--ink);max-width:560px;margin:28px auto 0;line-height:1.45;opacity:0;transform:translateY(10px);transition:opacity 1.5s var(--ease),transform 1.5s var(--ease)}
+.opener.in{opacity:1;transform:none}
+.saved-line{font-size:15.5px;color:var(--stone);max-width:500px;margin:18px auto 0;line-height:1.55;font-style:italic}
+.pills{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:520px;margin:0 auto}
+.pill{font-family:var(--font);font-size:14px;color:var(--stone);background:var(--paper);border:1px solid var(--line);border-radius:40px;padding:9px 18px;cursor:pointer;text-transform:capitalize;transition:all .2s var(--ease)}
+.pill:hover{border-color:var(--sea)}
+.pill.on{background:var(--sea-dp);color:var(--paper);border-color:var(--sea-dp)}
+.feature-panel{max-width:500px;margin:0 auto;opacity:0;transition:opacity .45s var(--ease)}
+.feature-panel.in{opacity:1;margin-top:22px}
+.feat-explain{font-size:17px;color:var(--ink);line-height:1.5}
+.feat-reassure{font-size:15px;color:var(--sea-dp);font-style:italic;margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
+/* ---- final self + spotlight ---- */
+.finalwrap{max-width:400px;margin:16px auto 0}
+.final-img{position:relative;width:100%;aspect-ratio:3/4;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.final-img img{width:100%;height:100%;object-fit:cover}
+.final-load{font-size:13px;color:var(--stone-lt);font-style:italic}
+.spot{position:absolute;border:2px solid rgba(255,255,255,.85);border-radius:12px;box-shadow:0 0 0 9999px rgba(44,56,53,.46),0 0 22px rgba(255,255,255,.32);display:none;transition:all .45s var(--ease);pointer-events:none}
+.spot-cap{font-size:15px;color:var(--stone-lt);font-style:italic;margin-top:16px;min-height:22px;line-height:1.4;transition:color .3s}
+.spot-cap.lit{color:var(--sea-dp)}
+.spot-cards{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.spot-card{flex:1;max-width:130px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px 10px;cursor:pointer;font-family:var(--font);transition:all .2s var(--ease);text-align:center}
+.spot-card span{display:block;font-size:15px;color:var(--ink);font-weight:500}
+.spot-card small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-lt);margin-top:4px}
+.spot-card.active{border-color:var(--sea);background:#FBF7EC;box-shadow:0 6px 18px rgba(44,56,53,.1)}
+
+/* ---- the mirror: you beside her ---- */
+.mirror{display:flex;gap:16px;justify-content:center;margin:40px auto 6px;max-width:600px}
+.mir{flex:1;max-width:280px;margin:0}
+.mir-img{position:relative;width:100%;aspect-ratio:3/4;background:var(--paper);border:1px solid var(--line);border-radius:5px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.mir-img img{width:100%;height:100%;object-fit:cover}
+.mir-load{font-size:13px;color:var(--stone-lt);font-style:italic;padding:0 10px;text-align:center}
+.mir .ref-name{font-family:var(--font);font-style:italic;font-size:20px;color:var(--stone);padding:0 12px;text-align:center}
+.mir figcaption{text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone-lt);margin-top:11px}
+.why-return{font-size:clamp(17px,2.5vw,22px);font-style:italic;color:var(--ink);max-width:540px;margin:28px auto 0;line-height:1.4}
+.shared{list-style:none;padding:0;margin:16px auto 0;max-width:420px;display:flex;flex-direction:column;gap:9px;text-align:left}
+.shared li{font-size:15.5px;color:var(--stone);padding-left:20px;position:relative}
+.shared li::before{content:"—";position:absolute;left:0;color:var(--sea)}
+.merge{display:flex;flex-direction:column;gap:15px;max-width:520px;margin:0 auto;text-align:left}
+.mrg span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sea-dp);display:block;margin-bottom:3px}
+.mrg p{font-size:16px;color:var(--stone);line-height:1.5}
+.emb{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.emb-i{flex:1;min-width:150px;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:18px 16px;text-align:center}
+.emb-i span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone-lt);display:block;margin-bottom:6px}
+.emb-i p{font-size:14.5px;color:var(--ink);line-height:1.45}
+.forces{display:flex;gap:16px;margin:50px 0;flex-wrap:wrap;justify-content:center}
+.force{flex:1;min-width:240px;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:22px 20px;text-align:left}
+.force h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--sea-dp);font-weight:600;margin-bottom:4px}
+.force .sign{font-size:20px;font-weight:500;margin-bottom:8px}
+.force p{font-size:15.5px;line-height:1.55;color:var(--stone)}
+.block{margin:48px 0;text-align:left}
+.block-h{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone-lt);text-align:center;margin-bottom:24px}
+.love{padding:18px 0;border-bottom:1px solid var(--line)}
+.love:last-child{border-bottom:none}
+.love .name{font-size:19px;font-weight:500;font-style:italic}
+.love .thread{font-size:15.5px;color:var(--stone);margin-top:5px;line-height:1.5}
+.love .integ{font-size:15px;color:var(--sea-dp);margin-top:7px;line-height:1.5}
+.love .integ b{font-weight:600;letter-spacing:.08em;font-size:11px;text-transform:uppercase}
+.palette{display:flex;gap:0;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.sw{flex:1;min-width:96px;text-align:center}
+.sw-c{height:96px;width:100%}
+.sw-n{font-size:13px;color:var(--stone);margin-top:9px;letter-spacing:.02em}
+.two-col{display:flex;gap:16px;flex-wrap:wrap}
+.two-col .block{flex:1;min-width:240px;margin:0}
+.mini{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:22px}
+.mini .m-metal{font-size:22px;font-weight:500;margin-bottom:6px}
+.mini p{font-size:15.5px;line-height:1.55;color:var(--stone)}
+.closing{font-size:clamp(20px,3vw,27px);font-style:italic;line-height:1.4;color:var(--ink);max-width:520px;margin:16px auto 0}
+.closing-mark{width:40px;height:1px;background:var(--sea);margin:44px auto 26px}
+.reveal-actions{margin:40px 0 8vh}
+</style>
+</head>
+<body class="astro">
+
+<!-- ============ SCREEN 0 · INVITATION ============ -->
+<section class="screen active" id="screenIntro">
+  <div class="eyebrow">Astro Stylist</div>
+  <h1 class="serif-xl">Become recognizable<br><span class="italic">to yourself.</span></h1>
+  <p class="lede">You were never missing clothes — you were missing the words. This uncovers the self you've always been dressing for: the place where your softness and your fire finally meet.</p>
+  <button class="btn" onclick="go('screenBirth')">Begin</button>
+  <button class="linkback" onclick="window.location.href='index.html'">← back</button>
+</section>
+
+<!-- ============ SCREEN 1 · BIRTH DETAILS ============ -->
+<section class="screen" id="screenBirth">
+  <div class="card">
+    <div class="eyebrow" style="text-align:center">Your stars</div>
+    <h2 class="serif-l" style="text-align:center;margin-bottom:8px">Your birth details</h2>
+    <p class="hint" style="text-align:center;margin-bottom:34px">Your exact time and place decide your Rising sign — so it has to be precise.</p>
+
+    <div class="field">
+      <label>Your name</label>
+      <input type="text" id="fullName" placeholder="First name">
+    </div>
+
+    <div class="field">
+      <label>You are</label>
+      <select id="gender">
+        <option value="">Select</option>
+        <option value="female">Woman</option>
+        <option value="male">Man</option>
+        <option value="other">Prefer not to say</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Date of birth</label>
+      <div class="row">
+        <div class="field"><select id="day"><option value="">Day</option></select></div>
+        <div class="field"><select id="month"><option value="">Month</option></select></div>
+        <div class="field"><select id="year"><option value="">Year</option></select></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Time of birth</label>
+      <div class="row">
+        <div class="field"><select id="hour"><option value="">Hour</option></select></div>
+        <div class="field"><select id="minute"><option value="">Min</option></select></div>
+      </div>
+      <label class="checkline"><input type="checkbox" id="noTime"> I don't know my birth time</label>
+      <p class="hint">Your exact time sharpens your Rising sign. Don't know it? Tick the box — we'll read your chart from your date.</p>
+    </div>
+
+    <div class="field location-wrapper">
+      <label>Place of birth</label>
+      <input type="text" id="location" placeholder="City you were born in" autocomplete="off">
+      <div class="suggestions" id="locationSuggestions"></div>
+    </div>
+
+    <p class="msg" id="birthMsg"></p>
+    <div style="text-align:center">
+      <button class="btn" id="birthBtn" onclick="submitBirth()">Continue →</button>
+    </div>
+    <button class="linkback" onclick="go('screenIntro')" style="display:block;margin:22px auto 0">← back</button>
+  </div>
+</section>
+
+<!-- ============ SCREEN 2 · ATTRACTIONS ============ -->
+<section class="screen" id="screenAttr">
+  <div class="card">
+    <div class="eyebrow" style="text-align:center">A few quiet things</div>
+    <h2 class="serif-l" style="text-align:center;margin-bottom:8px">Let's find your<br>visual language</h2>
+    <p class="hint" style="text-align:center;margin-bottom:38px">We already know your vibe. A little more, and we'll show you the two of you, together.</p>
+
+    <div class="q">
+      <label class="q-label">A photo of you</label>
+      <p class="q-sub">So we can show you beside her, and read your colours. A clear, well-lit photo of you.</p>
+      <label class="drop" id="youDrop">
+        <input type="file" id="youPhoto" accept="image/*" hidden>
+        <span class="drop-plus">+</span>
+        <span class="drop-label">upload your photo</span>
+        <img class="drop-prev" id="youPrev" alt="">
+      </label>
+    </div>
+
+    <div class="q">
+      <label class="q-label">Who has quietly shaped your idea of beauty?</label>
+      <p class="q-sub">The one whose presence you've kept returning to — even years later. Her name, and a photo of her if you have one.</p>
+      <input type="text" id="celebName" placeholder="their name">
+      <label class="drop" id="refDrop" style="margin-top:12px;height:120px">
+        <input type="file" id="refPhoto" accept="image/*" hidden>
+        <span class="drop-plus">+</span>
+        <span class="drop-label">add her photo (optional)</span>
+        <img class="drop-prev" id="refPrev" alt="">
+      </label>
+    </div>
+
+    <div class="q">
+      <label class="q-label">What part of them feels like coming home?</label>
+      <p class="q-sub">Not what they're wearing — what part of them makes you think, <em>"that's who I've always wanted to be."</em> (optional)</p>
+      <div class="chips" id="homeChips">
+        <span class="chip" onclick="this.classList.toggle('on')">Effortless elegance</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Quiet confidence</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Soft femininity</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Fierce presence</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Artistic soul</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Timeless beauty</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Magnetic energy</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Refined simplicity</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Playful charm</span>
+        <span class="chip" onclick="this.classList.toggle('on')">Mysterious allure</span>
+      </div>
+      <input type="text" id="celebWhy" placeholder="…or in your own words" style="margin-top:12px">
+    </div>
+
+    <div class="q">
+      <label class="q-label">What image have you never been able to forget?</label>
+      <p class="q-sub">An outfit, a room, a place, a painting — the one that stayed with you. <em>This is the one that reveals the pattern.</em> (optional)</p>
+      <label class="drop" id="imgDrop">
+        <input type="file" id="unforgettable" accept="image/*" hidden>
+        <span class="drop-plus">+</span>
+        <span class="drop-label">upload the image</span>
+        <img class="drop-prev" id="imgPrev" alt="">
+      </label>
+    </div>
+    <p class="msg" id="attrMsg"></p>
+
+    <div style="text-align:center">
+      <button class="btn" onclick="submitAttr()">Show me the pattern ✦</button>
+    </div>
+    <button class="linkback" onclick="go('screenBirth')" style="display:block;margin:22px auto 0">← back</button>
+  </div>
+</section>
+
+<!-- ============ SCREEN 3 · REVEAL ============ -->
+<section class="screen" id="screenReveal">
+  <div class="reveal-inner" id="revealBody">
+    <div id="loadingBox" style="margin-top:22vh">
+      <div class="serif-l italic" style="color:var(--stone)">Reading your stars…</div>
+      <div style="margin-top:22px"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ---------- screen nav ---------- */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ---------- populate selects ---------- */
+(function(){
+  const add=(sel,from,to,pad)=>{const el=document.getElementById(sel);for(let i=from;i<=to;i++){const o=document.createElement('option');o.value=String(i).padStart(pad,'0');o.textContent=String(i).padStart(pad,'0');el.appendChild(o);}};
+  add('day',1,31,2); add('hour',0,23,2); add('minute',0,59,2);
+  const m=document.getElementById('month');['01 January','02 February','03 March','04 April','05 May','06 June','07 July','08 August','09 September','10 October','11 November','12 December'].forEach(x=>{const o=document.createElement('option');o.value=x.slice(0,2);o.textContent=x.slice(3);m.appendChild(o);});
+  const y=document.getElementById('year');const cur=new Date().getFullYear();for(let i=cur;i>=1950;i--){const o=document.createElement('option');o.value=i;o.textContent=i;y.appendChild(o);}
+})();
+
+/* ---------- "I don't know my birth time" toggle ---------- */
+document.getElementById('noTime').addEventListener('change', e=>{
+  const on=e.target.checked;
+  document.getElementById('hour').disabled=on;
+  document.getElementById('minute').disabled=on;
+});
+
+/* ---------- location autocomplete ---------- */
+const locationInput=document.getElementById('location');
+const suggestionsBox=document.getElementById('locationSuggestions');
+let debTimer;
+locationInput.addEventListener('input',()=>{
+  clearTimeout(debTimer);
+  debTimer=setTimeout(async()=>{
+    const q=locationInput.value.trim();
+    if(q.length<2){suggestionsBox.style.display='none';return;}
+    try{
+      const r=await fetch(`/search-location?query=${encodeURIComponent(q)}`);
+      const d=await r.json();
+      suggestionsBox.innerHTML='';
+      if(!d.results||!d.results.length){suggestionsBox.style.display='none';return;}
+      d.results.forEach(p=>{
+        const div=document.createElement('div');
+        div.className='suggestion-item';
+        div.textContent=`${p.name}, ${p.country}`;
+        div.onclick=()=>{
+          locationInput.value=`${p.name}, ${p.country}`;
+          locationInput.dataset.lat=p.latitude; locationInput.dataset.lng=p.longitude;
+          locationInput.dataset.tz=p.timezone; locationInput.dataset.city=p.name;
+          suggestionsBox.style.display='none';
+        };
+        suggestionsBox.appendChild(div);
+      });
+      suggestionsBox.style.display='block';
+    }catch(e){suggestionsBox.style.display='none';}
+  },400);
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('.location-wrapper')) suggestionsBox.style.display='none'; });
+
+/* ---------- state ---------- */
+let SIGNS={venusSign:'',risingSign:'',gender:'',fullName:''};
+
+/* ---------- birth submit → /calculate-signs ---------- */
+async function submitBirth(){
+  const msg=document.getElementById('birthMsg'); msg.textContent='';
+  const fullName=document.getElementById('fullName').value.trim();
+  const gender=document.getElementById('gender').value;
+  const day=document.getElementById('day').value, month=document.getElementById('month').value, year=document.getElementById('year').value;
+  const noTime=document.getElementById('noTime').checked;
+  let hour=document.getElementById('hour').value, minute=document.getElementById('minute').value;
+  if(noTime){ hour='12'; minute='00'; }   // unknown time → noon (standard for time-unknown charts)
+  const lat=parseFloat(locationInput.dataset.lat), lng=parseFloat(locationInput.dataset.lng);
+  const tz=locationInput.dataset.tz, city=locationInput.dataset.city||locationInput.value.split(',')[0].trim();
+  if(!fullName||!gender||!day||!month||!year||(!noTime&&(!hour||!minute))||isNaN(lat)||isNaN(lng)||!tz){
+    msg.textContent='Fill everything in, and pick your birthplace from the list ✦'; return;
+  }
+  const btn=document.getElementById('birthBtn'); btn.disabled=true; btn.textContent='Reading your chart…';
+  try{
+    const r=await fetch('/calculate-signs',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fullName,gender,dob:`${year}-${month}-${day}`,tob:`${hour}:${minute}`,latitude:lat,longitude:lng,timezone:tz,city})});
+    const d=await r.json();
+    if(!r.ok||!d.venusSign||d.venusSign==='Unknown'){throw new Error('chart');}
+    SIGNS={venusSign:d.venusSign,risingSign:d.risingSign,gender,fullName};
+    go('screenAttr');
+  }catch(e){ msg.textContent='Something went wrong reading your chart. Check your details and try again ✦'; }
+  finally{ btn.disabled=false; btn.textContent='Continue →'; }
+}
+
+/* ---------- photo captures (you, her, the unforgettable image) ---------- */
+let YOU_IMG=null, YOU_MIME='image/jpeg', REF_IMG=null, REF_MIME='image/jpeg', INSPO_IMG=null, INSPO_MIME='image/jpeg';
+function wireDrop(inputId, prevId, set){
+  const inp=document.getElementById(inputId), prev=document.getElementById(prevId);
+  if(!inp) return;
+  inp.addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const data=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});
+    set(data, f.type||'image/jpeg');
+    if(prev){ prev.src=data; prev.style.display='block'; }
+  });
+}
+wireDrop('youPhoto','youPrev',(d,m)=>{YOU_IMG=d;YOU_MIME=m;});
+wireDrop('refPhoto','refPrev',(d,m)=>{REF_IMG=d;REF_MIME=m;});
+wireDrop('unforgettable','imgPrev',(d,m)=>{INSPO_IMG=d;INSPO_MIME=m;});
+
+function savedVibe(){
+  try{
+    const u=JSON.parse(localStorage.getItem('astraUser')||'{}');
+    const id=u.identity||{};
+    return [id.threeWords, id.energy, id.inspoLike].filter(Boolean).join(' · ');
+  }catch(e){ return ''; }
+}
+
+let CELEB='';
+function submitAttr(){
+  const name=document.getElementById('celebName').value.trim();
+  if(!YOU_IMG){ document.getElementById('attrMsg').textContent='Add a photo of you, so we can stand you beside her ✦'; return; }
+  if(!name){ document.getElementById('attrMsg').textContent='Name the one who shaped your beauty ✦'; return; }
+  const chips=[...document.querySelectorAll('#homeChips .chip.on')].map(c=>c.textContent);
+  const free=document.getElementById('celebWhy').value.trim();
+  const feels=[...chips, free].filter(Boolean).join(', ');
+  CELEB=name;
+  runReveal(name, feels, savedVibe());
+}
+
+/* ---------- reveal → /analyze-astro ---------- */
+async function runReveal(celebName, feels, vibe){
+  go('screenReveal');
+  document.getElementById('revealBody').innerHTML=`<div id="loadingBox" style="margin-top:22vh"><div class="serif-l italic" style="color:var(--stone)">Finding the visual language of your authentic self…</div><div style="margin-top:22px"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>`;
+  try{
+    const r=await fetch('/analyze-astro',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({venusSign:SIGNS.venusSign,risingSign:SIGNS.risingSign,gender:SIGNS.gender,vibe,
+        celebName, feels, herPhoto:YOU_IMG, herMime:YOU_MIME, refImage:REF_IMG, refMime:REF_MIME, inspoImage:INSPO_IMG, inspoMime:INSPO_MIME})});
+    const d=await r.json();
+    if(!d.success||!d.report) throw new Error(d.error||'no data');
+    localStorage.setItem('astraEssence',JSON.stringify(d.report));
+    renderReveal(d.report, celebName);
+    generateHer(d.report.imagePrompt);
+  }catch(e){
+    document.getElementById('revealBody').innerHTML=`<div style="margin-top:20vh"><p class="lede">The stars got shy. <br>Let's try that once more.</p><button class="btn" onclick="go('screenAttr')">← try again</button></div>`;
+  }
+}
+
+async function generateHer(prompt){
+  const load=document.getElementById('finalLoad'), img=document.getElementById('finalImg');
+  if(!prompt){ if(load) load.textContent='(your image is coming soon)'; return; }
+  try{
+    const r=await fetch('/generate-avatar-image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatarPrompt:prompt, photoBase64:YOU_IMG})});
+    const d=await r.json();
+    if(d.success&&d.imageUrl&&img){ img.onload=()=>{img.style.display='block'; if(load) load.style.display='none';}; img.src=d.imageUrl; }
+    else if(load){ load.textContent='(your image is coming soon)'; }
+  }catch(e){ if(load) load.textContent='(your image is coming soon)'; }
+}
+
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+let VENUS_SHOWS='', RISING_SHOWS='', MATCHES=[];
+const ANCHOR2KEY={eyes:'eyes',eye:'eyes',left_eye:'eyes',right_eye:'eyes',eyebrows:'eyebrows',brows:'eyebrows',eyebrow:'eyebrows',nose:'nose',lips:'lips',mouth:'lips',smile:'smile',jawline:'jawline',jaw:'jawline',chin:'chin',cheekbones:'cheekbones',cheeks:'cheekbones',cheek:'cheekbones',hair:'hair',hair_part:'hair',jewellery:'jewellery',jewelry:'jewellery',face:'presence',harmony:'presence',neckline:'presence',colour:'presence',clothing:'presence',silhouette:'presence'};
+function keyFor(m){ const a=String(m.anchor||m.id||'').toLowerCase().replace(/\s+/g,'_'); return ANCHOR2KEY[a]||'presence'; }
+
+/* ---- face detection: highlight the matched feature on the two real photos ---- */
+let BOXES={you:null, ref:null}, FACE_READY=false;
+const APPROX={ eyes:{x:22,y:30,w:56,h:13}, eyebrows:{x:24,y:24,w:52,h:8}, nose:{x:38,y:38,w:24,h:18}, lips:{x:34,y:57,w:32,h:11}, smile:{x:32,y:56,w:36,h:13}, hair:{x:14,y:1,w:72,h:24},
+  jawline:{x:20,y:58,w:60,h:24}, chin:{x:40,y:74,w:20,h:12}, cheekbones:{x:18,y:44,w:64,h:16}, jewellery:{x:16,y:66,w:68,h:26}, presence:{x:10,y:5,w:80,h:90} };
+async function loadFace(){
+  if(FACE_READY) return true;
+  if(!window.faceapi) return false;
+  try{
+    const M='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+    await faceapi.nets.tinyFaceDetector.loadFromUri(M);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(M);
+    FACE_READY=true;
+  }catch(e){ console.warn('face models failed', e); FACE_READY=false; }
+  return FACE_READY;
+}
+function boxesFrom(det, img){
+  const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height, pos=det.landmarks.positions;
+  const mk=(pts,padX,padY)=>{ let x0=Math.min(...pts.map(p=>p.x)),x1=Math.max(...pts.map(p=>p.x)),y0=Math.min(...pts.map(p=>p.y)),y1=Math.max(...pts.map(p=>p.y));
+    const px=(x1-x0)*padX,py=(y1-y0)*padY; x0-=px;x1+=px;y0-=py;y1+=py;
+    return {x:Math.max(0,x0/iw*100),y:Math.max(0,y0/ih*100),w:(x1-x0)/iw*100,h:(y1-y0)/ih*100}; };
+  const R=(a,b)=>pos.slice(a,b+1);
+  const jaw=mk(R(0,16),0.05,0.2), brows=mk(R(17,26),0.1,0.1), fb=det.detection.box, P=i=>pos[i];
+  return {
+    eyes:mk(R(36,47),0.35,0.7), eyebrows:mk(R(17,26),0.15,0.5), nose:mk(R(27,35),0.35,0.15),
+    lips:mk(R(48,67),0.2,0.45), smile:mk(R(48,67),0.2,0.4), jawline:jaw,
+    chin:mk([P(7),P(8),P(9)],0.9,0.5),
+    cheekbones:mk([P(1),P(2),P(3),P(13),P(14),P(15),P(31),P(35)],0.05,0.2),
+    hair:{x:Math.max(0,jaw.x-2),y:0,w:Math.min(100,jaw.w+4),h:Math.max(8,brows.y)},
+    jewellery:{x:jaw.x,y:Math.min(94,jaw.y+jaw.h*0.5),w:jaw.w,h:jaw.h*0.9},
+    presence:{x:Math.max(0,fb.x/iw*100-3),y:Math.max(0,fb.y/ih*100-6),w:Math.min(100,fb.width/iw*100+6),h:Math.min(100,fb.height/ih*100+12)}
+  };
+}
+async function detectFace(imgId){
+  const img=document.getElementById(imgId); if(!img) return null;
+  if(!await loadFace()) return null;
+  try{
+    if(!img.complete) await new Promise(r=>{ img.onload=r; img.onerror=r; });
+    const det=await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({inputSize:416})).withFaceLandmarks();
+    return det ? boxesFrom(det, img) : null;
+  }catch(e){ return null; }
+}
+async function runDetection(){
+  BOXES.you = await detectFace('youFace');
+  BOXES.ref = REF_IMG ? await detectFace('refFace') : null;
+}
+function placeGlow(id, side, k, show){
+  const g=document.getElementById(id); if(!g) return;
+  if(!show){ g.classList.remove('on'); return; }
+  const box=(BOXES[side]&&BOXES[side][k])?BOXES[side][k]:APPROX[k];
+  g.style.left=box.x+'%'; g.style.top=box.y+'%'; g.style.width=box.w+'%'; g.style.height=box.h+'%';
+  g.classList.add('on');
+}
+
+function showMatch(i){
+  const m=MATCHES[i]||{}, k=keyFor(m);
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on', +p.dataset.i===i));
+  placeGlow('glowYou','you',k,true);
+  placeGlow('glowRef','ref',k, !!REF_IMG);
+  const panel=document.getElementById('featurePanel');
+  panel.innerHTML=`<div class="hl-row">${(m.highlights||[]).map(h=>`<span class="hl">${esc(h)}</span>`).join('')}</div>`;
+  panel.classList.add('in');
+}
+
+function showSpot(which){
+  const spot=document.getElementById('spot'), cap=document.getElementById('spotCap');
+  const cv=document.getElementById('cardVenus'), cr=document.getElementById('cardRising'), cg=document.getElementById('cardGlow');
+  if(!spot) return;
+  cv.classList.toggle('active', which==='venus');
+  cr.classList.toggle('active', which==='rising');
+  cg.classList.toggle('active', which==='glow');
+  if(which==='venus'){
+    spot.style.left='15%'; spot.style.top='32%'; spot.style.width='70%'; spot.style.height='56%'; spot.style.display='block';
+    cap.textContent = VENUS_SHOWS || 'your soft colours, fabrics & light makeup';
+  } else if(which==='rising'){
+    spot.style.left='13%'; spot.style.top='2%'; spot.style.width='74%'; spot.style.height='44%'; spot.style.display='block';
+    cap.textContent = RISING_SHOWS || 'your posture, presence & your jewellery';
+  } else {
+    spot.style.display='none';
+    cap.textContent = 'This is you once your visual language becomes coherent — not prettier, just aligned.';
+  }
+  cap.classList.add('lit');
+}
+
+function renderReveal(g, celebName){
+  VENUS_SHOWS=g.venusShows||''; RISING_SHOWS=g.risingShows||''; MATCHES=g.matches||[];
+  const shared=(g.shared||[]).map(s=>`<li>${esc(s)}</li>`).join('');
+  const sw=(g.palette||[]).map(c=>`<div class="sw"><div class="sw-c" style="background:${esc(c.hex)}"></div><div class="sw-n">${esc(c.name)}</div></div>`).join('');
+  const refHalf = REF_IMG ? `<img id="refFace" src="${REF_IMG}" alt="">` : `<div class="ref-name">${esc(celebName)}</div>`;
+  const pills = MATCHES.map((m,i)=>`<button class="pill" data-i="${i}" onclick="showMatch(${i})">${esc(m.label||m.id)}</button>`).join('');
+  document.getElementById('revealBody').innerHTML=`
+    <div class="split">
+      <div class="half"><img id="youFace" src="${YOU_IMG}" alt=""><div class="fglow" id="glowYou"></div></div>
+      <div class="half">${refHalf}<div class="fglow" id="glowRef"></div></div>
+    </div>
+    <div class="split-cap"><span>you</span><span class="dot-sep">·</span><span>${esc(celebName)}</span></div>
+
+    <p class="opener" id="opener">Your Pinterest wasn't showing you someone else. It was showing you pieces of yourself you hadn't learned to name yet.</p>
+
+    <p class="why-return">${esc(g.whyReturn)}</p>
+    <p class="saved-line">You didn't save her because you wanted to become her. You saved her because she expresses something your own features have been asking for.</p>
+    ${shared?`<ul class="shared">${shared}</ul>`:''}
+
+    ${MATCHES.length?`<div class="block-h" style="margin-top:50px">What you actually share — tap to see</div>
+    <div class="pills">${pills}</div>
+    <div class="feature-panel" id="featurePanel"></div>`:''}
+
+    <div class="block-h" style="margin-top:56px">Your self, made visible</div>
+    <div class="finalwrap">
+      <div class="final-img" id="finalWrap">
+        <div class="final-load" id="finalLoad">painting you…</div>
+        <img id="finalImg" alt="" style="display:none">
+        <div class="spot" id="spot"></div>
+      </div>
+      <p class="spot-cap" id="spotCap">tap a card to see it on you</p>
+      <div class="spot-cards">
+        <button class="spot-card" id="cardVenus" onclick="showSpot('venus')"><span>♡ Venus</span><small>${esc(SIGNS.venusSign)}</small></button>
+        <button class="spot-card" id="cardRising" onclick="showSpot('rising')"><span>☉ Rising</span><small>${esc(SIGNS.risingSign)}</small></button>
+        <button class="spot-card" id="cardGlow" onclick="showSpot('glow')"><span>✨ Glow-Up</span><small>aligned you</small></button>
+      </div>
+    </div>
+
+    <div class="block"><div class="block-h">Your colours</div><div class="palette">${sw}</div></div>
+
+    <div class="closing-mark"></div>
+    <p class="closing">${esc(g.closing)}</p>
+
+    <div class="reveal-actions">
+      <button class="btn ghost" onclick="go('screenIntro')">Read again</button>
+    </div>`;
+  requestAnimationFrame(()=>{ const o=document.getElementById('opener'); if(o) setTimeout(()=>o.classList.add('in'), 400); });
+  runDetection();   // find the features on the two real photos (glows sharpen once ready)
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>

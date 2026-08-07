@@ -1,0 +1,256 @@
+{
+  "main": {
+    "id": "3603681bdaba6f92",
+    "type": "split",
+    "children": [
+      {
+        "id": "043d4c8b7c4bb205",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "eba343ddf62e1ef3",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "01-Ideas/Affiliate Marketplace.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Affiliate Marketplace"
+            }
+          }
+        ]
+      },
+      {
+        "id": "5231775da9c2bcaf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "70ec0fb55260ab8e",
+            "type": "leaf",
+            "state": {
+              "type": "localgraph",
+              "state": {
+                "file": "01-Ideas/Affiliate Marketplace.md",
+                "options": {
+                  "collapse-filter": true,
+                  "search": "",
+                  "localJumps": 1,
+                  "localBacklinks": true,
+                  "localForelinks": true,
+                  "localInterlinks": false,
+                  "showTags": false,
+                  "showAttachments": false,
+                  "hideUnresolved": false,
+                  "collapse-color-groups": true,
+                  "colorGroups": [],
+                  "collapse-display": true,
+                  "showArrow": false,
+                  "textFadeMultiplier": 0,
+                  "nodeSizeMultiplier": 1,
+                  "lineSizeMultiplier": 1,
+                  "collapse-forces": true,
+                  "centerStrength": 0.518713248970312,
+                  "repelStrength": 10,
+                  "linkStrength": 1,
+                  "linkDistance": 250,
+                  "scale": 1,
+                  "close": false
+                }
+              },
+              "icon": "lucide-git-fork",
+              "title": "Graph of Affiliate Marketplace"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e265b4af3a14564a",
+    "type": "split",
+    "children": [
+      {
+        "id": "4d8e0e8c6ac5bf19",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "20ae9b32b89748ef",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "0975fc829e45464a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "fb5d0717fa87260d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "17ada31a8fdd3b08",
+    "type": "split",
+    "children": [
+      {
+        "id": "4a1ccb9e9a985bce",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "eab53100d9c3dc03",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "01-Ideas/_Ideas Index.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for _Ideas Index"
+            }
+          },
+          {
+            "id": "b32709018fdfef7a",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "01-Ideas/_Ideas Index.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from _Ideas Index"
+            }
+          },
+          {
+            "id": "d042459bc3bd6f16",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "345dc61ef06eb044",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "c5fc597a962823b1",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "01-Ideas/_Ideas Index.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of _Ideas Index"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "eba343ddf62e1ef3",
+  "lastOpenFiles": [
+    "🏠 Home.md",
+    "01-Ideas/AI Assistant — Explain Any Term.md",
+    "01-Ideas/_Ideas Index.md",
+    "01-Ideas/Body Scan & Avatar Input.md",
+    "02-Skills/AstraWear — How It Works (technical).md",
+    "04-Research/Competitors.md",
+    "02-Skills/Design the Winged ASTRA Logo.md",
+    "02-Skills/Resume vs Reality — AstraWear Audit.md",
+    "02-Skills/4-Day Sprint — Interview Ready.md",
+    "02-Skills/My Skill Tracks.md",
+    "02-Skills/Figma — Build the ASTRA Logo.md",
+    "04-Research/attachments/README.md",
+    "04-Research/attachments",
+    "04-Research/Brand Identity.md",
+    "Untitled.md",
+    "02-Skills/Roadmap — Build It Myself.md",
+    "02-Skills/Webhooks (Reverse API) & Git.md",
+    "02-Skills",
+    "What AstraWear Does.md",
+    "01-Ideas/Styling Pipeline.md",
+    "01-Ideas/Pinterest Recommendation System.md",
+    "01-Ideas/Affiliate Marketplace.md",
+    "01-Ideas/3D Mystery Box.md",
+    "00-Inbox/Inbox.md"
+  ]
+}

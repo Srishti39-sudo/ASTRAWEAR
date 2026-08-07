@@ -1,0 +1,13 @@
+# Stage 1 (InsightFace SCRFD) — M1-native, no TensorFlow
+fastapi
+uvicorn[standard]
+numpy
+opencv-python
+insightface
+onnxruntime          # arm64-native on Apple Silicon (CPU). CoreML EP optional later.
+
+mediapipe            # Stage 2 — 478 face mesh (arm64 wheels)
+
+# --- coming in the next stages (leave commented until we add them) ---
+# open-clip-torch    # Stage 5 — CLIP / SigLIP styling
+# torch              # CLIP backend
