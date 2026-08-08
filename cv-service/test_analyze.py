@@ -26,6 +26,8 @@ if __name__ == "__main__":
     payload = {"user_image": b64(sys.argv[1])}
     if len(sys.argv) > 2:
         payload["reference_image"] = b64(sys.argv[2])
+    if len(sys.argv) > 3:
+        payload["vibe_image"] = b64(sys.argv[3])   # optional: the unforgettable / vibe image
     d = requests.post("http://localhost:8000/analyze", json=payload, timeout=180).json()
 
     print("\nUSER:"); print(face_line(d.get("user")))
@@ -48,5 +50,18 @@ if __name__ == "__main__":
         for m in ms:
             pts = sum(len(r) for r in m.get("user_landmarks", []))
             print(f"   {m['id']:12s} conf {m['confidence']}   ({pts} trace pts)")
+            if m.get("labels"):
+                print(f"        labels: {' · '.join(m['labels'])}")
+            if m.get("line"):
+                print(f"        line:   {m['line']}")
+        aes = d.get("aesthetic")
+        if aes:
+            print(f"\nAESTHETIC ENGINE — visual_similarity: {aes.get('visual_similarity')}")
+            print("   you:  " + ", ".join(f"{p['concept']} {p['score']}" for p in aes.get("user_profile", [])))
+            print("   her:  " + ", ".join(f"{p['concept']} {p['score']}" for p in aes.get("reference_profile", [])))
+            if aes.get("vibe_profile"):
+                print("   vibe: " + ", ".join(f"{p['concept']} {p['score']}" for p in aes["vibe_profile"]))
+            print("   SHARED energy (you∩her): " + ", ".join(s["concept"] for s in aes.get("shared", [])))
+            print("   YOUR VISUAL LANGUAGE: " + ", ".join(p["concept"] for p in aes.get("visual_language", [])))
     json.dump(d, open("last_result.json", "w"), indent=2)
     print("\n(full JSON saved to last_result.json)")

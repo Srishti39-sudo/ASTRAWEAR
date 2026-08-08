@@ -7,7 +7,10 @@ insightface
 onnxruntime          # arm64-native on Apple Silicon (CPU). CoreML EP optional later.
 
 mediapipe            # Stage 2 — 478 face mesh (arm64 wheels)
+requests             # Stage 8 — call Gemini for labels
+python-dotenv        # load GEMINI_API_KEY from backend/.env
 
-# --- coming in the next stages (leave commented until we add them) ---
-# open-clip-torch    # Stage 5 — CLIP / SigLIP styling
-# torch              # CLIP backend
+# --- Aesthetic / energy engine (SigLIP + DINOv2). Heavy (~2GB w/ models). Install to enable ---
+torch                # SigLIP + DINOv2 backend (arm64 wheels for M1)
+transformers         # SigLIP zero-shot + DINOv2
+pillow               # image handling for transformers

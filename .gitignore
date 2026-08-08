@@ -32,3 +32,9 @@ __pycache__/
 cv-service/face_landmarker.task
 cv-service/last_result.json
 *.onnx
+
+# Personal test photos (keep faces out of the repo) + stray docs
+cv-service/you.png
+cv-service/her.png
+cv-service/vibe.png
+UHV_Summary_Sheet.pdf

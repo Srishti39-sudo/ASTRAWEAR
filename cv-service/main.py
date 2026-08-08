@@ -24,12 +24,15 @@ First run downloads the buffalo_l model pack (~300 MB) into ~/.insightface.
 """
 
 import os
+import json
 import base64
 import urllib.request
 from typing import Optional
 
 import numpy as np
 import cv2
+import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -43,6 +46,15 @@ from mediapipe.tasks.python import vision as mp_vision
 # MediaPipe FaceLandmarker (Tasks API) — version-proof; auto-downloads the model once.
 MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "face_landmarker.task")
+
+# Reuse the Gemini key from the Node backend's .env (Stage 8 labels) — no duplicate key.
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "backend", ".env"))
+
+# Aesthetic / energy engine — SEPARATE pipeline (SigLIP + DINOv2). Heavy + optional; imported lazily-safe.
+try:
+    from aesthetic import aesthetic_engine
+except Exception:
+    aesthetic_engine = None
 
 app = FastAPI(title="AstroStylist CV")
 app.add_middleware(
@@ -345,6 +357,61 @@ def _arcface_note(cos):
     return "different people (expected — measures identity, not lookalike features)"
 
 
+# ------------------------------------------------------------------ Stage 8: LLM labels (DESCRIBES CV output, never decides)
+GEMINI_MODEL = "gemini-2.5-flash"
+LABELS_SCHEMA = {"type": "OBJECT", "properties": {"items": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {
+    "id": {"type": "STRING"},
+    "labels": {"type": "ARRAY", "items": {"type": "STRING"}},
+    "line": {"type": "STRING"},
+}}}}}
+
+
+def _strip_b64(dataurl):
+    if not dataurl:
+        return None
+    return dataurl.split(",", 1)[1] if "," in dataurl else dataurl
+
+
+def stage8_labels(matched_ids, structure_tags, user_crop, ref_crop):
+    """Take the CV-decided matches → Gemini writes tiny labels + one emotional line each. Adds/removes nothing."""
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key or not matched_ids:
+        return {}
+    ids = ", ".join(matched_ids)
+    prompt = (
+        "You are AstroStylist's label writer. A computer-vision engine has ALREADY decided that these two people "
+        f"share these features (do NOT add or remove any — describe ONLY these): {ids}.\n"
+        "Look at both faces. For EACH feature id return:\n"
+        '- "labels": 2-4 VERY short observational phrases (e.g. "almond shape", "soft upper lid", "gentle outer tilt") '
+        "— plain, specific, no sentences.\n"
+        '- "line": ONE short sentence that OBSERVES what the two genuinely share in this feature AND what it does — '
+        "stated as calm fact, NEVER a compliment. Do NOT use flattery words (beautiful, stunning, gorgeous, radiant, "
+        "lovely, graceful, elegant, captivating, harmony, glow, frame, enhance). Let the PRECISION of the observation "
+        'be the compliment. Simple everyday words. e.g. "your eyes both soften before they sharpen, so eye contact '
+        'reads magnetic rather than sharp" or "you share a jaw that holds its line without hardening — presence, not edge".\n'
+        f"Her overall structure: {structure_tags}.\n"
+        f'Return items = a list of {{id, labels, line}} for EXACTLY these ids: {ids}.'
+    )
+    parts = [{"text": prompt}]
+    if user_crop:
+        parts += [{"text": "User face:"}, {"inline_data": {"mime_type": "image/jpeg", "data": user_crop}}]
+    if ref_crop:
+        parts += [{"text": "Reference face:"}, {"inline_data": {"mime_type": "image/jpeg", "data": ref_crop}}]
+    body = {"contents": [{"parts": parts}],
+            "generationConfig": {"responseMimeType": "application/json", "responseSchema": LABELS_SCHEMA, "temperature": 0.4}}
+    try:
+        r = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent",
+            headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body, timeout=60)
+        if not r.ok:
+            print("⚠️ Stage 8 error:", r.status_code, r.text[:200]); return {}
+        text = "".join(p.get("text", "") for p in r.json().get("candidates", [{}])[0].get("content", {}).get("parts", []))
+        items = json.loads(text).get("items", [])
+        return {it["id"]: {"labels": it.get("labels", []), "line": it.get("line", "")} for it in items if it.get("id")}
+    except Exception as e:
+        print("⚠️ Stage 8 exception:", e); return {}
+
+
 def analyze_face(img: Optional[np.ndarray]) -> dict:
     if img is None:
         return {"detected": False, "error": "decode failed"}
@@ -358,19 +425,38 @@ def analyze_face(img: Optional[np.ndarray]) -> dict:
 class AnalyzeIn(BaseModel):
     user_image: str
     reference_image: Optional[str] = None
+    vibe_image: Optional[str] = None   # the "unforgettable image" — aspirational aesthetic (any subject)
 
 
 @app.post("/analyze")
 def analyze(body: AnalyzeIn):
-    user = analyze_face(decode_image(body.user_image))
+    u_img = decode_image(body.user_image)
+    user = analyze_face(u_img)
     result = {"stage": 6, "user": user}
     if body.reference_image:
-        ref = analyze_face(decode_image(body.reference_image))
+        r_img = decode_image(body.reference_image)
+        ref = analyze_face(r_img)
         result["reference"] = ref
         if user.get("detected") and ref.get("detected"):
             result.update(stage3to6(user, ref))   # Layer 1 (structure) + Layer 2 (feature matches)
             cos = result.pop("global_cosine", 0.0)
             result["arcface"] = {"cosine": cos, "note": _arcface_note(cos), "role": "quality signal, not scoring"}
+            # Stage 8 — LLM labels for the CV-decided matches (optional; needs GEMINI_API_KEY)
+            if result.get("matches"):
+                lab = stage8_labels(
+                    [m["id"] for m in result["matches"]],
+                    ", ".join((result.get("structure") or {}).get("user_tags", [])),
+                    _strip_b64(user.get("aligned_face")), _strip_b64(ref.get("aligned_face")))
+                for m in result["matches"]:
+                    if m["id"] in lab:
+                        m["labels"] = lab[m["id"]]["labels"]
+                        m["line"] = lab[m["id"]]["line"]
+            # Aesthetic / energy engine (separate pipeline — user anchor + reference + optional vibe image)
+            if aesthetic_engine is not None:
+                vibe_img = decode_image(body.vibe_image) if body.vibe_image else None
+                aes = aesthetic_engine(u_img, r_img, vibe_img)
+                if aes:
+                    result["aesthetic"] = aes
     # strip internal embeddings from the response (kept only for the similarity math)
     for k in ("user", "reference"):
         if isinstance(result.get(k), dict):
