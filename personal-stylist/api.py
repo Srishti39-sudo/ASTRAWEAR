@@ -256,6 +256,29 @@ def agent_chat(a: AgentIn):
                 "error": str(e), "tools_used": []}
 
 
+class PhotoIn(BaseModel):
+    image: str                                           # data URI — front, full body, daylight
+    side_image: Optional[str] = None
+    height_cm: Optional[float] = None                    # turns pixel widths into cm
+
+
+@app.post("/profile/photo")
+def profile_photo(p: PhotoIn):
+    """Her photo -> colour (undertone / depth / contrast / skin hex) + body (silhouette, ratios, cm) saved
+    into profile.json. Same path the agent's analyze_my_photo tool uses; this is the direct button."""
+    return agent._analyze_photo(p.image, _load_profile(), _save_profile, height_cm=p.height_cm, side_image=p.side_image)
+
+
+@app.get("/profile/photo-file")
+def profile_photo_file():
+    """The stored photo itself (for the measurement page's 'use my stored photo')."""
+    from fastapi.responses import FileResponse, JSONResponse
+    path = _load_profile().get("photo_path") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "me.jpg")
+    if not os.path.exists(path):
+        return JSONResponse({"error": "no stored photo"}, status_code=404)
+    return FileResponse(path, media_type="image/jpeg")
+
+
 class DecisionIn(BaseModel):
     decision: str                                        # "skipped" | "bought"
     product: Optional[Dict[str, Any]] = None             # the page's product (from the extension)

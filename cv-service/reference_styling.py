@@ -206,7 +206,60 @@ def sample_skin(img, mesh):
         return None
 
 
+_HAIR_SEG = None
+
+
+def _hair_segmenter():
+    """MediaPipe multiclass selfie segmenter (class 1 = hair). Same model file body_geometry downloads."""
+    global _HAIR_SEG
+    if _HAIR_SEG is None:
+        import body_geometry as BG
+        from mediapipe.tasks import python
+        from mediapipe.tasks.python import vision
+        BG._download(BG._SEG_URL, BG._SEG_MODEL)
+        _HAIR_SEG = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
+            base_options=python.BaseOptions(model_asset_path=BG._SEG_MODEL), output_category_mask=True))
+    return _HAIR_SEG
+
+
+def sample_hair_seg(img, mesh=None, min_px=400):
+    """Median hair colour over the segmenter's HAIR class -> (r,g,b) | None. Thousands of pixels instead of a
+    13x9 patch at one hairline point, so a highlight, a parting or background bleeding in no longer flips
+    the skin-vs-hair contrast read. Median (not mean) so shine and flyaways don't lighten it."""
+    try:
+        import numpy as np
+        import cv2
+        import mediapipe as mp_
+        if img is None:
+            return None
+        H, W = img.shape[:2]
+        scale = 720.0 / max(H, W)
+        small = cv2.resize(img, (int(W * scale), int(H * scale))) if scale < 1 else img
+        rgb = np.ascontiguousarray(cv2.cvtColor(small, cv2.COLOR_BGR2RGB), dtype=np.uint8)
+        res = _hair_segmenter().segment(mp_.Image(image_format=mp_.ImageFormat.SRGB, data=rgb))
+        cat = np.asarray(res.category_mask.numpy_view())
+        if cat.ndim > 2:
+            cat = cat[:, :, 0]
+        hair = rgb[cat == 1]
+        if len(hair) < min_px:
+            return None
+        med = np.median(hair, axis=0)
+        return (float(med[0]), float(med[1]), float(med[2]))
+    except Exception as e:
+        print("⚠️ sample_hair_seg:", e)
+        return None
+
+
 def sample_hair(img, mesh):
+    """Hair tone -> (r,g,b) for the colouring-contrast dial. Segmenter hair class first; the old
+    single-patch-above-the-hairline read is the fallback."""
+    seg = sample_hair_seg(img, mesh)
+    if seg is not None:
+        return seg
+    return _sample_hair_patch(img, mesh)
+
+
+def _sample_hair_patch(img, mesh):
     """Mean hair tone (patch just above the hairline) -> (r,g,b), for the colouring-contrast dial.
     Best-effort: returns None if the region reads like skin/background (no reliable hair patch)."""
     try:

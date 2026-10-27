@@ -532,9 +532,14 @@ def analyze_avatar(body: AvatarIn):
     # GEOMETRY first — MediaPipe now runs in an isolated subprocess, so a crash returns an error (server
     # survives) rather than aborting. Gemini visual classification is the fallback.
     prof = avatar_engine.analyze_from_geometry(body.front_image, body.side_image, body.height_cm, body.gender)
+    if prof.get("error") and ("not in the frame" in prof["error"] or "torso edges" in prof["error"]):
+        # a chest-up selfie: no model can measure what is not in the picture — say so, don't guess
+        return {"error": prof["error"], "needs": "full-body photo, head to feet, plain background"}
     if prof.get("error"):
         print("ℹ️ geometry fell back to Gemini:", prof["error"])
         prof = avatar_engine.analyze_body(body.front_image, body.side_image, body.gender)
+        if not prof.get("error"):
+            prof["source"] = "gemini visual classification (fallback — no geometry, no cm)"
     if prof.get("error"):
         return {"error": prof["error"]}
     out = {"body_profile": prof}
@@ -674,6 +679,18 @@ def analyze(body: AnalyzeIn):
             vlang = ((result.get("aesthetic") or {}).get("visual_language"))
             styled = style_engine(umesh, result.get("matches"), vlang)
             if styled:
+                # FACIAL CONTRAST (Russell) — eyes/lips/brows vs skin luminance, measured off HER 478 landmarks.
+                # Runs with just her photo: the measurement page and the colour profile need it without a reference.
+                if CE is not None:
+                    _fc = CE.measure_contrast(u_img, umesh)
+                    if _fc:
+                        _fc["guidance"] = CE.contrast_guidance(_fc["level"])
+                        result["facial_contrast"] = _fc
+                # FACE SHAPE — deterministic geometry from the landmarks (length/width, forehead/jaw ratios)
+                if FS is not None:
+                    _fs = FS.classify_face_shape(umesh, image_wh=(u_img.shape[1], u_img.shape[0]) if u_img is not None else None)
+                    if _fs:
+                        result["face_shape"] = _fs
                 # §15 Color analysis — grounded in HER real skin; vibe/Venus only nudge the mood. Runs w/o reference.
                 if color_analysis is not None and ref_styling is not None:
                     u_skin = ref_styling.sample_skin(u_img, umesh)
@@ -729,22 +746,15 @@ def analyze(body: AnalyzeIn):
                     conc = ref_styling.concealer_feature(concealer_cv)
                     if conc:
                         styled["features"]["concealer"] = conc
-                    # FACIAL CONTRAST (Russell) — measured off HER face -> makeup lift/define guidance
-                    if CE is not None:
-                        _fc = CE.measure_contrast(u_img, umesh)
-                        if _fc:
-                            _fc["guidance"] = CE.contrast_guidance(_fc["level"])
-                            result["facial_contrast"] = _fc
-                            _eyes = (styled.get("features") or {}).get("eyes")
-                            if isinstance(_eyes, dict):
-                                _eyes["contrast_tip"] = _fc["guidance"]["note"]   # light touch on the eyes card
-                    # FACE-SHAPE-driven hair (women) / beard (men) — deterministic, from her 478 landmarks
+                    # facial contrast + face shape are measured above (no reference needed); here they
+                    # only feed the eyes card tip and the hair recommendation.
+                    if result.get("facial_contrast"):
+                        _eyes = (styled.get("features") or {}).get("eyes")
+                        if isinstance(_eyes, dict):
+                            _eyes["contrast_tip"] = result["facial_contrast"]["guidance"]["note"]
                     face_rec = None
-                    if FS is not None:
-                        _fs = FS.classify_face_shape(umesh, image_wh=(u_img.shape[1], u_img.shape[0]) if u_img is not None else None)
-                        if _fs:
-                            result["face_shape"] = _fs
-                            face_rec = FS.recommend(_fs["shape"], body.gender)
+                    if FS is not None and result.get("face_shape"):
+                        face_rec = FS.recommend(result["face_shape"]["shape"], body.gender)
                     styled["features"]["hair"] = ref_styling.hair_feature(rstyle, face_rec)
                     # BEAUTY PROFILE — hair + makeup for the Personal Stylist look-card (Daily Outfit Generator)
                     bp = _beauty_profile(styled, result.get("color_analysis"))
@@ -900,6 +910,13 @@ def glowup_status():
     return {"remote": (remote_glowup.available() if remote_glowup else {"ready": False}),
             "gemini": (gemini_glowup.available() if gemini_glowup else {"ready": False}),
             "fal": (fal_glowup.available() if fal_glowup else {"ready": False})}
+
+
+@app.get("/measure")
+def measure_page():
+    """The 'how good is the read' page: her photo -> every measured number, how it was derived, tape compare."""
+    from fastapi.responses import FileResponse
+    return FileResponse(os.path.join(os.path.dirname(os.path.abspath(__file__)), "measure_me.html"), media_type="text/html")
 
 
 @app.get("/health")

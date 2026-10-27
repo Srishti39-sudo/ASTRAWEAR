@@ -162,6 +162,15 @@ def _impl(front_b64, side_b64, height_cm):
     if lms is None or seg is None:
         return {"error": "no body pose/silhouette found in the front photo"}
     H, W = seg.shape[:2]
+    # FRAME GUARD — the pose model happily places landmarks it cannot see (y > 1). A chest-up selfie
+    # then yields hip width 0, a bust "circumference" of 200+ cm and an 'apple' silhouette. Refuse instead.
+    hip_y_n = (lms[L_HIP][1] + lms[R_HIP][1]) / 2
+    if hip_y_n >= 0.97:
+        return {"error": "hips are not in the frame — body measurements need a full-body photo, head to feet"}
+    feet_in_frame = all(lms[i][1] <= 1.0 for i in (L_ANKLE, R_ANKLE)) if len(lms) > R_ANKLE else False
+    if height_cm and not feet_in_frame:
+        print("[MEDIAPIPE] feet out of frame -> cm calibration skipped (height span unknown)", flush=True)
+        height_cm = None
     cx = int(((lms[L_HIP][0] + lms[R_HIP][0]) / 2) * W)          # torso centre x, from the hip landmarks
     lv = key_levels(lms, H)
     nw_y, nw_w = natural_waist(seg, lv["band"], cx)
@@ -200,7 +209,9 @@ def _impl(front_b64, side_b64, height_cm):
     # there is no side photo, which is a population guess; ALTIER solves for the user's OWN
     # depth ratio from one tape measurement and needs these two to do it. Purely additive —
     # nothing that already reads this dict is affected.
-    return {"ratios": rat, "widths_px": widths, "zones": zones,
+    if not widths["hip"] or not widths["shoulder"]:
+        return {"error": "could not find the torso edges at the hip/shoulder level — stand against a plain background in fitted clothes"}
+    return {"ratios": rat, "widths_px": widths, "zones": zones, "feet_in_frame": feet_in_frame,
             "height_px": height_px, "side_depths_px": side_depths,
             "waist_placement": "high" if (nw_y - lv["shoulder_y"]) < 0.42 * lv["torso_px"] else "natural",
             "vertical_proportion": ("long_legs" if widths["leg_px"] > 1.15 * widths["torso_px"]

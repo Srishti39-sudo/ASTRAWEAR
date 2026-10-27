@@ -248,7 +248,7 @@ def _price(v):
         return None
 
 
-def _analyze_photo(image: str, prof: dict, save) -> dict:
+def _analyze_photo(image: str, prof: dict, save, height_cm=None, side_image=None) -> dict:
     a = requests.post(f"{_CV_URL}/analyze", json={"user_image": image}, timeout=120).json()
     if not (a.get("user") or {}).get("detected"):
         return {"error": "no face found — ask for a clear, front-facing photo in daylight"}
@@ -257,8 +257,23 @@ def _analyze_photo(image: str, prof: dict, save) -> dict:
         # a dark or blown-out selfie would store a wrong undertone; refuse and say how to retake
         return {"error": "the light in this photo is not good enough to read colour from",
                 "capture_quality": cq, "advice": cq.get("advice")}
-    body = requests.post(f"{_CV_URL}/analyze-avatar", json={"front_image": image}, timeout=120).json()
-    prof["style"] = a.get("style_profile")
+    body = requests.post(f"{_CV_URL}/analyze-avatar",
+                         json={"front_image": image, "side_image": side_image, "height_cm": height_cm}, timeout=120).json()
+    # colour keys are re-read from the photo; what she TOLD us (vibe word, never, prints) is kept
+    new_style = a.get("style_profile") or {}
+    old_style = prof.get("style") or {}
+    merged = dict(old_style)
+    for k in ("undertone", "depth", "contrast", "skin_hex", "season", "palette"):
+        if new_style.get(k) is not None:
+            merged[k] = new_style[k]
+    for k in ("vibe", "best_prints", "vibe_line", "never"):
+        if not merged.get(k) and new_style.get(k):
+            merged[k] = new_style[k]
+    prof["style"] = merged
+    if a.get("facial_contrast") and prof["style"] is not None:
+        prof["style"]["facial_contrast"] = a["facial_contrast"].get("level")   # Russell read, beside the skin/hair one
+    if a.get("face_shape") and prof["style"] is not None:
+        prof["style"]["face_shape"] = a["face_shape"].get("shape")
     if body.get("body_profile"):
         prof["body"] = body["body_profile"]
     # keep the photo on disk for try-on (profile.json stays small)
@@ -271,6 +286,7 @@ def _analyze_photo(image: str, prof: dict, save) -> dict:
     save(prof)
     ca = a.get("color_analysis") or {}
     return {"saved": True, "undertone": ca.get("undertone"), "season": ca.get("season_lean"),
+            "skin_hex": ca.get("skin_hex"), "measurements": (prof.get("body") or {}).get("measurements"),
             "contrast": ca.get("contrast"), "depth": ca.get("depth"), "note": ca.get("note"),
             "capture_quality": {"flags": cq.get("flags", []), "advice": cq.get("advice")},
             **_profile_summary(prof)}

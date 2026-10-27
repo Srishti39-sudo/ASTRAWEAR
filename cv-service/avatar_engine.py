@@ -374,6 +374,13 @@ def analyze_from_geometry(front_b64, side_b64=None, height_cm=None, gender="fema
     prof = _conclusions(raw_from_geometry(geom, gender), gender)
     prof["ratios"] = geom.get("ratios")
     prof["zones"] = geom.get("zones")          # "See It On You" glow positions (from the pose landmarks)
+    # raw geometry kept so the measurement page can show pixel widths, and so a caller can re-calibrate
+    # circumferences from one tape measurement (own depth ratio instead of the 0.72 population guess)
+    prof["geometry"] = {"widths_px": geom.get("widths_px"), "height_px": geom.get("height_px"),
+                        "side_depths_px": geom.get("side_depths_px") or {},
+                        "feet_in_frame": geom.get("feet_in_frame"),
+                        "source": "mediapipe pose (33 pts) + own silhouette mask",
+                        "depth_assumption": "side photo" if geom.get("side_depths_px") else "0.72 x front width (population guess)"}
     print(f"[GEOMETRY] silhouette={prof['silhouette']}  waist_gap={prof.get('waist_gap')}  "
           f"shoulder={prof.get('shoulder_width')}  ratios={geom.get('ratios')}", flush=True)
     return prof

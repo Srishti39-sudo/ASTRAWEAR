@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASTRA · Measure Me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Archivo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F4EEE3;--cream-2:#EFE7D7;--ink:#2C2822;--ink-soft:#5A5346;--stone:#9A8F7B;--brass:#9B7A44;--brass-2:#B18E57;
+  --line:#E4DBC9;--ok:#4F7A4A;--warn:#B07A2A;--bad:#AE5A38;
+  --serif:'Cormorant Garamond',Georgia,serif;--display:'Marcellus',Georgia,serif;--sans:'Archivo',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(130% 100% at 50% -10%,#F8F3EA 0%,var(--cream) 55%,#EFE7D8 100%);color:var(--ink);
+  font-family:var(--serif);min-height:100vh;padding:32px 16px 56px;-webkit-font-smoothing:antialiased}
+.head{text-align:center;margin-bottom:26px}
+.wordmark{font-family:var(--display);font-size:15px;letter-spacing:8px;padding-left:8px}
+.sub{font-style:italic;color:var(--ink-soft);font-size:17px;margin-top:8px}
+.rule{width:38px;height:1px;background:var(--brass);opacity:.5;margin:12px auto 0}
+.shell{max-width:1060px;margin:0 auto}
+.label{font-family:var(--sans);font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--stone)}
+
+/* inputs */
+.gate{display:grid;grid-template-columns:150px 150px 1fr;gap:18px;align-items:start;margin-bottom:26px}
+.drop{height:190px;border:1px dashed var(--brass-2);border-radius:4px;cursor:pointer;position:relative;overflow:hidden;background:var(--cream-2);
+  display:flex;align-items:center;justify-content:center;text-align:center}
+.drop .plus{font-family:var(--sans);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--stone);line-height:1.9;padding:8px}
+.drop .plus b{display:block;font-size:16px;color:var(--brass-2);font-weight:400}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop.filled .plus{display:none}
+.drop input{display:none}
+.controls{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px}
+input[type=number],input[type=text]{font-family:var(--sans);font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:#fff;width:110px;color:var(--ink)}
+button{background:var(--ink);color:var(--cream);border:0;border-radius:2px;padding:12px 24px;font-family:var(--sans);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer}
+button:hover{background:var(--brass)}button:disabled{opacity:.4;cursor:default}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--brass-2)}
+.hint{font-style:italic;color:var(--stone);font-size:14px;line-height:1.5}
+.status{font-style:italic;font-size:15px;color:var(--ink-soft);min-height:20px}
+.status.err{color:var(--bad)}
+
+/* results */
+.grid{display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}.gate{grid-template-columns:1fr 1fr}}
+.frame{position:relative;border-radius:4px;overflow:hidden;background:#e7ddcb;box-shadow:0 16px 40px -22px rgba(70,52,24,.5)}
+.frame img{display:block;width:100%;height:auto}
+.frame svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.card{background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:4px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-family:var(--display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline}
+.card h3 .tag{font-family:var(--sans);font-size:9px;letter-spacing:2px;color:var(--stone);font-weight:400}
+table{width:100%;border-collapse:collapse;font-size:15.5px}
+td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{color:var(--ink-soft);width:34%}
+td.v{font-family:var(--sans);font-size:14px}
+td.how{font-style:italic;color:var(--stone);font-size:13.5px;width:34%}
+tr:last-child td{border-bottom:0}
+.sw{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-3px;margin-right:6px;border:1px solid rgba(0,0,0,.12)}
+.pal{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.pal span{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-soft)}
+.pal i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
+.flag{display:inline-block;font-family:var(--sans);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin:2px 4px 2px 0}
+.flag.ok{background:#e4ecdf;color:var(--ok)}.flag.warn{background:#f3e7d1;color:var(--warn)}.flag.bad{background:#f3dcd3;color:var(--bad)}
+.src{font-family:var(--sans);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:var(--cream-2);color:var(--stone)}
+.src.m{color:var(--ok)}.src.c{color:var(--warn)}.src.a{color:var(--bad)}
+.legend{font-size:13.5px;color:var(--stone);font-style:italic;margin-top:10px;line-height:1.6}
+.tape td input{width:80px}
+.diff{font-family:var(--sans);font-size:13px}
+.diff.good{color:var(--ok)}.diff.meh{color:var(--warn)}.diff.off{color:var(--bad)}
+.hidden{display:none}
+.legend-sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div class="head">
+  <div class="wordmark">ASTRA</div>
+  <div class="sub">Measure me — how good is the read?</div>
+  <div class="rule"></div>
+</div>
+
+<div class="shell">
+  <div class="gate">
+    <label class="drop" id="dropFront"><span class="plus"><b>+</b>Front photo<br>full body, facing camera</span><img alt=""><input type="file" accept="image/*"></label>
+    <label class="drop" id="dropSide"><span class="plus"><b>+</b>Side photo<br>optional · fixes depth</span><img alt=""><input type="file" accept="image/*"></label>
+    <div class="controls">
+      <div class="row">
+        <div class="field"><span class="label">Height (cm)</span><input type="number" id="height" placeholder="e.g. 162" min="120" max="210"></div>
+        <div class="field"><span class="label">&nbsp;</span><button id="go" disabled>Read my photo</button></div>
+        <div class="field"><span class="label">&nbsp;</span><button id="useStored" class="ghost">Use my stored photo</button></div>
+      </div>
+      <div class="hint">Daylight, no filter, phone at chest height, arms slightly away from the body, fitted clothes. Height turns pixel widths into cm; without it you get shape and ratios only. Nothing is saved until you press Save.</div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <div class="grid hidden" id="result">
+    <div>
+      <div class="frame" id="frame"><img id="photo" alt=""><svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>
+      <div class="legend">
+        <span class="legend-sw" style="background:#9B7A44"></span>shoulder &nbsp;
+        <span class="legend-sw" style="background:#AE5A38"></span>bust &nbsp;
+        <span class="legend-sw" style="background:#4F7A4A"></span>waist &nbsp;
+        <span class="legend-sw" style="background:#5A6FA8"></span>hip<br>
+        Each line is the torso width the silhouette mask found at that level. If a line sits on the wrong place on your body, the number under it is wrong too.
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button id="save" class="ghost">Save to my profile</button>
+        <span class="status" id="saveStatus"></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="cardCapture"><h3>Light check <span class="tag" id="capTag"></span></h3><div id="capture"></div></div>
+      <div class="card"><h3>Colour <span class="tag">from your face, white-balanced off your eye whites</span></h3><table id="colour"></table><div class="pal" id="palBest"></div><div class="pal" id="palCare"></div></div>
+      <div class="card"><h3>Face <span class="tag">478 landmarks</span></h3><table id="face"></table></div>
+      <div class="card"><h3>Body <span class="tag" id="bodyTag"></span></h3><table id="body"></table></div>
+      <div class="card"><h3>Tape check <span class="tag">type what a tape says, see the gap</span></h3>
+        <table class="tape" id="tape"></table>
+        <div class="legend" id="tapeNote"></div>
+      </div>
+      <div class="legend">
+        <span class="src m">measured</span> read straight off your pixels &nbsp;
+        <span class="src c">convention</span> a published rule applied to a measurement &nbsp;
+        <span class="src a">approximate</span> a population guess stands in for something we could not see
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CV = `${location.protocol==='file:'?'http://localhost:8000':location.origin}`;
+const ASTRA = `http://${location.hostname||'localhost'}:8090`;
+const IMG = {front:null, side:null};
+let LAST = {analyze:null, body:null};
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'—':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const src = k => `<span class="src ${k[0]}">${k}</span>`;
+
+function wireDrop(id, key){
+  const d=$(id), inp=d.querySelector('input'), im=d.querySelector('img');
+  inp.addEventListener('change', ()=>{
+    const f=inp.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ IMG[key]=r.result; im.src=r.result; d.classList.add('filled'); $('go').disabled=!IMG.front; };
+    r.readAsDataURL(f);
+  });
+}
+wireDrop('dropFront','front'); wireDrop('dropSide','side');
+
+// ?auto=stored&h=162 -> load the stored photo and read it straight away (bookmarkable)
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const q=new URLSearchParams(location.search);
+  if(q.get('h')) $('height').value=q.get('h');
+  if(q.get('auto')==='stored'){ await loadStored(); if(IMG.front) $('go').click(); }
+});
+$('useStored').onclick = ()=>loadStored();
+async function loadStored(){
+  setStatus('Loading your stored photo…');
+  try{
+    const r=await fetch(`${ASTRA}/profile/photo-file`); if(!r.ok) throw new Error('no stored photo on the ASTRA service');
+    const b=await r.blob(); const fr=new FileReader();
+    fr.onload=()=>{ IMG.front=fr.result; const d=$('dropFront'); d.querySelector('img').src=fr.result; d.classList.add('filled'); $('go').disabled=false; setStatus('Stored photo loaded. Add your height, then read.'); };
+    await new Promise(res=>{ fr.onloadend=res; fr.readAsDataURL(b); });
+  }catch(e){ setStatus(e.message, true); }
+}
+
+function setStatus(t, err){ const s=$('status'); s.textContent=t; s.className='status'+(err?' err':''); }
+
+$('go').onclick = async ()=>{
+  if(!IMG.front) return;
+  $('go').disabled=true; setStatus('Reading face and colour…');
+  const h = parseFloat($('height').value)||null;
+  try{
+    const a = await (await fetch(`${CV}/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_image:IMG.front})})).json();
+    LAST.analyze=a;
+    setStatus('Reading body geometry…');
+    const b = await (await fetch(`${CV}/analyze-avatar`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({front_image:IMG.front, side_image:IMG.side, height_cm:h})})).json();
+    LAST.body=b;
+    render(a,b,h);
+    setStatus('');
+  }catch(e){ setStatus('Service did not answer: '+e.message, true); }
+  $('go').disabled=false;
+};
+
+function render(a,b,h){
+  $('result').classList.remove('hidden');
+  $('photo').src=IMG.front;
+  renderCapture(a.capture_quality, a.user);
+  renderColour(a.color_analysis, a.style_profile, a.facial_contrast);
+  renderFace(a.user, a.face_shape, a.facial_contrast);
+  renderBody(b.body_profile, b.error, h);
+  renderTape(b.body_profile, h);
+  drawZones(b.body_profile);
+}
+
+function renderCapture(cq, user){
+  const el=$('capture');
+  if(!user||!user.detected){ el.innerHTML='<span class="flag bad">no face found</span> <span class="hint">Face the camera, no sunglasses, whole head in frame.</span>'; $('capTag').textContent=''; return; }
+  if(!cq){ el.innerHTML='<span class="hint">not assessed</span>'; return; }
+  const m=cq.metrics||{};
+  let html = cq.ok&&!(cq.flags||[]).length ? '<span class="flag ok">good light</span>' : '';
+  (cq.flags||[]).forEach(f=> html+=`<span class="flag ${cq.blocking?'bad':'warn'}">${esc(f).replace(/_/g,' ')}</span>`);
+  if(cq.blocking) html+=' <span class="flag bad">blocks the colour read</span>';
+  html += `<div class="legend">${(cq.notes||[]).map(esc).join(' ')}${cq.advice?' <b>'+esc(cq.advice)+'</b>':''}</div>`;
+  const bits=[];
+  if(m.face_mean_L!=null) bits.push(`face L* ${(+m.face_mean_L).toFixed(0)}`);
+  if(m.clipped_frac!=null) bits.push(`clipped ${(100*m.clipped_frac).toFixed(1)}%`);
+  if(m.wb_gains_rgb) bits.push(`white-balance gains ${m.wb_gains_rgb.map(x=>(+x).toFixed(2)).join(' / ')}`);
+  if(m.face_px!=null) bits.push(`face ${m.face_px}px`);
+  $('capTag').textContent = bits.join(' · ');
+  el.innerHTML=html;
+}
+
+function renderColour(ca, sp, fc){
+  const t=$('colour');
+  if(!ca){ t.innerHTML='<tr><td colspan=3 class="hint">No colour read — the face mesh did not come through.</td></tr>'; return; }
+  const rows=[
+    ['Skin (corrected)', `<span class="sw" style="background:${ca.skin_hex}"></span>${ca.skin_hex}${ca.wb_corrected?'':' <i>(no correction applied)</i>'}`, src('measured')+' median cheek/forehead pixels'],
+    ['Undertone', `${esc(ca.undertone)} <span class="diff">confidence ${(+ca.confidence).toFixed(2)}</span>`, src('measured')+' warm/cool axis of the skin colour'],
+    ['Depth', esc(ca.depth), src('convention')+' lightness bands fair / medium / deep'],
+    ['Contrast (skin vs hair)', esc(ca.contrast), src('measured')+' luminance gap skin ↔ hair'],
+    ['Contrast (features vs skin)', fc?`${esc(fc.level)} <span class="diff">eyes ${fc.eye_contrast} · lips ${fc.lip_contrast} · brows ${fc.brow_contrast}</span>`:'—', src('measured')+' Russell facial-contrast read'],
+    ['Season lean', esc(ca.season_lean), src('convention')+' undertone × depth × contrast'],
+  ];
+  t.innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="v">${r[1]}</td><td class="how">${r[2]}</td></tr>`).join('');
+  const best=(ca.palette&&ca.palette.best)||[], care=(ca.palette&&ca.palette.care)||[];
+  $('palBest').innerHTML = `<span class="label" style="width:100%">Best</span>`+best.map(c=>`<span><i style="background:${c.hex}"></i>${esc(c.name)}</span>`).join('');
+  $('palCare').innerHTML = `<span class="label" style="width:100%">Wear with care</span>`+care.map(c=>`<span><i style="background:${c.hex}"></i>${esc(c.name)}</span>`).join('');
+}
+
+function renderFace(user, fs, fc){
+  const t=$('face'); const rows=[];
+  if(user&&user.detected){
+    const bb=user.bbox||user.box||null;
+    rows.push(['Detected', `yes${user.det_score?` · score ${(+user.det_score).toFixed(2)}`:''}`, src('measured')+' SCRFD detector']);
+    rows.push(['Mesh', (user.mesh&&user.mesh.mesh_n)?`${user.mesh.mesh_n.length} landmarks`:'none', src('measured')+' MediaPipe FaceLandmarker']);
+  }
+  if(fs){
+    const r=fs.ratios||{};
+    rows.push(['Face shape', `${esc(fs.shape)} <span class="diff">confidence ${fs.confidence}</span>`, src('convention')+' cosmetology shape rules on measured ratios']);
+    if(r.length_to_width) rows.push(['Length : width', (+r.length_to_width).toFixed(2), src('measured')]);
+    if(r.forehead_to_jaw) rows.push(['Forehead : jaw', (+r.forehead_to_jaw).toFixed(2), src('measured')]);
+    if(r.cheek_dominance) rows.push(['Cheek dominance', (+r.cheek_dominance).toFixed(2), src('measured')]);
+    if(r.jaw_to_cheek) rows.push(['Jaw : cheek', (+r.jaw_to_cheek).toFixed(2), src('measured')]);
+  }
+  if(fc&&fc.guidance) rows.push(['What it means', esc(fc.guidance.note), src('convention')]);
+  t.innerHTML=rows.length?rows.map(r=>`<tr><td>${r[0]}</td><td class="v">${r[1]}</td><td class="how">${r[2]}</td></tr>`).join(''):'<tr><td class="hint">no face data</td></tr>';
+}
+
+const CM_KEYS=[['shoulder_width','Shoulder width'],['bust','Bust'],['upper_waist','Waist (natural)'],['lower_waist','Lower waist'],['hip','Hip']];
+function renderBody(bp, err, h){
+  const t=$('body');
+  if(!bp){ t.innerHTML=`<tr><td colspan=3 class="hint">No body read: ${esc(err||'pose or silhouette not found')}. Use a full-body photo, standing, whole body in frame.</td></tr>`; $('bodyTag').textContent=''; return; }
+  const g=bp.geometry||{}, w=g.widths_px||{}, m=bp.measurements||{}, r=bp.ratios||{};
+  $('bodyTag').textContent = g.source||'';
+  const rows=[
+    ['Silhouette', esc(bp.silhouette), src('convention')+' classifier on shoulder / waist / hip widths'],
+    ['Body shape', esc(bp.body_shape), src('convention')+' waist : hip ≤ 0.78 → curvy'],
+    ['Shoulder line', esc(bp.shoulder_width), src('convention')+' shoulder : hip ratio'],
+    ['Waist placement', esc(bp.waist_placement), src('measured')+' where the narrowest torso row sits'],
+    ['Proportion', esc(bp.vertical_proportion), src('measured')+' torso px vs leg px'],
+    ['Shoulder : waist', r.shoulder_to_waist, src('measured')], ['Waist : hip', r.waist_to_hip, src('measured')],
+    ['Shoulder : hip', r.shoulder_to_hip, src('measured')], ['Torso : leg', r.torso_to_leg, src('measured')],
+  ];
+  if(bp.waist_gap!=null) rows.push(['Waist gap', esc(bp.waist_gap), src('convention')]);
+  if(bp.best_necklines) rows.push(['Necklines that work', bp.best_necklines.map(esc).join(', '), src('convention')]);
+  if(bp.best_fits) rows.push(['Fits that work', bp.best_fits.map(esc).join(', '), src('convention')]);
+  rows.push(['<b>Pixel widths</b>', CM_KEYS.map(k=>{const kk=k[0]==='shoulder_width'?'shoulder':k[0]; return w[kk]!=null?`${k[1].split(' ')[0].toLowerCase()} ${w[kk]}`:null}).filter(Boolean).join(' · ')+(g.height_px?` · height ${g.height_px}`:''), src('measured')+' silhouette mask run at each level']);
+  if(h&&Object.keys(m).length){
+    CM_KEYS.forEach(k=>{ if(m[k[0]]!=null){
+      const circ = k[0]!=='shoulder_width';
+      rows.push([k[1]+(circ?' circumference':''), `${m[k[0]]} cm`, circ ? src(g.side_depths_px&&Object.keys(g.side_depths_px).length?'measured':'approximate')+` ellipse of front width × depth (${esc(g.depth_assumption)})` : src('measured')+' front width ÷ px-per-cm']);
+    }});
+  } else {
+    rows.push(['Centimetres', '<i>enter your height to get cm</i>', src('approximate')]);
+  }
+  t.innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td class="v">${r[1]==null?'—':r[1]}</td><td class="how">${r[2]}</td></tr>`).join('');
+}
+
+function renderTape(bp, h){
+  const t=$('tape'); const m=(bp&&bp.measurements)||{};
+  if(!bp||!h||!Object.keys(m).length){ t.innerHTML='<tr><td class="hint" colspan=4>Needs a body read with height.</td></tr>'; $('tapeNote').textContent=''; return; }
+  t.innerHTML = CM_KEYS.filter(k=>m[k[0]]!=null).map(k=>`<tr><td>${k[1]}</td><td class="v">${m[k[0]]} cm</td><td><input type="number" data-k="${k[0]}" placeholder="tape cm"></td><td class="diff" id="d_${k[0]}"></td></tr>`).join('');
+  t.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{
+    const k=inp.dataset.k, v=parseFloat(inp.value); const d=$('d_'+k);
+    if(!v){ d.textContent=''; return; }
+    const diff=m[k]-v, pct=Math.abs(diff)/v*100;
+    d.textContent=`${diff>0?'+':''}${diff.toFixed(1)} cm (${pct.toFixed(1)}%)`;
+    d.className='diff '+(pct<=3?'good':pct<=7?'meh':'off');
+    summarizeTape(m);
+  }));
+  $('tapeNote').textContent='Within 3% is as good as a tape held by a friend. 3–7% is one size band. Above that the depth guess is wrong for you; a side photo fixes it.';
+}
+function summarizeTape(m){
+  const errs=[...document.querySelectorAll('#tape input')].map(i=>({k:i.dataset.k,v:parseFloat(i.value)})).filter(x=>x.v).map(x=>Math.abs(m[x.k]-x.v));
+  if(!errs.length) return;
+  const mae=errs.reduce((a,b)=>a+b,0)/errs.length;
+  $('tapeNote').textContent=`Mean error over ${errs.length} measurement${errs.length>1?'s':''}: ${mae.toFixed(1)} cm. Within 3% is as good as a tape held by a friend; 3–7% is one size band; above that a side photo is needed.`;
+}
+
+function drawZones(bp){
+  const svg=$('overlay'); svg.innerHTML='';
+  const z=(bp&&bp.zones)||{}; const col={shoulders:'#9B7A44',bust:'#AE5A38',waist:'#4F7A4A',hips:'#5A6FA8'};
+  Object.entries(col).forEach(([k,c])=>{
+    const p=z[k]; if(!p) return;
+    const y=p.y*100, x0=(p.cx-p.hw)*100, x1=(p.cx+p.hw)*100;
+    svg.insertAdjacentHTML('beforeend',`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${c}" stroke-width="0.6" vector-effect="non-scaling-stroke" style="stroke-width:2px"/>
+      <line x1="${x0}" y1="${y-1.2}" x2="${x0}" y2="${y+1.2}" stroke="${c}" style="stroke-width:2px" vector-effect="non-scaling-stroke"/>
+      <line x1="${x1}" y1="${y-1.2}" x2="${x1}" y2="${y+1.2}" stroke="${c}" style="stroke-width:2px" vector-effect="non-scaling-stroke"/>`);
+  });
+}
+
+$('save').onclick = async ()=>{
+  const s=$('saveStatus'); s.textContent='Saving…'; s.className='status';
+  try{
+    const h=parseFloat($('height').value)||null;
+    const r=await (await fetch(`${ASTRA}/profile/photo`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:IMG.front, side_image:IMG.side, height_cm:h})})).json();
+    if(r.error){ s.textContent=r.error; s.className='status err'; return; }
+    s.textContent=`Saved. Profile: ${r.undertone} undertone, ${r.depth} depth, ${r.contrast} contrast${r.measurements&&r.measurements.bust?`, bust ${r.measurements.bust} / waist ${r.measurements.upper_waist} / hip ${r.measurements.hip} cm`:''}.`;
+  }catch(e){ s.textContent='ASTRA service (8090) did not answer: '+e.message; s.className='status err'; }
+};
+</script>
+</body>
+</html>
