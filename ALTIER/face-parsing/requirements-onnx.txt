@@ -1,0 +1,5 @@
+# ALTIER face-parsing — ONNX inference only (no PyTorch needed, runs on M1 CPU)
+onnxruntime
+opencv-python
+numpy
+pillow

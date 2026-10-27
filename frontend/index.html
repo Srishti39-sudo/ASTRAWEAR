@@ -1,769 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASTRAWEAR — styled by the stars</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="home.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASTRA · Fashion that knows you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9E1D1; --paper2:#F5F0E6; --tile:#EFE8DA;
+  --ink:#22201a; --stone:#8b8273; --line:#D6CBB6; --line2:#E4DBC9;
+  --sea:#3C6A62; --amber:#B67B18; --cherry:#8B1E2D;
+  --display:'Marcellus', serif; --serif:'Cormorant Garamond', Georgia, serif;
+  --body:'EB Garamond', Georgia, serif; --sans:'Archivo', system-ui, sans-serif;
+  --ease:cubic-bezier(.16,.7,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  background-image:radial-gradient(60% 45% at 22% 22%, rgba(216,184,119,.12), transparent 60%),
+                   radial-gradient(50% 45% at 82% 82%, rgba(60,106,98,.08), transparent 60%);}
+
+/* header */
+.site{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 46px;border-bottom:1px solid var(--line);background:rgba(233,225,209,.9);backdrop-filter:blur(6px)}
+.site nav{display:flex;gap:26px;font-family:var(--serif);font-weight:500;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.site nav.right{justify-content:flex-end}
+.site nav a{color:var(--ink);text-decoration:none;cursor:pointer;transition:color .3s}
+.site nav a:hover{color:var(--sea)}
+.brand{text-align:center}
+.brand .astra{font-family:var(--display);font-size:22px;letter-spacing:.4em;color:var(--ink);padding-left:.4em}
+.brand .tag{font-family:var(--serif);font-style:italic;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-top:1px}
+
+/* hero */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 6vw 40px}
+.eyebrow{font-family:var(--sans);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sea);margin-bottom:20px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,8vw,96px);line-height:1;letter-spacing:.01em;color:var(--ink);margin-bottom:22px}
+.hero h1 em{font-style:italic;font-family:var(--serif);color:var(--sea)}
+.hero .lead{font-family:var(--body);font-size:clamp(16px,2.1vw,20px);font-style:italic;line-height:1.6;color:#5a5648;max-width:46ch;margin:0 auto 34px}
+.cta{display:inline-block;background:var(--sea);color:#F7F1E4;border:none;border-radius:999px;padding:15px 42px;
+  font-family:var(--serif);font-size:17px;letter-spacing:.04em;text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),opacity .2s var(--ease)}
+.cta:hover{transform:translateY(-2px)}
+
+/* three pillars */
+.pillars{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;padding:20px 6vw 70px;max-width:1120px;margin:0 auto}
+.pillar{flex:1 1 300px;max-width:340px;background:var(--paper2);border:1px solid var(--line);border-radius:18px;
+  padding:34px 28px;text-align:left;text-decoration:none;color:var(--ink);
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.pillar:hover{transform:translateY(-4px);box-shadow:0 24px 50px rgba(34,32,26,.13);border-color:var(--sea)}
+.pillar .num{font-family:var(--sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--sea);margin-bottom:14px}
+.pillar h3{font-family:var(--serif);font-weight:400;font-size:30px;color:var(--ink);margin:0 0 10px}
+.pillar p{font-family:var(--body);font-size:15.5px;line-height:1.55;color:#5a5648;margin:0}
+.pillar .go{font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--sea);margin-top:18px;display:inline-block}
+.foot{text-align:center;font-family:var(--serif);font-style:italic;font-size:13px;color:var(--stone);padding:0 0 30px}
+</style>
 </head>
-<body class="home fullpage">
+<body>
+  <header class="site">
+    <nav class="left"><a href="astra.html">Agent</a><a href="create-avatar.html">Avatar</a><a href="astrostylist-input.html">Astro</a><a href="stylist-input.html">Stylist</a></nav>
+    <div class="brand"><div class="astra">ASTRA</div><div class="tag">It's your right to be divinely beautiful</div></div>
+    <nav class="right"><a href="auth.html">Login</a></nav>
+  </header>
 
-  <!-- ================= THIN TOP BAR ================= -->
-  <nav class="topbar">
-    <div class="tb-side tb-left">
-      <div class="tb-group">
-        <a href="#avatar" class="tb-nav">Avatar</a>
-        <div class="tb-menu">
-          <a href="#avatar">Create avatar</a>
-          <a href="result.html">Your result</a>
-        </div>
-      </div>
-      <div class="tb-group">
-        <a href="#astro" class="tb-nav">Astro</a>
-        <div class="tb-menu">
-          <a href="astro.html">Astro Stylist</a>
-        </div>
-      </div>
-      <div class="tb-group">
-        <a href="#stylist" class="tb-nav">Stylist</a>
-        <div class="tb-menu">
-          <a href="stylist-input.html">Build outfit</a>
-          <a href="stylist-result.html">Your outfit</a>
-        </div>
-      </div>
-    </div>
-    <a class="tb-logo" href="#top">ASTRA<span class="tb-tag">it's your right to be divinely beautiful</span></a>
-    <div class="tb-side tb-right">
-      <a href="#moodboard" class="tb-nav">Moodboard</a>
-      <button class="tb-nav" id="accountBtn" onclick="handleAccount()">Login</button>
-    </div>
-  </nav>
+  <section class="hero">
+    <p class="eyebrow">Fashion has never known who you are — until now</p>
+    <h1>Style that knows<br><em>you</em>.</h1>
+    <p class="lead">Not the trend. Not someone else. You — your body, your colours, your vibe. Start with two photos and end with a wardrobe that finally feels like yours.</p>
+    <a class="cta" href="create-avatar.html">Begin — create your avatar →</a>
+  </section>
 
-  <div class="move-cue" id="moveCue"><span>swipe through</span><span class="arw">←</span></div>
-
-  <!-- ================= DECK (full-page vertical snap between features) ================= -->
-  <div class="deck" id="deck">
-
-  <!-- ================= HERO ================= -->
-  <section class="panel panel--hero" id="top">
-    <video class="hero-video" autoplay muted loop playsinline poster="videos/hero-poster.jpg">
-      <source src="videos/hero.mp4" type="video/mp4">
-    </video>
-    <div class="hero-overlay"></div>
-    <a href="#avatar" class="scroll-cue light" aria-label="Scroll down">
-      <span>swipe to begin</span>
-      <span class="cue-arrow">↓</span>
+  <section class="pillars">
+    <a class="pillar" href="create-avatar.html">
+      <div class="num">01 · Create Avatar</div>
+      <h3>Know your body</h3>
+      <p>Two photos. I read your silhouette, your proportions, your three strongest features and the necklines that flatter you — your real body, nothing changed.</p>
+      <span class="go">Two photos →</span>
+    </a>
+    <a class="pillar" href="astrostylist-input.html">
+      <div class="num">02 · AstroStylist</div>
+      <h3>Know your vibe</h3>
+      <p>Your face, your references, your stars. I find your authentic colour palette and the vibe that's genuinely yours — plus your makeup and hair.</p>
+      <span class="go">Your colours + vibe →</span>
+    </a>
+    <a class="pillar" href="stylist-input.html">
+      <div class="num">03 · Personal Stylist</div>
+      <h3>Get dressed</h3>
+      <p><em>Worth It?</em> — paste a link, get an honest verdict. <em>Dress Me</em> — occasion in, a flattering look out. Styling solved in seconds.</p>
+      <span class="go">Worth It? · Dress Me →</span>
     </a>
   </section>
 
-  <!-- ================= CREATE AVATAR JOURNEY (one moving scene) ================= -->
-  <div class="ca-track" id="avatar">
-    <div class="ca-stage">
-      <div class="drift"></div>
-
-      <!-- 0 · SILHOUETTE -->
-      <div class="moment" data-i="0">
-        <p class="eyebrow">create avatar</p>
-        <div class="sil-hero">
-          <img class="fig-img" src="images/figure.png" alt="" onerror="this.style.display='none'">
-        </div>
-        <p class="m-line">First, your <em>silhouette</em>.</p>
-        <p class="m-sub">Move through to bring it to life.</p>
-      </div>
-
-      <!-- 1 · SCAN (silhouette → scan) -->
-      <div class="moment" data-i="1">
-        <p class="eyebrow">step one · scan</p>
-        <div class="sil-hero">
-          <img class="fig-img" src="images/figure.png" alt="" onerror="this.style.display='none'">
-          <div class="scan-sweep"></div>
-        </div>
-        <h2 class="m-h" style="font-size:clamp(26px,3.6vw,46px)">The Beginning of You</h2>
-        <p class="m-sub">Two natural photographs are all I need to begin crafting a style experience designed entirely around you.</p>
-        <div class="scan-grid">
-          <div class="scan-slot">
-            <label class="scan-drop" for="photoFull"><img class="sp-prev" alt=""><span class="plus">+</span><span class="sd-label">Full body</span></label>
-            <input type="file" id="photoFull" accept="image/*" hidden>
-            <p class="scan-hint">Stand straight, head to toe in frame, plain wall behind you.</p>
-          </div>
-          <div class="scan-slot">
-            <label class="scan-drop" for="photoFace"><img class="sp-prev" alt=""><span class="plus">+</span><span class="sd-label">Face</span></label>
-            <input type="file" id="photoFace" accept="image/*" hidden>
-            <p class="scan-hint">Clear face in daylight / good light, no filter, hair off your face.</p>
-          </div>
-        </div>
-        <p class="scan-status" id="scanStatus"></p>
-      </div>
-
-      <!-- 2 · THE ATELIER (measurements) -->
-      <div class="moment" data-i="2">
-        <p class="eyebrow">step two · the atelier</p>
-        <h2 class="m-h" style="font-size:clamp(26px,3.6vw,46px)">Taking your measurements</h2>
-        <div class="atelier">
-          <svg class="dressform" viewBox="0 0 200 300">
-            <path d="M90,18 L90,40 M110,18 L110,40"/>
-            <path d="M70,44 Q58,52 62,92 Q65,145 80,202 L120,202 Q135,145 138,92 Q142,52 130,44 Q100,56 70,44 Z"/>
-            <path d="M100,44 L100,202"/>
-            <path class="band" d="M63,88 Q100,99 137,88"/>
-            <path class="band" d="M67,132 Q100,141 133,132"/>
-            <path class="band" d="M75,182 Q100,190 125,182"/>
-            <path d="M100,202 L100,268 M78,284 L122,284 M100,268 L100,284"/>
-          </svg>
-          <form class="a-form" id="avatarForm" onsubmit="return false">
-            <div><label>Height (cm)</label><input type="number" id="height" min="50" max="250"></div>
-            <div><label>Bust (cm)</label><input type="number" id="bust" min="40" max="200"></div>
-            <div><label>Upper waist (cm)</label><input type="number" id="upperWaist" min="40" max="200"></div>
-            <div><label>Lower waist (cm)</label><input type="number" id="lowerWaist" min="40" max="200"></div>
-            <div class="full"><label>Hips (cm)</label><input type="number" id="hips" min="50" max="200"></div>
-          </form>
-        </div>
-      </div>
-
-      <!-- 3 · AESTHETIC -->
-      <div class="moment" data-i="3">
-        <p class="eyebrow">step three · your world</p>
-        <h2 class="m-h">Beyond The Clothes</h2>
-        <p class="m-sub">Every unforgettable style begins with understanding the person wearing it. There are no right answers — the more honest you are, the more personal your blueprint becomes.</p>
-        <div class="a-form q-form">
-          <div class="full"><label>Gender</label>
-            <select id="gender"><option value="">Select</option><option value="female">Female</option><option value="male">Male</option></select>
-          </div>
-          <div class="full"><label>Three words you want people to think of you</label><input type="text" id="idWords" placeholder="e.g. elegant, sharp, warm"></div>
-          <div class="full"><label>Which feels most like you at your best?</label>
-            <div class="energy-chips" id="energyChips">
-              <span class="e-chip" data-val="Calm">Calm</span>
-              <span class="e-chip" data-val="Warm">Warm</span>
-              <span class="e-chip" data-val="Bold">Bold</span>
-              <span class="e-chip" data-val="Playful">Playful</span>
-              <span class="e-chip" data-val="Magnetic">Magnetic</span>
-              <span class="e-chip" data-val="Grounded">Grounded</span>
-              <span class="e-chip" data-val="Radiant">Radiant</span>
-              <span class="e-chip" data-val="Poised">Poised</span>
-              <span class="e-chip" data-val="Elegant">Elegant</span>
-              <span class="e-chip" data-val="Effortless">Effortless</span>
-              <span class="e-chip" data-val="Soft">Soft</span>
-              <span class="e-chip" data-val="Fierce">Fierce</span>
-              <span class="e-chip" data-val="Ethereal">Ethereal</span>
-              <span class="e-chip" data-val="Mysterious">Mysterious</span>
-              <span class="e-chip" data-val="Free-spirited">Free-spirited</span>
-            </div>
-          </div>
-          <div><label>What has never felt like “you”?</label><input type="text" id="idNever" placeholder="a colour, a cut, a vibe that isn't you"></div>
-          <div class="full"><label>Add one inspiration image — and tell us what you love</label>
-            <div class="inspo-wrap">
-              <label class="inspo-drop" for="inspoInput"><img class="sp-prev" alt=""><span class="plus">+</span><span class="sd-label">Inspo</span></label>
-              <input type="file" id="inspoInput" accept="image/*" hidden>
-              <input type="text" id="inspoLike" placeholder="What do you love most? the hairstyle, the dress, the colours…">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 · SPOTLIGHT -->
-      <div class="moment spotlight" data-i="4">
-        <div class="spot-beam"></div>
-        <div class="spot-floor"></div>
-        <p class="eyebrow">the stage</p>
-        <div class="stage-layout">
-        <div class="sil-wrap" id="silWrap">
-          <svg class="sil-svg" data-shape="hourglass" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M88,66 Q66,92 80,150 Q90,182 74,214 Q60,258 82,340 L118,340 Q140,258 126,214 Q110,182 120,150 Q134,92 112,66 Z"/></svg>
-          <svg class="sil-svg" data-shape="pear" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M91,66 Q78,92 84,150 Q90,182 72,214 Q54,262 80,340 L120,340 Q146,262 128,214 Q110,182 116,150 Q122,92 109,66 Z"/></svg>
-          <svg class="sil-svg" data-shape="rectangle" viewBox="0 0 200 360"><circle cx="100" cy="40" r="15"/><path d="M86,66 Q82,120 84,182 Q85,250 86,340 L114,340 Q115,250 116,182 Q118,120 114,66 Z"/></svg>
-          <svg class="sil-svg" data-shape="inverted triangle" viewBox="0 0 200 360" style="display:none"><circle cx="100" cy="40" r="15"/><path d="M84,66 Q60,92 78,150 Q92,182 84,214 Q80,262 88,340 L112,340 Q120,262 116,214 Q108,182 122,150 Q140,92 116,66 Z"/></svg>
-        </div>
-        <div class="report" id="report" style="display:none">
-          <p class="report-eyebrow">made just for you</p>
-          <h2 class="report-title">This is the real you</h2>
-          <div class="rep-card silh"><p class="rep-h">Your silhouette <span class="card-tag" id="repSilhShape"></span></p><p class="silh-text" id="repSilhouette"></p></div>
-          <p class="shine-label">Your timeless, effortless features</p>
-          <div class="power-row" id="powerRow"></div>
-          <div class="verdict-btn-wrap"><button class="verdict-btn" id="verdictBtn">Stylist's Verdict — just for you</button></div>
-          <div class="verdict-panel" id="repVerdict"></div>
-          <p class="rest-label">To elevate you</p>
-          <div class="card-grid" id="elevateGrid"></div>
-          <p class="rest-label">The rest of your blueprint</p>
-          <div class="card-grid" id="restGrid"></div>
-          <div class="gap-wrap" id="gapWrap">
-            <p class="seen-line">You were never searching for a new style — you were searching for the feeling of being understood.</p>
-            <button class="gap-btn" id="gapBtn">Let's dress the real you →</button>
-          </div>
-        </div>
-        </div>
-        <p class="m-line" id="revealShape">Step into the light</p>
-        <p class="finale-msg" id="finaleMsg"></p>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ================= ASTRO ================= -->
-  <section class="panel panel--feature panel--reverse" id="astro">
-    <div class="f-media">
-      <img alt="" loading="lazy" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=900&q=80"
-           onerror="this.closest('.f-media').classList.add('f-failed')">
-    </div>
-    <div class="f-body reveal">
-      <span class="f-index">02</span>
-      <h2 class="f-title">Astro Stylist</h2>
-      <p class="f-lines">Your birth chart, translated into style.<br>A colour palette and wardrobe written in your stars.</p>
-      <a href="astro.html" class="btn-line">Read my chart</a>
-    </div>
-  </section>
-
-  <!-- ================= STYLIST ================= -->
-  <section class="panel panel--feature" id="stylist">
-    <div class="f-media">
-      <img alt="" loading="lazy" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=900&q=80"
-           onerror="this.closest('.f-media').classList.add('f-failed')">
-    </div>
-    <div class="f-body reveal">
-      <span class="f-index">03</span>
-      <h2 class="f-title">Personal Stylist</h2>
-      <p class="f-lines">Tell us the occasion and your closet.<br>We build the outfit, piece by piece — with a reason for each.</p>
-      <a href="stylist-input.html" class="btn-line">Style me</a>
-    </div>
-  </section>
-
-  <!-- ================= MOODBOARD ================= -->
-  <section class="panel panel--mood" id="moodboard">
-    <p class="mood-label">endless inspiration</p>
-    <div class="mood-viewport" aria-hidden="true">
-      <div class="mood-row">
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-      </div>
-      <div class="mood-row rev">
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-        <div class="mt"><img loading="lazy" alt="" src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=401&q=80" onerror="this.closest('.mt').classList.add('mt-failed')"></div>
-      </div>
-    </div>
-    <footer class="mini-footer">
-      <span>ASTRAWEAR</span>
-      <a href="#top" class="to-top">back to top ↑</a>
-      <span>© 2026</span>
-    </footer>
-  </section>
-
-  </div><!-- /deck -->
-
-  <!-- ================= BOTTOM TAB BAR (always-there nav, Instagram-style) ================= -->
-  <nav class="tabbar" id="tabbar">
-    <a href="#top" id="tabHome">
-      <svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/></svg>
-      <span class="lbl">Home</span>
-    </a>
-    <a href="#avatar" id="tabAvatar">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3-5.6 7-5.6s7 2 7 5.6"/></svg>
-      <span class="lbl">Avatar</span>
-    </a>
-    <a href="astro.html" id="tabAstro">
-      <svg viewBox="0 0 24 24"><path d="M12 3.4l2.3 5.9 6.3.4-4.9 4 1.6 6.1-5.3-3.4-5.3 3.4 1.6-6.1-4.9-4 6.3-.4z"/></svg>
-      <span class="lbl">Astro</span>
-    </a>
-    <a href="stylist-input.html" id="tabStylist">
-      <svg viewBox="0 0 24 24"><path d="M11 6.7a1.6 1.6 0 1 1 1.9 1.6c-.8.2-1.4.6-1.4 1.5v.4"/><path d="M4 16.8 12 11l8 5.8a.9.9 0 0 1-.5 1.6H4.5a.9.9 0 0 1-.5-1.6z"/></svg>
-      <span class="lbl">Stylist</span>
-    </a>
-  </nav>
-
-  <!-- ================= AUTH ================= -->
-  <script type="module">
-    import { auth, onAuthStateChanged } from "./firebase-config.js";
-    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    const accountBtn = document.getElementById("accountBtn");
-    onAuthStateChanged(auth, (user) => {
-      if (user) { localStorage.setItem("userEmail", user.email); accountBtn.textContent = "Logout"; }
-      else { localStorage.removeItem("userEmail"); accountBtn.textContent = "Login"; }
-    });
-    window.handleAccount = async function () {
-      if (auth.currentUser) { await signOut(auth); }
-      else { window.location.href = "auth.html"; }
-    };
-  </script>
-
-  <!-- smooth scroll -->
-  <!-- PAGE 2 — the glow-up image page, reached from "Complete the gap" -->
-  <div class="consult glow-page" id="glowPage" aria-hidden="true">
-    <div class="consult-inner glow-inner">
-      <button class="consult-close" id="glowClose">← back to your analysis</button>
-      <h2 class="consult-title glow-title">THIS IS YOU.</h2>
-      <p class="glow-sub">Every recommendation is built around you — not trends, not rules, not someone else's idea of beauty.</p>
-      <div class="glow-hero">
-        <div class="you-frame">
-          <img id="youImg" class="you-photo" alt="">
-          <div class="you-loading" id="youLoading">dressing you with love…</div>
-        </div>
-        <p class="you-cap" id="youCap"></p>
-      </div>
-      <div class="glow-toggles">
-        <button class="glow-toggle" data-target="glowMust">Your must-haves</button>
-        <button class="glow-toggle" data-target="glowHaircut">Your haircut</button>
-        <button class="glow-toggle" data-target="glowAvoid">What doesn't do you justice</button>
-      </div>
-      <div class="glow-panel" id="glowMust"></div>
-      <div class="glow-panel" id="glowHaircut"></div>
-      <div class="glow-panel" id="glowAvoid"></div>
-      <p class="rep-h rep-h-wide glow-outfits-h">Two looks I picked just for you — tap one to try it on</p>
-      <div class="glow-outfits" id="glowLooks"></div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-
-  <!-- ================= CREATE AVATAR DEPTH ENGINE + LOGIC ================= -->
-  <script type="module">
-    let shape = null;
-    let lastScaled = 0;
-    const track = document.getElementById("avatar");
-    const stage = track.querySelector(".ca-stage");
-    const moments = Array.from(stage.querySelectorAll(".moment"));
-    const N = moments.length;
-    const moveCue = document.getElementById("moveCue");
-    const DEPTH = 900;
-    const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-
-    /* ===== two-axis navigation ===== */
-    /* VERTICAL = move between features, YSL-style full-page snap (one gesture = one panel) */
-    /* HORIZONTAL = move through Create Avatar's steps, right-to-left                       */
-    const deck = document.getElementById("deck");
-    const panels = Array.from(deck.children);          // [#top, #avatar, #astro, #stylist, #moodboard]
-    const avatarIndex = panels.indexOf(track);
-    let panel = 0, deckLock = false;
-
-    function overlayOpen(){ return !!document.querySelector(".consult.open, .report.open, .glow-page.open"); }
-    function onAvatar(){ return panel === avatarIndex; }
-    /* stack: panels 0..current sit covering (translateY 0), later ones wait below (100%). Higher index = higher z, so the next slides UP over the last. You never move — the page comes to you. */
-    panels.forEach((p,i)=>{ p.style.zIndex = String(i+1); });
-    const heroVid = document.querySelector("#top video");
-    function layoutDeck(){
-      panels.forEach((p,i)=>{
-        p.style.transform = (i <= panel) ? "translateY(0)" : "translateY(100%)";
-        p.classList.toggle("deck-rest", i < panel-1 || i > panel+1);   // park far panels (stop their video/animation)
-      });
-      if (heroVid){ if (panel <= 1){ const pr = heroVid.play(); if (pr && pr.catch) pr.catch(()=>{}); } else heroVid.pause(); }
-    }
-    function goPanel(n){
-      n = Math.max(0, Math.min(panels.length-1, n));
-      if (n === panel) return false;
-      panel = n; layoutDeck(); updateCue(); setActiveTab(); return true;
-    }
-    function setActiveTab(){
-      const map = { 0:"tabHome" }; map[avatarIndex] = "tabAvatar";
-      ["tabHome","tabAvatar"].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove("active"); });
-      const id = map[panel]; if(id){ const el=document.getElementById(id); if(el) el.classList.add("active"); }
-    }
-    function lockDeck(){ deckLock = true; setTimeout(()=>{ deckLock = false; }, 1250); }
-
-    /* ---- Create Avatar horizontal step engine ---- */
-    let caProgress = 0, caTarget = 0, caRAF = null, caLock = false;
-    function paintCA(){
-      moments.forEach((m,i)=>{
-        const diff = caProgress - i;
-        const ad = Math.abs(diff);
-        /* right-to-left slide: upcoming moments wait on the right, passed ones exit left */
-        const op = Math.max(0, Math.min(1, (0.62 - ad) / 0.16));
-        const x = -diff * window.innerWidth * 0.66;
-        m.style.transform = `translate(calc(-50% + ${x.toFixed(1)}px), -50%)`;
-        m.style.opacity = op.toFixed(3);
-        m.style.pointerEvents = ad < 0.5 ? "auto" : "none";
-        m.style.visibility = op < 0.02 ? "hidden" : "visible";
-        m.style.zIndex = String(60 - Math.round(ad*10));
-      });
-      if (lastScaled < 3.6 && caProgress >= 3.6) generateReport();   /* reaching the last step → reveal the report */
-      lastScaled = caProgress;
-    }
-    function animateCA(){
-      cancelAnimationFrame(caRAF);
-      const tick = ()=>{
-        caProgress += (caTarget - caProgress) * 0.075;   /* gentler, slower glide */
-        if (Math.abs(caTarget - caProgress) < 0.002) caProgress = caTarget;
-        paintCA();
-        if (caProgress !== caTarget) caRAF = requestAnimationFrame(tick);
-      };
-      caRAF = requestAnimationFrame(tick);
-    }
-    function stepCA(dir){
-      const next = clamp(caTarget + dir, 0, N-1);
-      if (next === caTarget) return false;
-      caTarget = next; animateCA(); updateCue(); return true;
-    }
-    function updateCue(){ moveCue.style.opacity = (onAvatar() && caTarget < N-1 && !overlayOpen()) ? "1" : "0"; }
-
-    /* overlays (report / glow) keep their own native scroll */
-    function inOverlay(e){ return overlayOpen() || (e.target.closest && e.target.closest(".consult, .report.open, [data-lenis-prevent]")); }
-
-    /* ---- one wheel handler routes both axes ---- */
-    window.addEventListener("wheel", (e)=>{
-      if (inOverlay(e)) return;
-      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) + 2;
-      e.preventDefault();
-      if (horizontal){
-        if (onAvatar() && !caLock){ if (stepCA(e.deltaX > 0 ? 1 : -1)){ caLock = true; setTimeout(()=>{ caLock = false; }, 900); } }
-      } else {
-        if (!deckLock && Math.abs(e.deltaY) > 4){ if (goPanel(panel + (e.deltaY > 0 ? 1 : -1))) lockDeck(); }
-      }
-    }, { passive:false, capture:true });
-
-    /* ---- touch: vertical swipe = feature, horizontal swipe = step ---- */
-    let tsx=0, tsy=0, touchOn=false;
-    window.addEventListener("touchstart",(e)=>{ if(inOverlay(e)){ touchOn=false; return; } const t=e.touches[0]; tsx=t.clientX; tsy=t.clientY; touchOn=true; }, { passive:true });
-    window.addEventListener("touchmove",(e)=>{
-      if(!touchOn) return;
-      const t=e.touches[0], dx=t.clientX-tsx, dy=t.clientY-tsy;
-      if(Math.max(Math.abs(dx),Math.abs(dy)) < 44) return;
-      e.preventDefault();
-      if(Math.abs(dx) > Math.abs(dy)){
-        if(onAvatar()) stepCA(dx < 0 ? 1 : -1);
-      } else {
-        if(!deckLock && goPanel(panel + (dy < 0 ? 1 : -1))) lockDeck();
-      }
-      touchOn=false;
-    }, { passive:false });
-    window.addEventListener("touchend", ()=>{ touchOn=false; }, { passive:true });
-
-    /* ---- keyboard: arrows work too ---- */
-    window.addEventListener("keydown",(e)=>{
-      if(overlayOpen()) return;
-      if(e.key==="ArrowDown"||e.key==="PageDown"){ if(!deckLock&&goPanel(panel+1))lockDeck(); }
-      else if(e.key==="ArrowUp"||e.key==="PageUp"){ if(!deckLock&&goPanel(panel-1))lockDeck(); }
-      else if(e.key==="ArrowRight"){ if(onAvatar()) stepCA(1); }
-      else if(e.key==="ArrowLeft"){ if(onAvatar()) stepCA(-1); }
-    });
-
-    window.addEventListener("resize", ()=>{ layoutDeck(); paintCA(); updateCue(); });
-
-    layoutDeck(); paintCA(); updateCue(); setActiveTab();
-
-    /* nav links → snap the deck to that feature */
-    const idToPanel = {};
-    panels.forEach((p,i)=>{ if(p.id) idToPanel["#"+p.id] = i; });
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener("click", (e) => {
-        const href = a.getAttribute("href");
-        if (idToPanel[href] !== undefined){ e.preventDefault(); if (goPanel(idToPanel[href])) lockDeck(); }
-      });
-    });
-
-    /* reveal for the feature panels */
-    const io = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add("in"); }), {threshold:.3});
-    document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
-
-    /* silhouette + shape */
-    function showShape(s){ shape = s;
-      document.querySelectorAll(".sil-svg").forEach(svg => svg.style.display = (svg.dataset.shape===s) ? "block" : "none");
-      document.getElementById("revealShape").textContent = "You are " + s;
-    }
-    function classify(sh,hp){ const r=sh/hp; return r>=1.08 ? "inverted triangle" : r<=0.92 ? "pear" : "rectangle"; }
-    /* deterministic shape from the entered measurements — same numbers → same shape, every time */
-    function classifyShape(b,w,h){
-      if(!b||!h) return shape||"rectangle";
-      if(b >= h*1.05) return "inverted triangle";
-      if(h >= b*1.05) return "pear";
-      const avg=(b+h)/2;
-      return (w && w <= avg*0.75) ? "hourglass" : "rectangle";
-    }
-
-    /* three-photo scan → Gemini reads the real detail */
-    const status = document.getElementById("scanStatus");
-    let photos = { full:null, face:null };
-    let photoMimes = { full:"image/jpeg", face:"image/jpeg" };
-    let inspoImage = null, inspoMime = "image/jpeg", INSPO_LIKE = "";
-    function wireSlot(id, key){
-      const inp = document.getElementById(id);
-      const label = inp.previousElementSibling;
-      const prev = label.querySelector(".sp-prev");
-      inp.addEventListener("change", async (e)=>{
-        const file = e.target.files[0]; if(!file) return;
-        photoMimes[key] = file.type || "image/jpeg";
-        photos[key] = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(file); });
-        prev.src = URL.createObjectURL(file); prev.style.display = "block";
-        label.querySelector(".plus").style.display = "none";
-        const lbl = label.querySelector(".sd-label"); if(lbl) lbl.style.display = "none";
-        const n = Object.values(photos).filter(Boolean).length;
-        status.textContent = n < 2 ? (n + " of 2 — full body & face") : "✓ both in — thank you, I can really see you now 🤍";
-      });
-    }
-    wireSlot("photoFull","full");
-    wireSlot("photoFace","face");
-
-    /* one inspiration image — Gemini sees it and pulls the element she loves */
-    (function(){
-      const inp = document.getElementById("inspoInput"); if(!inp) return;
-      const label = inp.previousElementSibling; const prev = label.querySelector(".sp-prev");
-      inp.addEventListener("change", async e=>{
-        const file = e.target.files[0]; if(!file) return;
-        inspoMime = file.type || "image/jpeg";
-        inspoImage = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(file); });
-        prev.src = URL.createObjectURL(file); prev.style.display = "block";
-        label.querySelector(".plus").style.display = "none";
-        const l = label.querySelector(".sd-label"); if(l) l.style.display = "none";
-      });
-    })();
-
-    /* manual drives silhouette */
-    const bust = document.getElementById("bust"), hips = document.getElementById("hips");
-    function manualShape(){ const b=+bust.value, h=+hips.value; if(!b||!h) return;
-      const r=b/h; showShape(r>=1.08 ? "inverted triangle" : r<=0.92 ? "pear" : "rectangle"); }
-    bust.addEventListener("input", manualShape);
-    hips.addEventListener("input", manualShape);
-
-    let aesthetic = ""; /* vibe now comes from the 5 questions, not a preset picker */
-
-    /* natural-energy chips (pick one) */
-    let energy = "";
-    document.querySelectorAll(".e-chip").forEach(chip => chip.addEventListener("click", ()=>{
-      document.querySelectorAll(".e-chip").forEach(c=>c.classList.remove("sel"));
-      chip.classList.add("sel"); energy = chip.dataset.val;
-    }));
-
-    /* auto-generate the avatar in the spotlight (no button, no page jump) */
-    let generated = false;
-    const avatarImg = document.getElementById("avatarImg");
-    const finaleMsg = document.getElementById("finaleMsg");
-    const revealShape = document.getElementById("revealShape");
-
-    /* vibe → outfit, shoes, and shape → flattering styling */
-    const OUTFIT = {
-      "old fashion":"an elegant old-money outfit — impeccably tailored, refined neutral tones, cashmere and silk, timeless and understated",
-      "baddie":"a bold baddie outfit — fitted and glamorous with statement pieces, confident and sharp",
-      "casual":"a casual-chic everyday outfit — relaxed, effortless and put-together",
-      "gym":"sleek athleisure — fitted leggings and a matching sports top, athletic",
-      "gothic":"an all-black gothic outfit — dark, elegant and edgy, leather and lace"
-    };
-    const SHOES = { "gym":"clean trainers", "casual":"minimal sneakers", "old fashion":"refined leather heels", "baddie":"strappy heels", "gothic":"black platform boots" };
-    const SHAPESTYLE = {
-      "hourglass":"styled to define the waist and honour balanced proportions",
-      "pear":"styled with structured shoulders to balance fuller hips",
-      "rectangle":"styled to create soft curves and waist definition",
-      "inverted triangle":"styled to soften the shoulders and add volume at the hips"
-    };
-    /* the stylist's note — what your shape is + the 3 looks that flatter it */
-    const SHAPEINFO = {
-      "hourglass":{ blurb:"Balanced bust and hips with a defined waist. Your line is the waist — everything you wear should honour it.", combos:["High-waisted tailored trousers + a fitted tucked top","A wrap dress that cinches at the waist","A belted blazer over straight-leg trousers"] },
-      "pear":{ blurb:"Hips a touch fuller than the shoulders. Draw the eye upward and let the lower half fall clean and straight.", combos:["A structured blazer over dark straight trousers","A boat-neck or statement-shoulder top + A-line skirt","An off-shoulder top + wide-leg trousers"] },
-      "rectangle":{ blurb:"Shoulders, waist and hips in a near-straight line. The goal is to suggest a waist and add a soft curve.", combos:["A belted or peplum top + fitted trousers","A wrap dress to draw in the waist","A cropped jacket + high-waisted flared jeans"] },
-      "inverted triangle":{ blurb:"Shoulders broader than the hips. Soften up top and build a little volume below to balance the frame.", combos:["A V-neck top + wide-leg or flared trousers","A simple fitted top + A-line skirt","A soft draped top + full pleated skirt"] }
-    };
-
-    async function generateReport(){
-      if (generated) return;
-      const gender = document.getElementById("gender").value;
-      const height = +document.getElementById("height").value;
-      const b=+bust.value, uw=+document.getElementById("upperWaist").value,
-            lw=+document.getElementById("lowerWaist").value, h=+hips.value;
-      if(!gender || !height || !b || !uw || !lw || !h){
-        finaleMsg.textContent = "Fill in your details above and I'll show you the real you ✨"; return;
-      }
-      if(!photos.full){
-        finaleMsg.textContent = "Add your full-body photo in step one so I can see you, love ✨"; return;
-      }
-      shape = classifyShape(b, uw, h); // deterministic from measurements — same numbers, same shape
-      generated = true; finaleMsg.textContent = "";
-      revealShape.textContent = "getting to know you…";
-
-      const identity = {
-        threeWords: (document.getElementById("idWords")||{}).value || "",
-        presence:   "",
-        energy:     energy,
-        never:      (document.getElementById("idNever")||{}).value || "",
-        inspoLike:  (document.getElementById("inspoLike")||{}).value || ""
-      };
-      INSPO_LIKE = identity.inspoLike;
-      const measurements = { height, bust:b, upperWaist:uw, lowerWaist:lw, hips:h };
-      localStorage.setItem("astraUser", JSON.stringify({ gender, shape, measurements, identity }));
-
-      PAYLOAD = { photos, photoMimes, inspoImage, inspoMime, gender, shape, measurements, identity };
-      try{
-        const r = await fetch("/analyze-style", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(PAYLOAD) });
-        const d = await r.json();
-        if(!d.success || !d.report){
-          generated=false; revealShape.textContent="Step into the light";
-          finaleMsg.textContent = d.error ? ("I couldn't quite read that — "+d.error) : "Something slipped — scroll up and back, and I'll try again for you.";
-          return;
-        }
-        renderReport(d.report);
-        fetch("/save-result", { method:"POST", headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ email:localStorage.getItem("userEmail")||"guest@astrawear.com", type:"report",
-            data:{ measurements, identity, report:d.report } }) }).catch(()=>{});
-      }catch(err){ console.error(err); generated=false; revealShape.textContent="Step into the light"; finaleMsg.textContent="I couldn't reach the studio — try me once more?"; }
-    }
-
-    let LOOKS = [], GAP = {}, AVOID = [], CELEB = {}, MUST = {}, BACKDROP = "", HAIRCUT = {}, PAYLOAD = null, BODY_LINE = "";
-    function esc(s){ return String(s==null?"":s).replace(/</g,"&lt;"); }
-    function repRow(label, val){ return val ? '<div class="rep-row"><span class="rl">'+label+'</span><span class="rv">'+esc(val)+'</span></div>' : ""; }
-    function lookRow(label, val){ return val ? '<span class="look-row"><i>'+label+'</i>'+esc(val)+'</span>' : ""; }
-    function ofRow(label, obj){
-      if(!obj || (!obj.what && !obj.why)) return "";
-      return '<div class="of-row"><span class="of-lab">'+label+'</span><span class="of-what">'+esc(obj.what||"")+
-             (obj.why?' <span class="of-why">— '+esc(obj.why)+'</span>':'')+'</span></div>';
-    }
-    async function openGlow(){
-      const page = document.getElementById("glowPage");
-      page.setAttribute("data-lenis-prevent", "");
-      page.classList.add("open"); page.setAttribute("aria-hidden","false"); page.scrollTop = 0;
-      document.getElementById("glowClose").onclick = closeGlow;
-      // loading state while page 2 (the glow plan) generates
-      document.getElementById("glowLooks").innerHTML = '<p class="glow-loading">crafting your looks…</p>';
-      const yl = document.getElementById("youLoading"); yl.style.display = "flex"; yl.textContent = "styling you…";
-      document.querySelectorAll(".glow-panel").forEach(p=>{ p.classList.remove("open"); p.innerHTML=""; });
-      document.querySelectorAll(".glow-toggle").forEach(b=>b.classList.remove("active"));
-      try{
-        const r = await fetch("/analyze-glow", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(PAYLOAD || {}) });
-        const d = await r.json();
-        if(!d.success || !d.report){
-          document.getElementById("glowLooks").innerHTML = '<p class="glow-loading">Couldn\'t craft your looks — go back and try again.</p>';
-          yl.style.display = "none"; return;
-        }
-        const g = d.report;
-        HAIRCUT = g.haircut || {}; MUST = g.mustHaves || {}; AVOID = g.avoid || []; CELEB = g.celeb || {}; BACKDROP = g.backdrop || ""; BODY_LINE = g.bodyLine || ""; LOOKS = (g.looks || []).slice(0,2);
-        renderGlow();
-      }catch(err){
-        console.error(err);
-        document.getElementById("glowLooks").innerHTML = '<p class="glow-loading">Connection error — go back and try again.</p>';
-        document.getElementById("youLoading").style.display = "none";
-      }
-    }
-    function renderGlow(){
-      document.getElementById("glowLooks").innerHTML = LOOKS.map((L,i)=>
-        '<button class="outfit-card" data-i="'+i+'">'+
-          '<span class="of-title">'+esc(L.title||("Look "+(i+1)))+'</span>'+
-          ofRow("Hair", L.hairstyle)+ofRow("Neckline", L.neckline)+ofRow("Waist", L.waist)+ofRow("Legs", L.legs)+ofRow("Heels", L.heels)+
-        '</button>'
-      ).join("");
-      document.querySelectorAll("#glowLooks .outfit-card").forEach(btn=>btn.addEventListener("click", ()=>selectLook(+btn.dataset.i)));
-      // must-haves — top / pants / belt / footwear
-      const mh = MUST || {};
-      const mhRow = (label,val)=> val ? '<div class="mh-row"><span class="mh-lab">'+label+'</span><span class="mh-val">'+esc(val)+'</span></div>' : '';
-      document.getElementById("glowMust").innerHTML = '<p class="cs-h">Your must-haves</p>' +
-        mhRow("Top", mh.top)+mhRow("Pants", mh.pants)+mhRow("Belt", mh.belt)+mhRow("Footwear", mh.footwear);
-      // avoid
-      document.getElementById("glowAvoid").innerHTML = '<p class="cs-h">They don\'t do you justice</p>' +
-        ((AVOID && AVOID.length) ? '<ul>'+AVOID.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>' : '');
-      // haircut
-      const hc = HAIRCUT || {};
-      document.getElementById("glowHaircut").innerHTML = '<p class="cs-h">Your haircut</p>' +
-        (hc.name?'<p class="hc-name">'+esc(hc.name)+'</p>':'') +
-        (hc.tip?'<p class="card-tip">'+esc(hc.tip)+'</p>':'') + (hc.why?'<p class="card-why">'+esc(hc.why)+'</p>':'');
-      // wire the toggle buttons — panel shows only when clicked
-      document.querySelectorAll(".glow-toggle").forEach(btn=>{
-        btn.onclick = ()=>{
-          const t = document.getElementById(btn.dataset.target);
-          const willOpen = !t.classList.contains("open");
-          // accordion: close every panel + button first
-          document.querySelectorAll(".glow-panel").forEach(p=>p.classList.remove("open"));
-          document.querySelectorAll(".glow-toggle").forEach(b=>b.classList.remove("active"));
-          // then open only the one clicked (unless it was already open → stays closed)
-          if(willOpen){ t.classList.add("open"); btn.classList.add("active"); }
-        };
-      });
-      if (LOOKS.length) selectLook(0);
-      else { document.getElementById("youImg").src = photos.full; document.getElementById("youLoading").style.display = "none"; }
-    }
-    function closeGlow(){
-      const page = document.getElementById("glowPage");
-      page.classList.remove("open"); page.setAttribute("aria-hidden","true");
-    }
-
-    const CARD_DEFS = [
-      ["faceType","Face type"],["neckline","Neckline"],["bust","Bust"],
-      ["waist","Waist"],["legs","Legs"],["vertical","Vertical proportion"],
-      ["footwear","Footwear"],["color","Colour theory"]
-    ];
-    function renderReport(rep){
-      document.getElementById("silWrap").style.display = "none";
-      revealShape.textContent = "";
-      document.getElementById("repSilhouette").textContent = rep.silhouette || rep.signature || "";
-      const _shape = (typeof shape === "string" && shape) ? (shape.charAt(0).toUpperCase() + shape.slice(1)) : "";
-      document.getElementById("repSilhShape").textContent = _shape ? ("· " + _shape) : "";
-      const cards = rep.cards || {};
-      const LABELS = Object.fromEntries(CARD_DEFS);
-      const allKeys = CARD_DEFS.map(([k])=>k).filter(k => cards[k]);
-      let powerKeys = (rep.power || []).filter(k => cards[k]).slice(0,3);
-      if(!powerKeys.length) powerKeys = allKeys.slice(0,3);
-      let elevateKeys = (rep.elevate || []).filter(k => cards[k] && !powerKeys.includes(k)).slice(0,3);
-      // top up elevate to 3 from leftovers if the model under-filled
-      for(const k of allKeys){ if(elevateKeys.length>=3) break; if(!powerKeys.includes(k) && !elevateKeys.includes(k)) elevateKeys.push(k); }
-      const restKeys = allKeys.filter(k => !powerKeys.includes(k) && !elevateKeys.includes(k));
-
-      document.getElementById("powerRow").innerHTML = powerKeys.map(k=>{
-        const c = cards[k] || {};
-        return '<div class="rep-card power-card"><p class="rep-h">'+(LABELS[k]||k)+'</p>'+
-               (c.tag?'<p class="power-tag">'+esc(c.tag)+'</p>':'')+
-               (c.tip?'<p class="card-tip">'+esc(c.tip)+'</p>':'')+
-               (c.why?'<p class="card-why">'+esc(c.why)+'</p>':'')+'</div>';
-      }).join("");
-      const gridCard = k=>{ const c = cards[k]||{}; const tag = c.tag ? '<span class="card-tag">'+esc(c.tag)+'</span>' : '';
-        return '<div class="rep-card"><p class="rep-h">'+(LABELS[k]||k)+tag+'</p>'+
-               (c.tip?'<p class="card-tip">'+esc(c.tip)+'</p>':'')+
-               (c.why?'<p class="card-why">'+esc(c.why)+'</p>':'')+'</div>'; };
-      document.getElementById("elevateGrid").innerHTML = elevateKeys.map(gridCard).join("");
-      document.getElementById("restGrid").innerHTML = restKeys.map(gridCard).join("");
-      const v = (rep.verdict || []).slice(0,3);
-      document.getElementById("repVerdict").innerHTML = v.length ?
-        ('<p class="v-lead">If you remembered only three things:</p>' +
-         '<ul class="v-list">' + v.map(x=>'<li>'+esc(x)+'</li>').join("") + '</ul>' +
-         '<p class="v-closer">Everything else is secondary.</p>') : "";
-      const vbtn = document.getElementById("verdictBtn");
-      vbtn.style.display = v.length ? "inline-block" : "none";
-      vbtn.onclick = ()=>{ const p = document.getElementById("repVerdict"); vbtn.classList.toggle("active", p.classList.toggle("open")); };
-      GAP = rep.gap || {};
-      document.getElementById("gapWrap").style.display = "flex";
-      document.getElementById("gapBtn").onclick = openGlow;
-
-      const _rep = document.getElementById("report");
-      if (_rep.parentElement !== document.body) document.body.appendChild(_rep); // escape the stage's opacity + transform
-      _rep.setAttribute("data-lenis-prevent", ""); // let the panel scroll natively over Lenis
-      _rep.style.display = "flex"; _rep.classList.add("open");
-    }
-
-    async function selectLook(i){
-      const L = LOOKS[i]; if(!L) return;
-      document.querySelectorAll(".outfit-card").forEach(c=>c.classList.toggle("active", +c.dataset.i===i));
-      document.getElementById("youCap").textContent = L.title || ("Look "+(i+1));
-      const loading = document.getElementById("youLoading");
-      loading.style.display = "flex"; loading.textContent = "dressing you with love…";
-      const D = k => (L[k] && L[k].what) ? L[k].what : "";
-      const detail = [
-        D("hairstyle") && ("hair styled as " + D("hairstyle")),
-        D("neckline")  && ("wearing " + D("neckline")),
-        D("waist")     && ("waist treatment: " + D("waist")),
-        D("legs")      && ("on the bottom, " + D("legs")),
-        D("heels")     && ("with " + D("heels"))
-      ].filter(Boolean).join("; ");
-      const prompt =
-        "A full-body editorial fashion photograph of " + (BODY_LINE || ("a woman with a " + (shape || "balanced") + " body shape")) + ", " +
-        "in one cohesive head-to-toe look" + (L.prompt ? (": " + L.prompt) : "") + (detail ? (" — " + detail) : "") + ". " +
-        (BACKDROP ? ("Set in " + BACKDROP + ", a natural setting that matches her vibe. ") : "In a soft, natural setting. ") +
-        "Full figure from head to feet, shoes fully visible, standing in a relaxed, confident pose. " +
-        "Shot on a real camera — natural skin with true texture, soft natural daylight, true-to-life colours, warm and gentle, photorealistic. " +
-        "NOT airbrushed, no plastic or waxy skin, no heavy retouching, not a 3D render or illustration, no exaggerated features.";
-      const withInspo = prompt + (INSPO_LIKE ? (" With a subtle nod to " + INSPO_LIKE + ".") : "");
-      try{
-        const r = await fetch("/generate-avatar-image", { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ avatarPrompt: withInspo, photoBase64: photos.full, photoMime: photoMimes.full, inspoBase64: inspoImage, inspoMime: inspoMime }) });
-        const d = await r.json();
-        if (d.success && d.imageUrl){
-          const img = document.getElementById("youImg");
-          img.onload = ()=>{ loading.style.display = "none"; };
-          img.onerror = ()=>{ img.src = photos.full; loading.style.display = "none"; }; // graceful: show her real photo
-          img.src = d.imageUrl;
-        } else { document.getElementById("youImg").src = photos.full; loading.style.display = "none"; }
-      }catch(err){ console.error(err); document.getElementById("youImg").src = photos.full; loading.style.display = "none"; }
-    }
-  </script>
+  <p class="foot">ASTRA — because the recommendations should finally know the person.</p>
 </body>
 </html>

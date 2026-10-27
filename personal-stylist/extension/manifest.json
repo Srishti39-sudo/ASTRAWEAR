@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "ASTRA \u2014 Buy or Not",
+  "version": "0.1",
+  "description": "Reads the product page you're on (Myntra/Amazon) and tells you: buy, caution, or skip \u2014 from the real fabric, refund policy, and genuine reviews.",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.myntra.com/*",
+    "*://*.amazon.in/*",
+    "*://*.amazon.com/*",
+    "*://*.nykaa.com/*",
+    "*://*.nykaafashion.com/*",
+    "*://*.ajio.com/*",
+    "http://localhost/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.myntra.com/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.com/*",
+        "*://*.nykaa.com/*",
+        "*://*.nykaafashion.com/*",
+        "*://*.ajio.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "card.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

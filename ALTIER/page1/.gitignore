@@ -1,0 +1,11 @@
+.env
+venv/
+__pycache__/
+*.pyc
+# Embedded candidate pools. Regenerate with taste_engine; they are large and machine-specific,
+# and a cache from a different model is worse than no cache (see LookIndex.load).
+*.npz
+
+# vecdb-backed indexes, rebuilt on first use (retrieval.py, stylist_rag.py). Machine-specific.
+data/looks_vecdb/
+data/knowledge/

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroStylist — Trace Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f4ead7; --stone:#b7ab98; --gold:#d9b978; --bg:#191512; --panel:#221d18;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(120% 90% at 50% -10%,#241e18 0%,var(--bg) 60%);
+    color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;padding:5vh 20px 12vh;text-align:center}
+  h1{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(28px,4vw,44px);margin:0 0 6px;letter-spacing:.5px}
+  .sub{color:var(--stone);font-size:14px;font-weight:300;margin:0 0 34px;font-style:italic;font-family:'Cormorant Garamond',serif;font-size:19px}
+  .split{position:relative;max-width:760px;margin:0 auto;display:flex;gap:26px;justify-content:center}
+  .photo{position:relative;flex:1;max-width:340px;border-radius:14px;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);background:#0d0b09;aspect-ratio:3/4}
+  .photo img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.92) brightness(.96)}
+  .photo svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .photo .cap{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 9px;font-size:12px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--ink);background:linear-gradient(to top,rgba(10,8,6,.85),transparent)}
+  #connect{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+  path.trace{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
+    filter:drop-shadow(0 0 4px rgba(217,185,120,.9)) drop-shadow(0 0 9px rgba(217,185,120,.45));
+    transition:stroke-dashoffset 1s cubic-bezier(.65,.02,.35,1)}
+  path.connect{fill:none;stroke:var(--gold);stroke-width:1.4;stroke-dasharray:2 5;opacity:.75;
+    filter:drop-shadow(0 0 5px rgba(217,185,120,.6));transition:stroke-dashoffset 1.1s ease}
+  .line{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(18px,2.4vw,23px);
+    line-height:1.5;max-width:600px;margin:30px auto 12px;min-height:64px;color:var(--ink);opacity:0;transition:opacity .7s ease}
+  .line.in{opacity:1}
+  .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 auto 6px;max-width:560px;min-height:30px}
+  .chip{border:1px solid rgba(217,185,120,.4);color:var(--gold);border-radius:20px;padding:5px 13px;font-size:12px;
+    letter-spacing:.4px;opacity:0;transform:translateY(4px);transition:all .5s ease}
+  .chip.in{opacity:1;transform:none}
+  .conf{color:var(--stone);font-size:12px;letter-spacing:1px;margin-top:2px}
+  .pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:38px auto 0;max-width:560px}
+  .pill{background:transparent;border:1px solid rgba(244,234,215,.28);color:var(--ink);border-radius:24px;
+    padding:9px 18px;font-family:'Inter';font-size:13px;cursor:pointer;transition:all .3s ease;letter-spacing:.3px}
+  .pill:hover{border-color:var(--gold)}
+  .pill.on{background:var(--ink);color:#1a1512;border-color:var(--ink)}
+  .lang{margin:52px auto 0;max-width:600px;border-top:1px solid rgba(244,234,215,.12);padding-top:30px}
+  .lang-h{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--stone);margin-bottom:16px}
+  .lang-words{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.4vw,34px);line-height:1.45}
+  .lang-words b{color:var(--gold);font-weight:500}
+  .shared-note{color:var(--stone);font-size:13px;margin-top:14px;font-style:italic;font-family:'Cormorant Garamond',serif;font-size:16px}
+</style>
+</head>
+<body>
+  <h1>What you actually share</h1>
+  <p class="sub">Not guessed. Traced — from the real geometry of both faces.</p>
+
+  <div class="split" id="split">
+    <div class="photo"><img id="imgYou" src="you.png" alt="you"><svg id="svgYou" viewBox="0 0 1 1" preserveAspectRatio="none"></svg><div class="cap">you</div></div>
+    <div class="photo"><img id="imgRef" src="her.png" alt="her"><svg id="svgRef" viewBox="0 0 1 1" preserveAspectRatio="none"></svg><div class="cap">her</div></div>
+    <svg id="connect" preserveAspectRatio="none"></svg>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div class="conf" id="conf"></div>
+  <p class="line" id="line"></p>
+
+  <div class="pills" id="pills"></div>
+
+  <div class="lang">
+    <div class="lang-h">Your visual language</div>
+    <div class="lang-words" id="langWords"></div>
+    <div class="shared-note" id="sharedNote"></div>
+  </div>
+
+<script>
+const DATA = {"matches": [{"id": "jawline", "label": "Jawline", "confidence": 0.857, "user_landmarks": [[[0.38075, 0.5241], [0.39761, 0.557], [0.41865, 0.58735], [0.43642, 0.60856], [0.4554, 0.62764], [0.47565, 0.64197], [0.49739, 0.64783], [0.51258, 0.64632], [0.52201, 0.63736], [0.52736, 0.62402], [0.53137, 0.60819], [0.53779, 0.58714], [0.54321, 0.56422], [0.5502, 0.53414], [0.55858, 0.49939], [0.56523, 0.46671]]], "reference_landmarks": [[[0.16791, 0.71508], [0.19474, 0.75343], [0.23323, 0.79024], [0.26847, 0.81706], [0.3077, 0.84206], [0.35215, 0.8641], [0.4067, 0.87862], [0.45452, 0.88437], [0.48971, 0.87954], [0.51681, 0.86937], [0.54131, 0.85592], [0.57048, 0.836], [0.59326, 0.81235], [0.6181, 0.77715], [0.64579, 0.73186], [0.66859, 0.68785]]], "labels": ["defined line", "soft curve to chin", "gentle angle"], "line": "You both share a jawline that holds its definition with a soft curve, giving a grounded presence."}, {"id": "eyes", "label": "Eyes", "confidence": 0.855, "user_landmarks": [[[0.60868, 0.41499], [0.60679, 0.41859], [0.60463, 0.42048], [0.60103, 0.42114], [0.59481, 0.41992], [0.58755, 0.4163], [0.58142, 0.41126], [0.57765, 0.40717], [0.57573, 0.40447], [0.5787, 0.40109], [0.58395, 0.39744], [0.59185, 0.39653], [0.60017, 0.39861], [0.6061, 0.40316], [0.60858, 0.40837], [0.60907, 0.41209]], [[0.47007, 0.35728], [0.47476, 0.36399], [0.4799, 0.3693], [0.48654, 0.3746], [0.49614, 0.3792], [0.50516, 0.38133], [0.51364, 0.3824], [0.51953, 0.38345], [0.52243, 0.38305], [0.52081, 0.37745], [0.51592, 0.36698], [0.50798, 0.35796], [0.49912, 0.35326], [0.48848, 0.3517], [0.48043, 0.35298], [0.47501, 0.355]]], "reference_landmarks": [[[0.70647, 0.57176], [0.69874, 0.57583], [0.69051, 0.5772], [0.67849, 0.5768], [0.66063, 0.5737], [0.64147, 0.56749], [0.62473, 0.55986], [0.61325, 0.55377], [0.60656, 0.54931], [0.61445, 0.54557], [0.62927, 0.54252], [0.65047, 0.54302], [0.67139, 0.54682], [0.68873, 0.55369], [0.69897, 0.56129], [0.70359, 0.56689]], [[0.3366, 0.47504], [0.34459, 0.4838], [0.35458, 0.49058], [0.36935, 0.49773], [0.39236, 0.50455], [0.4159, 0.50801], [0.43808, 0.50959], [0.45382, 0.5109], [0.46286, 0.51042], [0.45774, 0.50358], [0.44396, 0.49174], [0.42318, 0.48051], [0.4018, 0.4734], [0.3774, 0.46994], [0.35906, 0.47066], [0.34706, 0.47256]]], "labels": ["almond shape", "gentle outer tilt", "wide-set placement", "visible upper lid"], "line": "Your eyes both have an almond shape with a gentle outer tilt, so your gaze feels open and engaging."}, {"id": "nose", "label": "Nose", "confidence": 0.844, "user_landmarks": [[[0.56873, 0.38381], [0.56938, 0.40651], [0.57094, 0.42579], [0.57336, 0.44288], [0.57595, 0.46112], [0.57694, 0.48226], [0.57265, 0.49712], [0.56618, 0.50435], [0.56017, 0.50711], [0.55356, 0.50755], [0.51553, 0.48881], [0.57219, 0.50767]]], "reference_landmarks": [[[0.56418, 0.51076], [0.56046, 0.53832], [0.55877, 0.55979], [0.55871, 0.57883], [0.55809, 0.59948], [0.55403, 0.62499], [0.54418, 0.64558], [0.53377, 0.65746], [0.52558, 0.66344], [0.51806, 0.66822], [0.43629, 0.64682], [0.57276, 0.67929]]], "labels": ["straight bridge", "rounded tip", "proportionate width"], "line": "You share a nose with a straight bridge and a soft, rounded tip, which creates a balanced central feature."}, {"id": "cheekbones", "label": "Cheekbones", "confidence": 0.818, "user_landmarks": [[[0.4205, 0.37662], [0.41458, 0.41025], [0.40664, 0.44195], [0.42641, 0.45962], [0.46462, 0.46045], [0.59318, 0.50662], [0.5953, 0.51718], [0.59676, 0.50776], [0.60535, 0.48153], [0.60602, 0.45029]]], "reference_landmarks": [[[0.23415, 0.51257], [0.22186, 0.55531], [0.2085, 0.59766], [0.24585, 0.61591], [0.3219, 0.61144], [0.64949, 0.69321], [0.67378, 0.72112], [0.69036, 0.71653], [0.71179, 0.67924], [0.72553, 0.63911]]], "labels": ["high placement", "gentle curve", "subtle lift"], "line": "Your cheekbones both sit high with a gentle curve, giving a soft lift to the mid-face."}], "aesthetic": {"visual_similarity": 0.657, "shared": [{"concept": "sensual", "user": 0.511, "reference": 1.0}, {"concept": "quiet confidence", "user": 1.0, "reference": 0.343}, {"concept": "warm", "user": 0.447, "reference": 0.106}, {"concept": "fierce", "user": 0.089, "reference": 0.098}, {"concept": "dramatic", "user": 0.087, "reference": 0.159}], "visual_language": [{"concept": "quiet confidence", "score": 0.803}, {"concept": "sensual", "score": 0.412}, {"concept": "refined", "score": 0.337}, {"concept": "warm", "score": 0.256}, {"concept": "magnetic", "score": 0.142}, {"concept": "romantic", "score": 0.132}]}};
+
+const OPEN = new Set(['jawline','nose','eyebrows']); // draw as open curves; others close into loops
+const svgNS='http://www.w3.org/2000/svg';
+let current=-1, timer=null;
+
+function ringPath(ring, close){
+  let d='M '+ring.map(p=>p[0].toFixed(4)+' '+p[1].toFixed(4)).join(' L ');
+  if(close) d+=' Z';
+  return d;
+}
+
+function drawInto(svg, rings, id){
+  svg.innerHTML='';
+  const paths=[];
+  rings.forEach((ring,idx)=>{
+    const p=document.createElementNS(svgNS,'path');
+    p.setAttribute('d', ringPath(ring, !OPEN.has(id)));
+    p.setAttribute('class','trace');
+    p.setAttribute('vector-effect','non-scaling-stroke');
+    svg.appendChild(p);
+    const len=p.getTotalLength();
+    p.style.strokeDasharray=len; p.style.strokeDashoffset=len;   // hidden
+    paths.push({p,len,idx});
+  });
+  // animate the "draw" (Apple-Maps route), staggered per ring
+  requestAnimationFrame(()=>paths.forEach(o=>{ setTimeout(()=>{ o.p.style.strokeDashoffset=0; }, o.idx*260); }));
+}
+
+function centroid(ring){ let x=0,y=0; ring.forEach(p=>{x+=p[0];y+=p[1];}); return [x/ring.length, y/ring.length]; }
+
+function drawConnector(uRing, rRing){
+  const split=document.getElementById('split'), connect=document.getElementById('connect');
+  const pY=document.getElementById('imgYou').getBoundingClientRect();
+  const pR=document.getElementById('imgRef').getBoundingClientRect();
+  const box=split.getBoundingClientRect();
+  connect.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);
+  const [ux,uy]=centroid(uRing), [rx,ry]=centroid(rRing);
+  const x1=(pY.left-box.left)+ux*pY.width, y1=(pY.top-box.top)+uy*pY.height;
+  const x2=(pR.left-box.left)+rx*pR.width, y2=(pR.top-box.top)+ry*pR.height;
+  const my=Math.min(y1,y2)-26;
+  connect.innerHTML='';
+  const p=document.createElementNS(svgNS,'path');
+  p.setAttribute('d',`M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`);
+  p.setAttribute('class','connect');
+  connect.appendChild(p);
+  const len=p.getTotalLength();
+  p.style.strokeDashoffset=len; p.style.strokeDasharray=len;
+  setTimeout(()=>{ p.style.transition='stroke-dashoffset 1.1s ease'; p.style.strokeDasharray='2 5'; }, 900);
+}
+
+function show(i){
+  if(timer){clearTimeout(timer);timer=null;}
+  current=i;
+  const m=DATA.matches[i];
+  document.querySelectorAll('.pill').forEach((p,idx)=>p.classList.toggle('on',idx===i));
+  drawInto(document.getElementById('svgYou'), m.user_landmarks, m.id);
+  drawInto(document.getElementById('svgRef'), m.reference_landmarks, m.id);
+  drawConnector(m.user_landmarks[0], m.reference_landmarks[0]);
+
+  const line=document.getElementById('line'); line.classList.remove('in');
+  const chips=document.getElementById('chips'); chips.innerHTML='';
+  document.getElementById('conf').textContent='';
+  setTimeout(()=>{
+    m.labels.forEach((l,k)=>{ const c=document.createElement('span'); c.className='chip'; c.textContent=l; chips.appendChild(c);
+      setTimeout(()=>c.classList.add('in'), 120*k); });
+    document.getElementById('conf').textContent=`match confidence · ${Math.round(m.confidence*100)}%`;
+    line.textContent=m.line; setTimeout(()=>line.classList.add('in'),260);
+  }, 700);
+}
+
+// pills
+const pills=document.getElementById('pills');
+DATA.matches.forEach((m,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=m.label;
+  b.onclick=()=>show(i); pills.appendChild(b); });
+
+// visual language
+document.getElementById('langWords').innerHTML = DATA.aesthetic.visual_language.slice(0,4)
+  .map(p=>`<b>${p.concept}</b>`).join(' &nbsp;·&nbsp; ');
+document.getElementById('sharedNote').textContent =
+  'shared energy: ' + DATA.aesthetic.shared.slice(0,3).map(s=>s.concept).join(' · ');
+
+// autoplay through all four once images are ready, then rest on the first
+function startAuto(){
+  let i=0; show(0);
+  timer=setInterval(()=>{ i++; if(i>=DATA.matches.length){clearInterval(timer);timer=null;show(0);return;} show(i); }, 3200);
+}
+const imgs=[document.getElementById('imgYou'),document.getElementById('imgRef')];
+let loaded=0; imgs.forEach(im=>{ if(im.complete)done(); else {im.onload=done;im.onerror=done;} });
+function done(){ if(++loaded>=2) setTimeout(startAuto,500); }
+window.addEventListener('resize',()=>{ if(current>=0){ const m=DATA.matches[current]; drawConnector(m.user_landmarks[0],m.reference_landmarks[0]); }});
+</script>
+</body>
+</html>

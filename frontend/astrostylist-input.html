@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroStylist · AstraWear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9E1D1; --paper2:#F5F0E6; --tile:#EFE8DA;
+  --ink:#22201a; --stone:#8b8273; --line:#D6CBB6; --line2:#E4DBC9;
+  --sea:#3C6A62; --cherry:#8B1E2D;
+  --display:'Marcellus', serif; --serif:'Cormorant Garamond', Georgia, serif;
+  --body:'EB Garamond', Georgia, serif; --sans:'Archivo', system-ui, sans-serif;
+  --ease:cubic-bezier(.16,.7,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  background-image:radial-gradient(60% 45% at 22% 26%, rgba(216,184,119,.10), transparent 60%),
+                   radial-gradient(50% 40% at 82% 78%, rgba(60,106,98,.07), transparent 60%);}
+
+/* ---- ASTRA site header ---- */
+.site{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 46px;border-bottom:1px solid var(--line);background:rgba(233,225,209,.9);backdrop-filter:blur(6px)}
+.site nav{display:flex;gap:26px;font-family:var(--serif);font-weight:500;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.site nav.right{justify-content:flex-end}
+.site nav a{color:var(--ink);text-decoration:none;cursor:pointer;transition:color .3s}
+.site nav a:hover{color:var(--sea)}
+.brand{text-align:center}
+.brand .astra{font-family:var(--display);font-size:22px;letter-spacing:.4em;color:var(--ink);padding-left:.4em}
+.brand .tag{font-family:var(--serif);font-style:italic;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-top:1px}
+
+/* ---- layout ---- */
+.grid{flex:1;width:100%;max-width:1120px;margin:0 auto;padding:22px 6vw 40px;
+  display:grid;grid-template-columns:1fr 1px 1fr;gap:0 clamp(28px,4.5vw,64px);align-items:stretch}
+.divider{background:linear-gradient(180deg,transparent,var(--line) 12%,var(--line) 88%,transparent)}
+.col{padding:14px 0;min-width:0}
+
+.eyebrow{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.eyebrow .num{font-family:var(--sans);font-size:11px;letter-spacing:.22em;color:var(--sea)}
+.eyebrow .lbl{font-family:var(--sans);font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--stone)}
+.h{font-family:var(--serif);font-weight:400;font-size:clamp(33px,4.2vw,48px);line-height:1.06;letter-spacing:0;color:var(--ink);margin-bottom:15px}
+.h em{font-style:italic;font-weight:400;color:var(--sea)}
+.lead{font-family:var(--body);font-size:16.5px;font-style:italic;line-height:1.62;color:#5a5648;max-width:34ch;margin-bottom:26px}
+.lead em{font-style:italic;color:var(--sea);font-weight:500}
+
+/* ---- upload tiles ---- */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.tile{position:relative;aspect-ratio:3/4;border:1px solid var(--line);border-radius:14px;background:var(--tile);
+  cursor:pointer;overflow:hidden;transition:border-color .25s var(--ease),transform .25s var(--ease),box-shadow .25s var(--ease);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px}
+.tile:hover{border-color:var(--sea);transform:translateY(-2px);box-shadow:0 10px 26px rgba(74,50,30,.10)}
+.tile.filled{border-style:solid;border-color:var(--line)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s var(--ease)}
+.tile.filled img{opacity:1}
+.tile .plus{width:30px;height:30px;border-radius:50%;border:1px solid var(--stone);display:grid;place-items:center;
+  font-family:var(--serif);font-size:20px;color:var(--stone);transition:.25s var(--ease)}
+.tile:hover .plus{border-color:var(--sea);color:var(--sea)}
+.tile .tl{font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone)}
+.tile .opt{font-family:var(--body);font-style:italic;font-size:11px;color:var(--stone);margin-top:-4px}
+.tile.filled .plus,.tile.filled .tl,.tile.filled .opt{opacity:0}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:7px 9px;background:linear-gradient(0deg,rgba(20,18,14,.55),transparent);
+  font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#f4efe6;opacity:0;transition:.3s}
+.tile.filled .cap{opacity:1}
+
+/* ---- vibe word ---- */
+.word-wrap{margin-bottom:6px}
+.word-q{font-family:var(--body);font-style:italic;font-size:15px;color:#4a463c;margin-bottom:9px}
+.word{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 2px;
+  font-family:var(--serif);font-size:26px;color:var(--ink);outline:none;transition:border-color .25s var(--ease)}
+.word::placeholder{color:#c3b89f;font-style:italic}
+.word:focus{border-bottom-color:var(--sea)}
+
+/* ---- birth form ---- */
+.frow{display:flex;gap:12px;margin-bottom:15px}
+.fg{flex:1;min-width:0}
+.fg label{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:7px}
+.fg input,.fg select{width:100%;padding:12px 13px;font-family:var(--body);font-size:16px;color:var(--ink);
+  background:var(--paper2);border:1px solid var(--line);border-radius:10px;outline:none;-webkit-appearance:none;appearance:none;
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.fg select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'><path fill='%238b8273' d='M5.5 7 0 0h11z'/></svg>");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.fg input::placeholder{color:#bcb199}
+.fg input:focus,.fg select:focus{border-color:var(--sea);background:var(--paper2);box-shadow:0 0 0 3px rgba(60,106,98,.10)}
+.loc{position:relative}
+.loc-sugg{position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--paper2);border:1px solid var(--line);border-radius:10px;max-height:210px;overflow-y:auto;display:none;z-index:30;box-shadow:0 12px 28px rgba(74,50,30,.15)}
+.loc-sugg.in{display:block}
+.loc-item{padding:11px 14px;font-family:var(--body);font-size:15px;cursor:pointer;border-bottom:1px solid var(--line2);color:var(--ink)}
+.loc-item:last-child{border-bottom:0}
+.loc-item:hover{background:var(--tile);color:var(--sea)}
+
+/* ---- cta ---- */
+.foot{max-width:1120px;margin:0 auto;width:100%;padding:6px 6vw 46px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.hint{font-family:var(--body);font-style:italic;font-size:13px;color:var(--stone)}
+.cta{appearance:none;border:0;cursor:pointer;background:var(--ink);color:var(--paper2);
+  font-family:var(--sans);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:15px 30px;border-radius:40px;
+  transition:transform .25s var(--ease),background .25s var(--ease),box-shadow .25s var(--ease);box-shadow:0 8px 22px rgba(34,32,26,.16)}
+.cta:hover{transform:translateY(-2px);background:#171610;box-shadow:0 12px 28px rgba(34,32,26,.24)}
+.cta:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.msg{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--cherry)}
+
+/* ---- responsive: stack, inspiration first, birth below ---- */
+@media(max-width:840px){
+  .grid{grid-template-columns:1fr;gap:0}
+  .divider{height:1px;width:100%;margin:26px 0;background:linear-gradient(90deg,transparent,var(--line) 15%,var(--line) 85%,transparent)}
+  .h{font-size:clamp(30px,8vw,40px)}
+  .foot{justify-content:center;text-align:center}
+}
+input[type=file]{display:none}
+.journey{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin:40px auto 30px}
+.j-step{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;min-width:112px}
+.j-node{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper2);display:grid;place-items:center;font-family:var(--serif);font-size:20px;color:var(--stone);transition:all .2s var(--ease)}
+.j-step:hover .j-node{border-color:var(--sea);color:var(--sea)}
+.j-step.active .j-node{background:var(--sea);color:#F7F1E4;border-color:var(--sea)}
+.j-label{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone)}
+.j-step:hover .j-label,.j-step.active .j-label{color:var(--sea)}
+.j-line{width:46px;height:1px;background:var(--line);margin:0 2px 22px}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="left"><a href="create-avatar.html">Avatar</a><a class="on">Astro</a><a href="stylist-input.html">Stylist</a></nav>
+  <div class="brand"><div class="astra">ASTRA</div><div class="tag">It's your right to be divinely beautiful</div></div>
+  <nav class="right"><a href="index.html">Moodboard</a><a href="auth.html">Logout</a></nav>
+</header>
+
+<form class="grid" id="form" onsubmit="return submitForm(event)">
+
+  <!-- LEFT / TOP — what you're drawn to -->
+  <section class="col">
+    <div class="eyebrow"><span class="num">01</span><span class="lbl">What you're drawn to</span></div>
+    <h1 class="h">The face you keep<br><em>coming back</em> to.</h1>
+    <p class="lead">Not to become her — to find what's already yours in what you love.</p>
+
+    <div class="tiles">
+      <div class="tile" id="tYou" onclick="pick('you')"><img id="iYou" alt=""><span class="plus">+</span><span class="tl">You</span><span class="cap">You</span></div>
+      <div class="tile" id="tRef" onclick="pick('ref')"><img id="iRef" alt=""><span class="plus">+</span><span class="tl">Reference</span><span class="cap">Reference</span></div>
+      <div class="tile" id="tVibe" onclick="pick('vibe')"><img id="iVibe" alt=""><span class="plus">+</span><span class="tl">Vibe</span><span class="opt">optional</span><span class="cap">Vibe</span></div>
+    </div>
+
+    <div class="word-wrap">
+      <div class="word-q">In one word — how do you want to feel?</div>
+      <input class="word" id="vibeWord" maxlength="18" placeholder="magnetic, soft, quiet…" autocomplete="off">
+    </div>
+
+    <div class="word-wrap">
+      <div class="word-q">What has never felt like you?</div>
+      <input class="word" id="neverWord" maxlength="60" placeholder="a bob cut, dark colours, anything clingy…" autocomplete="off">
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- RIGHT / BOTTOM — your stars -->
+  <section class="col">
+    <div class="eyebrow"><span class="num">02</span><span class="lbl">Your stars · optional</span></div>
+    <h1 class="h">Written in<br><em>your stars</em>.</h1>
+    <p class="lead">Your Venus and Rising only refine the read. Skip any of it — the look still works.</p>
+
+    <div class="frow">
+      <div class="fg"><label>Name</label><input id="fullName" placeholder="Your name" autocomplete="off"></div>
+      <div class="fg"><label>Gender</label>
+        <select id="gender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Day</label><select id="day"></select></div>
+      <div class="fg"><label>Month</label><select id="month"></select></div>
+      <div class="fg"><label>Year</label><select id="year"></select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Hour</label><select id="hour"></select></div>
+      <div class="fg"><label>Minute</label><select id="minute"></select></div>
+    </div>
+    <div class="fg loc"><label>Birth place</label><input id="place" placeholder="Start typing your city…" autocomplete="off"><div class="loc-sugg" id="placeSugg"></div></div>
+  </section>
+</form>
+
+<div class="foot">
+  <span class="hint" id="hint"></span>
+  <button class="cta" id="cta" form="form" type="submit">Let's find you &nbsp;→</button>
+  <div class="journey">
+    <a class="j-step" href="create-avatar.html"><span class="j-node">✦</span><span class="j-label">Create Avatar</span></a>
+    <span class="j-line"></span>
+    <a class="j-step active" href="astrostylist-input.html"><span class="j-node">✧</span><span class="j-label">AstroStylist</span></a>
+    <span class="j-line"></span>
+    <a class="j-step" href="stylist-input.html"><span class="j-node">❋</span><span class="j-label">Personal Stylist</span></a>
+  </div>
+</div>
+
+<input type="file" id="file" accept="image/*">
+
+<script>
+const IMG={you:null,ref:null,vibe:null};
+let target=null;
+const file=document.getElementById('file');
+function pick(w){target=w;file.value='';file.click();}
+file.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{IMG[target]=r.result;
+    const tile=document.getElementById({you:'tYou',ref:'tRef',vibe:'tVibe'}[target]);
+    const img=document.getElementById({you:'iYou',ref:'iRef',vibe:'iVibe'}[target]);
+    img.src=r.result;tile.classList.add('filled');refreshCta();};
+  r.readAsDataURL(f);};
+
+// populate date/time selects
+function fill(sel,from,to,pad,label){const s=document.getElementById(sel);
+  s.innerHTML='<option value="">'+label+'</option>';
+  for(let i=from;i<=to;i++){const v=pad?String(i).padStart(2,'0'):i;s.insertAdjacentHTML('beforeend',`<option value="${i}">${v}</option>`);} }
+const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+fill('day',1,31,false,'Day');
+(function(){const m=document.getElementById('month');m.innerHTML='<option value="">Month</option>';months.forEach((n,i)=>m.insertAdjacentHTML('beforeend',`<option value="${i+1}">${n}</option>`));})();
+(function(){const y=document.getElementById('year');y.innerHTML='<option value="">Year</option>';const now=new Date().getFullYear();for(let i=now;i>=1940;i--)y.insertAdjacentHTML('beforeend',`<option value="${i}">${i}</option>`);})();
+fill('hour',0,23,true,'Hour');
+fill('minute',0,59,true,'Min');
+
+function refreshCta(){const ready=IMG.you&&IMG.ref;
+  document.getElementById('cta').disabled=!ready;
+  document.getElementById('hint').textContent=ready?'':'';}
+refreshCta();
+
+// ---- city autocomplete (node backend /search-location -> Nominatim) ----
+const place=document.getElementById('place'), sugg=document.getElementById('placeSugg');
+const NODE=`http://${location.hostname||'localhost'}:5001`;
+let locSel=null, locTimer=null;
+place.addEventListener('input',()=>{locSel=null;clearTimeout(locTimer);const q=place.value.trim();
+  if(q.length<2){sugg.classList.remove('in');sugg.innerHTML='';return;}
+  locTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch(`${NODE}/search-location?query=${encodeURIComponent(q)}`);
+      const data=await r.json();
+      const items=Array.isArray(data)?data:(data.results||[]);   // endpoint returns {results:[...]}
+      sugg.innerHTML='';
+      if(!items.length){sugg.classList.remove('in');return;}
+      items.slice(0,6).forEach(pl=>{const d=document.createElement('div');d.className='loc-item';
+        d.textContent=`${pl.name}${pl.country?', '+pl.country:''}`;
+        d.onclick=()=>{place.value=d.textContent;
+          locSel={city:pl.name,latitude:pl.latitude,longitude:pl.longitude,timezone:pl.timezone};
+          sugg.classList.remove('in');sugg.innerHTML='';};
+        sugg.appendChild(d);});
+      sugg.classList.add('in');
+    }catch(_){sugg.classList.remove('in');}
+  },260);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.loc'))sugg.classList.remove('in');});
+
+function submitForm(e){e.preventDefault();
+  if(!IMG.you||!IMG.ref){document.getElementById('hint').textContent='Add your photo and a reference to begin.';return false;}
+  const payload={
+    user_image:IMG.you, reference_image:IMG.ref, vibe_image:IMG.vibe,
+    vibe_word:(document.getElementById('vibeWord').value||'').trim(),
+    never:(document.getElementById('neverWord').value||'').trim(),
+    name:document.getElementById('fullName').value.trim(),
+    gender:document.getElementById('gender').value,
+    birth:(function(){
+      const day=document.getElementById('day').value,month=document.getElementById('month').value,year=document.getElementById('year').value,
+            hour=document.getElementById('hour').value,minute=document.getElementById('minute').value;
+      const dob=(year&&month&&day)?`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`:'';
+      const tob=(hour!==''&&minute!=='')?`${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`:'';
+      return {day,month,year,hour,minute,dob,tob,place:document.getElementById('place').value.trim(),...(locSel||{})};
+    })(),
+  };
+  try{sessionStorage.setItem('astro_inputs',JSON.stringify(payload));}catch(_){}
+  // next page reads sessionStorage and calls /analyze
+  window.location.href='astrostylist-result.html';
+  return false;
+}
+</script>
+</body>
+</html>

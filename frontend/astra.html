@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>ASTRA — your stylist agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#F5F0E6; --ink:#22201a; --mute:#8b8273; --line:#D6CBB6; --card:#fff; --ok:#3C6A62; --warn:#B67B18; --skip:#8B1E2D; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--ink); font-family:"Archivo",-apple-system,sans-serif; font-size:15px; }
+  .wrap { max-width:720px; margin:0 auto; padding:24px 16px 120px; }
+  header { text-align:center; margin-bottom:18px; }
+  .logo { font-family:"Marcellus",serif; letter-spacing:.3em; font-size:22px; }
+  .tag { font-family:"Cormorant Garamond",serif; font-style:italic; color:var(--mute); font-size:17px; margin-top:2px; }
+  .impact { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:14px 0 20px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 16px; min-width:120px; text-align:center; }
+  .stat b { display:block; font-size:22px; font-family:"Marcellus",serif; }
+  .stat span { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+  .chat { display:flex; flex-direction:column; gap:10px; }
+  .msg { max-width:86%; padding:11px 14px; border-radius:16px; line-height:1.5; white-space:pre-wrap; }
+  .msg.user { align-self:flex-end; background:var(--ink); color:var(--bg); border-bottom-right-radius:4px; }
+  .msg.agent { align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px; }
+  .msg img { display:block; max-width:260px; border-radius:12px; margin-top:8px; }
+  .verdict { align-self:flex-start; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 14px; width:86%; }
+  .verdict .v { font-weight:600; letter-spacing:.12em; font-size:11px; padding:3px 10px; border-radius:20px; color:#fff; display:inline-block; }
+  .verdict .v.ok{background:var(--ok)} .verdict .v.caution{background:var(--warn)} .verdict .v.skip{background:var(--skip)}
+  .verdict .pct { font-family:"Marcellus",serif; font-size:26px; margin-left:10px; vertical-align:middle; }
+  .verdict ul { margin:8px 0 0; padding-left:18px; color:#3d3a30; font-size:13.5px; }
+  .verdict .acts { display:flex; gap:6px; margin-top:10px; }
+  .verdict .acts button { flex:1; font:inherit; font-size:12.5px; font-weight:600; padding:7px; border-radius:9px; cursor:pointer; background:var(--card); border:1px solid var(--line); }
+  .verdict .acts .s{border-color:var(--skip);color:var(--skip)} .verdict .acts .b{border-color:var(--ok);color:var(--ok)} .verdict .acts .t{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .bar { position:fixed; left:0; right:0; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:12px 16px calc(12px + env(safe-area-inset-bottom)); }
+  .bar form { max-width:720px; margin:0 auto; display:flex; gap:8px; align-items:center; }
+  .bar input[type=text] { flex:1; font:inherit; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); outline:none; }
+  .bar input[type=text]:focus { border-color:var(--ink); }
+  .bar button, .bar label { font:inherit; font-weight:600; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--card); cursor:pointer; }
+  .bar button.send { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .bar label.has { border-color:var(--ok); color:var(--ok); }
+  .bar input[type=file] { display:none; }
+  .hint { text-align:center; color:var(--mute); font-size:12.5px; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">ASTRA</div>
+    <div class="tag">Know what suits you. Buy less, buy right.</div>
+  </header>
+  <div class="impact" id="impact">
+    <div class="stat"><b id="i-skip">0</b><span>skipped</span></div>
+    <div class="stat"><b id="i-money">₹0</b><span>kept</span></div>
+    <div class="stat"><b id="i-co2">0 kg</b><span>CO₂e never made</span></div>
+  </div>
+  <div class="chat" id="chat"></div>
+</div>
+<div class="bar">
+  <form id="f">
+    <label id="photoLabel" title="attach a photo">📷<input type="file" id="photo" accept="image/*"></label>
+    <input type="text" id="q" placeholder="Paste a product link, or ask anything…" autocomplete="off">
+    <button class="send">→</button>
+  </form>
+  <div class="hint" id="hint">Start by sending a clear, front-facing photo in daylight — ASTRA reads your colouring and shape.</div>
+</div>
+<script>
+const BASE = `http://${location.hostname || 'localhost'}:8090`;
+const chat = document.getElementById('chat');
+let history = [], image = null, lastProduct = null;
+
+function add(role, text, extra) {
+  const m = document.createElement('div');
+  m.className = 'msg ' + role;
+  m.textContent = text;
+  if (extra) m.appendChild(extra);
+  chat.appendChild(m);
+  window.scrollTo(0, document.body.scrollHeight);
+  return m;
+}
+function setImpact(i) {
+  if (!i) return;
+  document.getElementById('i-skip').textContent = i.items_skipped;
+  document.getElementById('i-money').textContent = '₹' + (i.money_saved || 0).toLocaleString('en-IN');
+  document.getElementById('i-co2').textContent = (i.co2e_kg_saved_estimate || 0) + ' kg';
+  (i.patterns || []).forEach(p => add('agent', p));
+}
+function verdictCard(v) {
+  if (!v || !v.verdict) return;
+  const cls = v.verdict === 'SKIP' ? 'skip' : v.verdict === 'CAUTION' ? 'caution' : 'ok';
+  const s = v.summary || {};
+  const lines = [s.colour, s.neckline, s.structure, s.size, ...(v.wardrobe_notes || [])].filter(Boolean);
+  const c = document.createElement('div');
+  c.className = 'verdict';
+  c.innerHTML = `<span class="v ${cls}">${v.verdict}</span><span class="pct">${v.match ?? ''}%</span>
+    <div style="font-weight:600;margin-top:6px">${(v.product || {}).title || ''}</div>
+    <ul>${lines.map(l => `<li>${l}</li>`).join('')}</ul>
+    <div class="acts"><button class="s">Skipping it</button><button class="b">Bought it</button><button class="t">See it on me</button></div>`;
+  lastProduct = Object.assign({}, v.product || {}, { url: v.url });
+  c.querySelector('.s').onclick = () => decide('skipped');
+  c.querySelector('.b').onclick = () => decide('bought');
+  c.querySelector('.t').onclick = tryOn;
+  chat.appendChild(c);
+}
+async function decide(decision) {
+  const r = await fetch(BASE + '/decision', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ decision, product: lastProduct }) }).then(r => r.json()).catch(() => null);
+  if (r) { setImpact(r); add('agent', decision === 'skipped' ? 'Skip logged — a skip is a win. ' + r.say : 'Logged. Wear it well.'); }
+}
+async function tryOn() {
+  const m = add('agent', 'Dressing you… (GPU, ~30s)');
+  const r = await fetch(BASE + '/tryon', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product: lastProduct }) }).then(r => r.json()).catch(() => ({ error: 'ASTRA is offline' }));
+  if (r.image) { m.textContent = 'Here you are:'; const img = new Image(); img.src = r.image; m.appendChild(img); }
+  else m.textContent = r.error || "couldn't render";
+}
+document.getElementById('photo').onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { image = rd.result; document.getElementById('photoLabel').classList.add('has'); document.getElementById('hint').textContent = 'Photo attached — now press → (or type a note with it).'; };
+  rd.readAsDataURL(f);
+};
+document.getElementById('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const q = document.getElementById('q');
+  const message = q.value.trim() || (image ? "Here's my photo — figure out what suits me" : '');
+  if (!message) return;
+  q.value = '';
+  const preview = image ? Object.assign(new Image(), { src: image }) : null;
+  add('user', message, preview);
+  const thinking = add('agent', '…');
+  const payload = { message, history, image };
+  image = null; document.getElementById('photoLabel').classList.remove('has'); document.getElementById('hint').textContent = '';
+  try {
+    const r = await fetch(BASE + '/agent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(r => r.json());
+    thinking.textContent = r.reply || '…';
+    history.push({ role: 'user', text: message }, { role: 'agent', text: r.reply || '' });
+    if (r.verdict) verdictCard(r.verdict);
+    if (r.image) { const img = new Image(); img.src = r.image; thinking.appendChild(img); }
+    if (r.impact) setImpact(r.impact);
+  } catch (err) {
+    thinking.textContent = 'ASTRA is offline — start the engine (uvicorn api:app --port 8090).';
+  }
+};
+fetch(BASE + '/impact').then(r => r.json()).then(i => { setImpact(Object.assign({}, i, { patterns: [] })); }).catch(() => {});
+add('agent', "Hi — I'm ASTRA. Send me a photo and I'll read your colouring and shape. Then paste any product link and I'll tell you if it's worth it — and why.");
+</script>
+</body>
+</html>

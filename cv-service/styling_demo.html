@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroStylist — Show Me My Version</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#f4ead7;--stone:#b7ab98;--gold:#d9b978;--bg:#191512;}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(120% 90% at 50% -10%,#241e18 0%,var(--bg) 60%);
+    color:var(--ink);font-family:'Inter',sans-serif;min-height:100vh;padding:5vh 20px 12vh;text-align:center}
+  h1{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(26px,4vw,40px);margin:0 0 4px}
+  .sub{color:var(--stone);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:18px;margin:0 0 30px}
+  .stage{position:relative;width:min(360px,86vw);aspect-ratio:390/522;margin:0 auto;border-radius:16px;
+    overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.55);background:#0d0b09}
+  .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .stage canvas,.stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  #fx{opacity:0;transition:opacity .9s ease}
+  #fx.on{opacity:1}
+  .badge{position:absolute;top:12px;left:12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--ink);background:rgba(10,8,6,.5);padding:5px 10px;border-radius:20px;backdrop-filter:blur(4px)}
+  .pills{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:26px auto 0;max-width:460px}
+  .pill{background:transparent;border:1px solid rgba(244,234,215,.28);color:var(--ink);border-radius:24px;
+    padding:9px 17px;font-family:'Inter';font-size:13px;cursor:pointer;transition:all .3s ease}
+  .pill:hover{border-color:var(--gold)} .pill.on{background:var(--ink);color:#1a1512;border-color:var(--ink)}
+  .share{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(17px,2.3vw,21px);
+    max-width:440px;margin:26px auto 4px;min-height:56px;opacity:0;transition:opacity .6s ease}
+  .share.in{opacity:1}
+  .cta{margin:14px auto 0;opacity:0;transform:translateY(6px);transition:all .5s ease;pointer-events:none}
+  .cta.in{opacity:1;transform:none;pointer-events:auto}
+  .cta button{background:var(--gold);color:#1a1410;border:none;border-radius:26px;padding:13px 26px;
+    font-family:'Inter';font-weight:500;font-size:14px;letter-spacing:.4px;cursor:pointer;
+    box-shadow:0 8px 24px rgba(217,185,120,.25);transition:transform .2s ease}
+  .cta button:hover{transform:translateY(-1px)}
+  .result{margin:22px auto 0;max-width:460px;opacity:0;transition:opacity .6s ease}
+  .result.in{opacity:1}
+  .toggle{display:inline-flex;border:1px solid rgba(244,234,215,.25);border-radius:24px;overflow:hidden;margin-bottom:14px}
+  .toggle button{background:transparent;color:var(--stone);border:none;padding:9px 20px;font-family:'Inter';
+    font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .25s ease}
+  .toggle button.on{background:var(--ink);color:#1a1512}
+  .rec-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px auto 10px}
+  .rec-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(217,185,120,.35);
+    color:var(--ink);border-radius:20px;padding:5px 12px;font-size:12px}
+  .sw{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .reason{color:var(--stone);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;margin-top:6px}
+  .foot{margin-top:40px;color:var(--stone);font-size:12px;font-style:italic;font-family:'Cormorant Garamond',serif;font-size:15px;max-width:420px;margin-left:auto;margin-right:auto}
+</style>
+</head>
+<body>
+  <h1>Show me my version</h1>
+  <p class="sub">Not her makeup — the same feature, emphasized on your face.</p>
+
+  <div class="stage">
+    <img id="base" src="her.png" alt="you">
+    <canvas id="fx"></canvas>
+    <svg id="trace" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+    <div class="badge" id="badge">you</div>
+  </div>
+
+  <div class="pills" id="pills"></div>
+  <p class="share" id="share"></p>
+  <div class="cta" id="cta"><button onclick="showVersion()">Show me my version ✦</button></div>
+
+  <div class="result" id="result">
+    <div class="toggle">
+      <button id="tOrig" class="" onclick="setVer(false)">Original</button>
+      <button id="tMine" class="on" onclick="setVer(true)">My version</button>
+    </div>
+    <div class="rec-chips" id="recChips"></div>
+    <div class="reason" id="reason"></div>
+  </div>
+
+  <p class="foot">The reference only helped you notice it. Your own geometry decides how it's worn.</p>
+
+<script>
+const DATA = {"mesh_ok": true, "styling": {"palette": "quiet confidence", "features": {"eyes": {"feature": "eyes", "shared_feature": "Your eyes both have an almond shape with a gentle outer tilt, so your gaze feels open and engaging.", "shared_labels": ["almond shape", "gentle outer tilt", "wide-set placement", "visible upper lid"], "recommendation": {"technique": "define", "thickness": "very thin", "coverage": "tightline", "extension_ratio": 0.03, "direction": "gently upward", "finish": "soft", "emphasis_shift": "inner", "color": "neutral bronze", "hex": "#8a6a4a"}, "reason": "Almond with a level corner: a short upward tail adds lift without drama. Low lid space: keep liner to a tightline so you don't cover the eye.", "attributes": {"wh_ratio": 3.797, "spacing_ratio": 1.275, "outer_lift": 0.025, "lid_visibility": 0.038, "eye_size": 0.22, "brow_gap": 1}}, "cheeks": {"feature": "cheeks", "shared_feature": "Your cheekbones both sit high with a gentle curve, giving a soft lift to the mid-face.", "shared_labels": ["high placement", "gentle curve", "subtle lift"], "recommendation": {"technique": "blush", "placement": "apple", "direction": "upward-diagonal", "intensity": "soft", "highlight": "subtle", "color": "muted rose", "hex": "#d99a90"}, "reason": "Lower set: keep blush on the apple for a soft, youthful lift. Wider face: angle blush up-and-out to add structure.", "attributes": {"cheekbone_height": 0.445, "face_width_ratio": 0.964, "prominence": 0.637, "face_length_ratio": 1.037}}, "lips": {"feature": "lips", "shared_feature": null, "shared_labels": [], "recommendation": {"technique": "define", "definition": "soft-defined", "emphasis": "upper", "finish": "satin", "overline": false, "color": "rosewood nude", "hex": "#b57d72"}, "reason": "Fuller lower lip: gently define the upper so the pair reads balanced.", "attributes": {"upper_lower_ratio": 0.666, "width_ratio": 0.44, "fullness": 0.286, "cupid_depth": 0.214}}, "brows": {"feature": "brows", "shared_feature": null, "shared_labels": [], "recommendation": {"technique": "groom", "shape": "brushed-up", "direction": "upward", "arch_emphasis": "soften", "thickness_adjust": "keep", "color": "soft taupe", "hex": "#6f5140"}, "reason": "Arch already sits outer/high: soften it rather than sharpen. Full brow: brush up and keep \u2014 density is the asset.", "attributes": {"arch_pos": 0.74, "thickness": 1, "length_ratio": 1.32, "brow_eye_gap": 1}}}, "anchors": {"r_eye_upper": [[0.3366, 0.47504], [0.34706, 0.47256], [0.35906, 0.47066], [0.3774, 0.46994], [0.4018, 0.4734], [0.42318, 0.48051], [0.44396, 0.49174], [0.45774, 0.50358], [0.46286, 0.51042]], "l_eye_upper": [[0.70647, 0.57176], [0.70359, 0.56689], [0.69897, 0.56129], [0.68873, 0.55369], [0.67139, 0.54682], [0.65047, 0.54302], [0.62927, 0.54252], [0.61445, 0.54557], [0.60656, 0.54931]], "r_eye_lower": [[0.3366, 0.47504], [0.34459, 0.4838], [0.35458, 0.49058], [0.36935, 0.49773], [0.39236, 0.50455], [0.4159, 0.50801], [0.43808, 0.50959], [0.45382, 0.5109], [0.46286, 0.51042]], "l_eye_lower": [[0.70647, 0.57176], [0.69874, 0.57583], [0.69051, 0.5772], [0.67849, 0.5768], [0.66063, 0.5737], [0.64147, 0.56749], [0.62473, 0.55986], [0.61325, 0.55377], [0.60656, 0.54931]], "lips_outer": [[0.343, 0.70428], [0.36242, 0.70202], [0.38866, 0.70099], [0.42224, 0.69979], [0.46692, 0.70037], [0.50021, 0.71347], [0.53074, 0.71531], [0.55223, 0.72899], [0.564, 0.74171], [0.5689, 0.75216], [0.56941, 0.76087], [0.55956, 0.76863], [0.54585, 0.77646], [0.52333, 0.78364], [0.49466, 0.78507], [0.4633, 0.78032], [0.42661, 0.76861], [0.39502, 0.75142], [0.37069, 0.73181], [0.35422, 0.71721]], "r_brow": [[0.3193, 0.40813], [0.35613, 0.39567], [0.40014, 0.39584], [0.45303, 0.41238], [0.51578, 0.45089], [0.30412, 0.39648], [0.34546, 0.3783], [0.39704, 0.37737], [0.45664, 0.39442], [0.52007, 0.42041]], "l_brow": [[0.7575, 0.53025], [0.7521, 0.5093], [0.73136, 0.49408], [0.69377, 0.48491], [0.63103, 0.48553], [0.76571, 0.52527], [0.7633, 0.4994], [0.74329, 0.48086], [0.70456, 0.46995], [0.65012, 0.46096]], "cheek_centers": [[0.3219, 0.61144], [0.64949, 0.69321]], "cheek_temples": [[0.17578, 0.51188], [0.6886, 0.64509]]}, "order": ["eyes", "cheeks", "lips", "brows"]}};
+const A = DATA.styling.anchors, F = DATA.styling.features, ORDER = DATA.styling.order;
+const svgNS='http://www.w3.org/2000/svg';
+let feature=null, W=0, H=0;
+const stage=document.querySelector('.stage'), fx=document.getElementById('fx');
+const ctx=fx.getContext('2d');
+
+function size(){ const r=stage.getBoundingClientRect(); W=r.width; H=r.height; fx.width=W*devicePixelRatio; fx.height=H*devicePixelRatio;
+  fx.style.width=W+'px'; fx.style.height=H+'px'; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+const PX=p=>[p[0]*W, p[1]*H];
+
+/* ---------- thin editorial trace (before "show me my version") ---------- */
+function traceFeature(f){
+  const svg=document.getElementById('trace'); svg.innerHTML='';
+  const rings = f==='eyes' ? [A.r_eye_upper,A.l_eye_upper] :
+                f==='lips' ? [A.lips_outer] :
+                f==='brows'? [A.r_brow,A.l_brow] :
+                [circleRing(A.cheek_centers[0],0.11), circleRing(A.cheek_centers[1],0.11)];
+  rings.forEach((ring,i)=>{ const p=document.createElementNS(svgNS,'path');
+    p.setAttribute('d','M '+ring.map(pt=>pt[0].toFixed(4)+' '+pt[1].toFixed(4)).join(' L ')+(f==='lips'?' Z':''));
+    p.setAttribute('fill','none'); p.setAttribute('stroke','#f4ead7'); p.setAttribute('stroke-width','1.4');
+    p.setAttribute('vector-effect','non-scaling-stroke'); p.setAttribute('stroke-linecap','round');
+    p.style.filter='drop-shadow(0 0 3px rgba(217,185,120,.9))';
+    svg.appendChild(p); const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+    p.style.transition='stroke-dashoffset .9s ease'; setTimeout(()=>p.style.strokeDashoffset=0, 60+i*180); });
+}
+function circleRing(c,r){ const pts=[]; for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/8) pts.push([c[0]+r*Math.cos(a)*0.75, c[1]+r*Math.sin(a)]); return pts; }
+function clearTrace(){ document.getElementById('trace').innerHTML=''; }
+
+/* ---------- smooth path helper on canvas ---------- */
+function smooth(pts, close){ ctx.beginPath(); ctx.moveTo(...PX(pts[0]));
+  for(let i=1;i<pts.length-1;i++){ const a=PX(pts[i]),b=PX(pts[i+1]); ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}
+  const last=PX(pts[pts.length-1]); ctx.lineTo(last[0],last[1]); if(close) ctx.closePath(); }
+function dist(a,b){a=PX(a);b=PX(b);return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+
+/* ---------- makeup renderers (translucent, soft, aligned) ---------- */
+function drawEyes(rec){
+  const ext=rec.extension_ratio||0.06, cov=rec.coverage||'outer_third';
+  const thick={ 'very thin':0.16,'thin':0.22,'medium':0.32 }[rec.thickness]||0.22;
+  [[A.r_eye_upper,A.r_eye_lower,-1],[A.l_eye_upper,A.l_eye_lower,1]].forEach(([up,lo,dir])=>{
+    const ew=dist(up[0],up[up.length-1]);         // outer->inner distance in px
+    let pts=up.slice();
+    // coverage: keep outer portion (points ordered outer->inner)
+    if(cov==='outer_third') pts=pts.slice(0,Math.ceil(pts.length*0.5));
+    else if(cov==='outer_half') pts=pts.slice(0,Math.ceil(pts.length*0.65));
+    // extension tail beyond outer corner
+    const o=PX(up[0]), n=PX(up[1]); let ang=Math.atan2(o[1]-n[1],o[0]-n[0]);
+    if((rec.direction||'').includes('up')) ang-=0.35*(-dir<0?1:1)*0;   // lift handled by tail y-offset below
+    const tail=[ o[0]+Math.cos(ang)*ew*ext, o[1]+Math.sin(ang)*ew*ext - (String(rec.direction).includes('up')?ew*ext*0.6:0) ];
+    ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.strokeStyle=rec.hex; ctx.globalAlpha=0.85;
+    ctx.lineJoin='round'; ctx.lineCap='round'; ctx.shadowColor=rec.hex; ctx.shadowBlur=3;
+    // taper: thicker at outer corner, thinner inward
+    for(let i=0;i<pts.length-1;i++){ const t=i/(pts.length-1); const lw=(thick*ew/8)*(1-0.6*t);
+      const a=PX(pts[i]),b=PX(pts[i+1]); ctx.lineWidth=Math.max(0.8,lw); ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); }
+    // tail
+    ctx.lineWidth=Math.max(0.8,thick*ew/9); ctx.beginPath(); ctx.moveTo(...PX(pts[0])); ctx.lineTo(tail[0],tail[1]); ctx.stroke();
+    ctx.restore();
+    // inner-corner brighten if wide-set emphasis inner
+    if(rec.emphasis_shift==='inner'){ const ic=PX(up[up.length-1]); ctx.save(); ctx.globalCompositeOperation='soft-light';
+      const g=ctx.createRadialGradient(ic[0],ic[1],0,ic[0],ic[1],ew*0.14); g.addColorStop(0,'rgba(255,248,235,.7)'); g.addColorStop(1,'rgba(255,248,235,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(ic[0],ic[1],ew*0.14,0,7); ctx.fill(); ctx.restore(); }
+  });
+}
+function drawCheeks(rec){
+  const faceW=dist(A.cheek_temples[0],A.cheek_temples[1]);
+  A.cheek_centers.forEach((c,i)=>{
+    const t=A.cheek_temples[i], cc=PX(c), tt=PX(t);
+    // sweep toward temple for 'upward-diagonal'/'temple'
+    const mid=[cc[0]*0.7+tt[0]*0.3, cc[1]*0.7+tt[1]*0.3 - faceW*0.02];
+    const r=faceW*0.20;
+    ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.globalAlpha=(rec.intensity==='soft'?0.30:0.4);
+    const g=ctx.createRadialGradient(mid[0],mid[1],0,mid[0],mid[1],r);
+    g.addColorStop(0,rec.hex); g.addColorStop(0.6,rec.hex+'66'); g.addColorStop(1,rec.hex+'00');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(mid[0],mid[1],r,r*0.72,-0.35*(i?-1:1),0,7); ctx.fill(); ctx.restore();
+    if(rec.highlight&&rec.highlight!=='none'){ ctx.save(); ctx.globalCompositeOperation='soft-light'; ctx.globalAlpha=0.5;
+      const hp=[cc[0]*0.55+tt[0]*0.45, cc[1]-faceW*0.06]; const hg=ctx.createRadialGradient(hp[0],hp[1],0,hp[0],hp[1],r*0.5);
+      hg.addColorStop(0,'rgba(255,250,240,.8)'); hg.addColorStop(1,'rgba(255,250,240,0)'); ctx.fillStyle=hg;
+      ctx.beginPath(); ctx.arc(hp[0],hp[1],r*0.5,0,7); ctx.fill(); ctx.restore(); }
+  });
+}
+function drawLips(rec){
+  ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.globalAlpha=0.42; ctx.fillStyle=rec.hex;
+  ctx.shadowColor=rec.hex; ctx.shadowBlur=2; smooth(A.lips_outer,true); ctx.fill(); ctx.restore();
+  if(rec.definition&&rec.definition.includes('defined')){ ctx.save(); ctx.globalCompositeOperation='multiply';
+    ctx.globalAlpha=0.5; ctx.strokeStyle=rec.hex; ctx.lineWidth=Math.max(1,W*0.004); ctx.shadowColor=rec.hex; ctx.shadowBlur=2;
+    smooth(A.lips_outer,true); ctx.stroke(); ctx.restore(); }
+  if((rec.finish||'').includes('satin')||(rec.finish||'').includes('gloss')){ // center gloss
+    const ys=A.lips_outer.map(p=>p[1]), xs=A.lips_outer.map(p=>p[0]);
+    const cx=(Math.min(...xs)+Math.max(...xs))/2*W, cy=(Math.min(...ys)+Math.max(...ys))/2*H + H*0.012;
+    const r=(Math.max(...xs)-Math.min(...xs))*W*0.22; ctx.save(); ctx.globalCompositeOperation='soft-light'; ctx.globalAlpha=0.6;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r); g.addColorStop(0,'rgba(255,250,244,.9)'); g.addColorStop(1,'rgba(255,250,244,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(cx,cy,r,r*0.5,0,0,7); ctx.fill(); ctx.restore(); }
+}
+function drawBrows(rec){
+  [A.r_brow,A.l_brow].forEach(ring=>{
+    ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.globalAlpha=0.22; ctx.fillStyle=rec.hex;
+    ctx.shadowColor=rec.hex; ctx.shadowBlur=2; smooth(ring,true); ctx.fill(); ctx.restore();
+    if((rec.shape||'').includes('brushed')||String(rec.direction).includes('up')){ // upward hair strokes along top edge
+      ctx.save(); ctx.globalCompositeOperation='multiply'; ctx.globalAlpha=0.3; ctx.strokeStyle=rec.hex; ctx.lineCap='round';
+      const top=ring.slice(0,Math.ceil(ring.length/2));
+      top.forEach(p=>{ const a=PX(p); ctx.lineWidth=Math.max(.8,W*0.003); ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(a[0]+2,a[1]-W*0.02); ctx.stroke(); });
+      ctx.restore(); }
+  });
+}
+const RENDER={eyes:drawEyes,cheeks:drawCheeks,lips:drawLips,brows:drawBrows};
+
+/* ---------- interaction ---------- */
+function pick(f){
+  feature=f; clearOverlay();
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.f===f));
+  document.getElementById('result').classList.remove('in');
+  fx.classList.remove('on');
+  traceFeature(f);
+  const fo=F[f]||{}; const share=document.getElementById('share');
+  share.classList.remove('in');
+  const line = fo.shared_feature || ('Your ' + labelFor(f).toLowerCase() + ' — read from your own geometry.');
+  setTimeout(()=>{ share.textContent=line; share.classList.add('in');
+    document.getElementById('cta').classList.add('in'); }, 500);
+}
+function showVersion(){
+  if(!feature) return;
+  clearTrace();
+  clearOverlay();
+  RENDER[feature](F[feature].recommendation);
+  fx.classList.add('on'); setVer(true);
+  const fo=F[feature], rec=fo.recommendation;
+  const chips=document.getElementById('recChips'); chips.innerHTML='';
+  const bits=[[rec.color,rec.hex]].concat(techBits(feature,rec).map(t=>[t,null]));
+  bits.forEach(([t,hex])=>{ const c=document.createElement('span'); c.className='rec-chip';
+    c.innerHTML=(hex?`<span class="sw" style="background:${hex}"></span>`:'')+t; chips.appendChild(c); });
+  document.getElementById('reason').textContent=fo.reason;
+  document.getElementById('result').classList.add('in');
+  document.getElementById('cta').classList.remove('in');
+}
+function techBits(f,r){
+  if(f==='eyes') return [r.thickness+' liner', r.coverage.replace('_',' '), r.direction];
+  if(f==='cheeks') return [r.placement.replace('-',' '), r.intensity, r.highlight!=='none'?'+ highlight':''].filter(Boolean);
+  if(f==='lips') return [r.finish, r.definition.replace('-',' '), 'emphasis '+r.emphasis];
+  if(f==='brows') return [r.shape.replace('-',' '), r.arch_emphasis.replace('-',' ')];
+  return [];
+}
+function setVer(mine){ fx.classList.toggle('on',mine);
+  document.getElementById('tMine').classList.toggle('on',mine);
+  document.getElementById('tOrig').classList.toggle('on',!mine); }
+function clearOverlay(){ ctx.clearRect(0,0,W,H); }
+function labelFor(f){ return {eyes:'Eyes',cheeks:'Cheekbones',lips:'Lips',brows:'Brows'}[f]||f; }
+
+/* ---------- build pills ---------- */
+const pills=document.getElementById('pills');
+ORDER.forEach(f=>{ const b=document.createElement('button'); b.className='pill'; b.dataset.f=f;
+  b.textContent=labelFor(f); b.onclick=()=>pick(f); pills.appendChild(b); });
+
+const base=document.getElementById('base');
+function boot(){ size(); }
+if(base.complete) boot(); else base.onload=boot;
+window.addEventListener('resize',()=>{ size(); if(feature && fx.classList.contains('on')){ clearOverlay(); RENDER[feature](F[feature].recommendation); } });
+</script>
+</body>
+</html>

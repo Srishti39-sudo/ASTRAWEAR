@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASTRA · Stylist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Archivo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEE7D6; --card:#F4EEE0; --ink:#2A2620; --ink-soft:#5C5346; --stone:#948A76;
+  --line:#D8CDB6; --line-soft:#E4DBC8; --brass:#9A7B44; --brass-2:#B4915A; --terra:#AE5A38; --sage:#7C8A6F;
+  --serif:'Cormorant Garamond',Georgia,serif; --display:'Marcellus',Georgia,serif; --sans:'Archivo',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(120% 80% at 50% 0%, #F4EDDC 0%, var(--paper) 60%);color:var(--ink);
+  font-family:var(--serif);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+/* ---- ASTRA site chrome ---- */
+.site{position:fixed;top:0;left:0;right:0;z-index:9;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:15px 46px;border-bottom:1px solid var(--line);background:rgba(238,231,214,.92);backdrop-filter:blur(7px)}
+.site nav{display:flex;gap:28px;font-family:var(--serif);font-weight:500;font-size:13.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink)}
+.site nav.right{justify-content:flex-end}
+.site nav a{color:var(--ink);text-decoration:none;cursor:pointer;transition:color .3s}
+.site nav a:hover,.site nav a.on{color:var(--brass)}
+.brand{text-align:center}
+.brand .astra{font-family:var(--display);font-size:22px;letter-spacing:9px;color:var(--ink);padding-left:9px}
+.brand .tag{font-family:var(--serif);font-style:italic;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--stone);margin-top:1px}
+
+.dock{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:38px;
+  background:var(--card);border:1px solid var(--line);border-radius:44px;padding:11px 34px;box-shadow:0 16px 44px -18px rgba(70,52,24,.5)}
+.dock a{display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--sans);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--stone);cursor:pointer;transition:color .3s;text-decoration:none}
+.dock a.on,.dock a:hover{color:var(--ink)}
+.dock svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---- flow ---- */
+.stage{position:relative;z-index:5;min-height:100vh}
+.screen{position:absolute;inset:0;display:none;opacity:0;overflow-y:auto;padding:118px 7vw 128px;
+  transition:opacity .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1);transform:translateY(12px)}
+.screen.live{display:flex;align-items:center}
+#s-form.live{display:block}
+.screen.in{opacity:1;transform:none}
+
+.eyebrow{font-family:var(--sans);font-size:9.5px;letter-spacing:3.5px;text-transform:uppercase;color:var(--stone);display:flex;align-items:center;gap:11px}
+.eyebrow .num{font-family:var(--serif);font-size:12px;letter-spacing:.5px;color:var(--brass);font-style:italic}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--brass);opacity:.55}
+.subhead{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2.1vw,26px);line-height:1.2;color:var(--ink);margin:12px 0 0;letter-spacing:.2px}
+.subhead .it{font-style:italic;color:var(--brass)}
+.lede{font-size:clamp(16px,1.6vw,19px);line-height:1.55;color:var(--ink-soft)}
+
+.enter{font-family:var(--sans);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink);background:none;border:0;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:11px}
+.enter .ln{width:40px;height:1px;background:var(--ink);transition:width .4s}
+.enter:hover .ln{width:64px;background:var(--brass)}.enter:hover{color:var(--brass)}
+.enter.solid{background:var(--ink);color:var(--paper);padding:14px 30px;letter-spacing:2.5px;border-radius:1px}
+.enter.solid:hover{background:var(--brass);color:var(--paper)}.enter.solid .ln{display:none}
+
+label.lab{font-family:var(--sans);font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--stone);display:block;margin-bottom:8px}
+.field{position:relative;margin-top:6px}
+.uline{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink);font-family:var(--serif);font-size:19px;padding:6px 2px 9px;outline:none;transition:border-color .4s}
+.uline::placeholder{color:#B9AE97;font-style:italic}.uline:focus{border-color:var(--brass)}
+
+.choice{display:flex;gap:20px;flex-wrap:wrap;margin-top:2px}
+.opt{font-family:var(--serif);font-size:19px;color:var(--stone);cursor:pointer;position:relative;padding-bottom:4px;transition:color .3s;font-style:italic}
+.opt::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--brass);transition:width .35s}
+.opt:hover{color:var(--ink-soft)}.opt.on{color:var(--ink)}.opt.on::after{width:100%}
+
+.drops{display:flex;gap:14px;flex-wrap:wrap}
+.drop{width:96px;height:120px;border:1px dashed var(--brass-2);border-radius:3px;cursor:pointer;position:relative;overflow:hidden;background:var(--card);display:flex;align-items:center;justify-content:center;transition:all .3s;opacity:.9}
+.drop:hover{border-color:var(--brass);opacity:1}
+.drop .plus{font-family:var(--sans);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--stone);text-align:center;line-height:1.9;padding:0 8px}
+.drop .plus b{display:block;font-size:15px;font-weight:400;color:var(--brass-2);margin-bottom:3px}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop .tag{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(30,24,16,.55));color:var(--paper);font-family:var(--sans);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 6px 6px;text-align:center}
+.drop.filled .plus{display:none}.drop.filled{border-style:solid;opacity:1}
+.uploadnote{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--stone);margin-top:12px;line-height:1.4}
+
+.ac{position:absolute;left:0;right:0;top:100%;background:var(--card);border:1px solid var(--line);border-top:0;z-index:20;max-height:190px;overflow:auto;display:none;box-shadow:0 18px 44px -20px rgba(60,45,20,.4)}
+.ac.show{display:block}
+.ac div{padding:9px 12px;font-family:var(--serif);font-size:15px;color:var(--ink-soft);cursor:pointer;border-bottom:1px solid var(--line-soft)}
+.ac div:hover{background:#EDE4D3;color:var(--ink)}
+
+.note{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--stone);margin-top:9px}
+.check{display:inline-flex;align-items:center;gap:9px;cursor:pointer;margin-top:14px;font-family:var(--sans);font-size:10.5px;letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase}
+.check .box{width:14px;height:14px;border:1px solid var(--stone);display:inline-block;transition:all .3s}
+.check.on .box{background:var(--brass);border-color:var(--brass)}
+.err{font-family:var(--serif);font-style:italic;color:var(--terra);font-size:15px;min-height:18px;margin-top:12px;opacity:0;transition:opacity .3s;text-align:center}
+.err.show{opacity:1}
+
+.single{width:100%;max-width:660px;margin:0 auto}
+.seal{width:52px;height:52px;border:1px solid var(--brass);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;color:var(--brass);transform:rotate(-6deg);opacity:.8}
+.aside{border-left:1px solid var(--line);padding-left:30px;height:min(50vh,360px);display:flex;flex-direction:column;justify-content:space-between}
+.vlabel{font-family:var(--sans);font-size:9px;letter-spacing:3.5px;text-transform:uppercase;color:var(--stone);writing-mode:vertical-rl;transform:rotate(180deg);align-self:flex-end}
+.wrap{width:100%;max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:center}
+.col{max-width:470px}
+
+.formwrap{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:0 5.5vw}
+.col-celeb{border-left:1px solid var(--line);padding-left:5.5vw}
+.colhead{margin-bottom:24px}
+.block{margin-top:26px}
+.cta-row{max-width:1040px;margin:38px auto 0;text-align:center}
+
+#s-threshold{background:radial-gradient(120% 90% at 50% 10%,#241d14 0%,#171208 72%);color:#F0E6D4}
+#s-threshold .eyebrow{color:#9a8d76}#s-threshold .eyebrow::before{background:var(--brass-2)}
+.dots{display:inline-flex;gap:7px;margin-top:22px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--brass-2);opacity:.3;animation:pulse 1.4s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes floatIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stagger>*{animation:floatIn .8s both}
+.stagger>*:nth-child(2){animation-delay:.09s}.stagger>*:nth-child(3){animation-delay:.18s}.stagger>*:nth-child(4){animation-delay:.27s}
+
+@media(max-width:860px){
+  .site{padding:12px 20px;grid-template-columns:auto 1fr auto}.site nav{gap:16px;font-size:11px;letter-spacing:1.5px}
+  .site nav.left a:not(:first-child){display:none}  /* keep it tidy on mobile */
+  .wrap{grid-template-columns:1fr;gap:34px}.aside{display:none}
+  .screen{padding:104px 22px 120px;align-items:flex-start}
+  .formwrap{grid-template-columns:1fr;gap:44px}
+  .col-celeb{border-left:0;padding-left:0;order:1}
+  .col-details{order:2;border-top:1px solid var(--line);padding-top:34px}
+  .dock{gap:26px;padding:10px 22px}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ASTRA top bar -->
+<header class="site">
+  <nav class="left"><a>Avatar</a><a>Astro</a><a class="on">Stylist</a></nav>
+  <div class="brand"><div class="astra">ASTRA</div><div class="tag">It's your right to be divinely beautiful</div></div>
+  <nav class="right"><a>Moodboard</a><a>Logout</a></nav>
+</header>
+
+<div class="stage">
+
+  <!-- 0 · INVITATION -->
+  <section class="screen" id="s-intro">
+    <div class="wrap">
+      <div class="col stagger">
+        <div class="eyebrow"><span class="num">✦</span> The Stylist</div>
+        <h1 class="subhead" style="font-size:clamp(34px,5vw,58px);font-weight:500;margin:22px 0 0;line-height:1.05">Become recognizable<br><span class="it">to yourself.</span></h1>
+        <p class="lede" style="margin:24px 0 34px;max-width:400px">Not a makeover — a recognition. I read the quiet language your own face already speaks, and show you your version of it.</p>
+        <button class="enter" onclick="go(1)">Step inside <span class="ln"></span></button>
+      </div>
+      <div class="aside"><div class="seal">A</div><div class="vlabel">Est. by you · Côte d'Azur</div></div>
+    </div>
+  </section>
+
+  <!-- 1 · DETAILS + THE ONE YOU'RE DRAWN TO -->
+  <section class="screen" id="s-form">
+    <div class="formwrap stagger">
+
+      <div class="col-details">
+        <div class="colhead">
+          <div class="eyebrow"><span class="num">I</span> Your details</div>
+          <h3 class="subhead">Under which sky <span class="it">you arrived.</span></h3>
+        </div>
+        <div class="field"><label class="lab" for="fName">Your name</label>
+          <input class="uline" id="fName" placeholder="e.g. Aishwarya" autocomplete="off"></div>
+        <div class="block"><label class="lab">And we should speak of you as</label>
+          <div class="choice" id="genderChoice">
+            <span class="opt" data-v="woman">a woman</span><span class="opt" data-v="man">a man</span><span class="opt" data-v="nonbinary">simply myself</span>
+          </div></div>
+        <div class="block" style="display:grid;grid-template-columns:1fr 1fr;gap:26px">
+          <div class="field"><label class="lab" for="fDate">Date of birth</label><input type="date" class="uline" id="fDate"></div>
+          <div class="field"><label class="lab" for="fTime">Time of birth</label><input type="time" class="uline" id="fTime"></div>
+        </div>
+        <div class="check" id="noTime" onclick="toggleNoTime()"><span class="box"></span> I don't know my birth time</div>
+        <div class="field block"><label class="lab" for="fPlace">Place of birth</label>
+          <input class="uline" id="fPlace" placeholder="City of birth" autocomplete="off" oninput="searchPlace(this.value)">
+          <div class="ac" id="acList"></div>
+          <p class="note">I read your Rising and Venus — your natural colours and textures. Never shared.</p>
+        </div>
+      </div>
+
+      <div class="col-celeb">
+        <div class="colhead">
+          <div class="eyebrow"><span class="num">II</span> The one you're drawn to</div>
+          <h3 class="subhead">The essence that <span class="it">never left your head.</span></h3>
+        </div>
+
+        <label class="lab">Two portraits — soft, natural light</label>
+        <div class="drops" style="margin:8px 0 0">
+          <div class="drop" id="dYou" onclick="pickFile('you')"><span class="plus"><b>＋</b>you</span><div class="tag">you</div></div>
+          <div class="drop" id="dRef" onclick="pickFile('ref')"><span class="plus"><b>＋</b>her</span><div class="tag">reference</div></div>
+        </div>
+        <p class="uploadnote">You can add just one — only yours, or only hers — or both. One photograph is enough to begin.</p>
+
+        <div class="field block"><label class="lab" for="fRefName">Who has quietly shaped your idea of beauty?</label>
+          <input class="uline" id="fRefName" placeholder="A name — or simply “her”" autocomplete="off"></div>
+
+        <div class="block"><label class="lab">One image you could never forget <span style="text-transform:none;letter-spacing:0;font-family:var(--serif);font-style:italic;color:var(--stone)">— the essence that stayed</span></label>
+          <div class="drops" style="margin:8px 0 0">
+            <div class="drop" id="dVibe" onclick="pickFile('vibe')"><span class="plus"><b>＋</b>the image</span><div class="tag">vibe</div></div>
+          </div>
+          <p class="uploadnote">An outfit, a room, a painting, a face — the one that never left your head. It tells me your visual language.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <div class="err" id="errForm"></div>
+      <button class="enter solid" onclick="submitForm()" style="margin-top:6px">Reveal what you share</button>
+    </div>
+  </section>
+
+  <!-- 2 · THRESHOLD -->
+  <section class="screen" id="s-threshold">
+    <div class="single" style="text-align:center;max-width:600px">
+      <div class="eyebrow" style="justify-content:center"><span class="num">✦</span> The mirror warms</div>
+      <h2 class="subhead" style="font-style:italic;font-weight:400;color:#F0E6D4;font-size:clamp(24px,3vw,38px);margin:22px 0 0">Finding the visual language<br>of your authentic self…</h2>
+      <div class="dots"><i></i><i></i><i></i></div>
+      <p id="threshMsg" style="font-family:var(--serif);font-style:italic;color:#a2937a;margin-top:34px;font-size:17px;min-height:24px"></p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ASTRA bottom dock -->
+<nav class="dock">
+  <a><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+  <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1-4 4-5.5 7-5.5s6 1.5 7 5.5"/></svg>Avatar</a>
+  <a><svg viewBox="0 0 24 24"><path d="M12 3l2.4 5.4 5.9.5-4.5 3.9 1.4 5.8L12 16.9 6.8 19l1.4-5.8L3.7 9.3l5.9-.5z"/></svg>Astro</a>
+  <a class="on"><svg viewBox="0 0 24 24"><path d="M12 5a2 2 0 1 1 1.5 3.4L21 15H3l7.5-6.6"/></svg>Stylist</a>
+</nav>
+
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<script>
+const S={name:'',gender:'',date:'',time:'',noTime:false,place:'',lat:null,lon:null,refName:'',you:null,ref:null,vibe:null};
+let step=0, fileTarget=null;
+const screens=['s-intro','s-form','s-threshold'];
+function go(i){
+  const cur=document.querySelector('.screen.live');
+  if(cur){cur.classList.remove('in');setTimeout(()=>cur.classList.remove('live'),480);}
+  step=i;const el=document.getElementById(screens[i]);
+  setTimeout(()=>{el.classList.add('live');el.scrollTop=0;requestAnimationFrame(()=>el.classList.add('in'));
+    const st=el.querySelector('.stagger');if(st){st.querySelectorAll('*').forEach(c=>{c.style.animation='none';void c.offsetWidth;c.style.animation='';});}
+  },cur?500:0);
+}
+document.querySelectorAll('#genderChoice .opt').forEach(o=>o.onclick=()=>{document.querySelectorAll('#genderChoice .opt').forEach(x=>x.classList.remove('on'));o.classList.add('on');S.gender=o.dataset.v;});
+function err(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3400);}
+function toggleNoTime(){const el=document.getElementById('noTime');el.classList.toggle('on');S.noTime=el.classList.contains('on');const t=document.getElementById('fTime');t.disabled=S.noTime;t.style.opacity=S.noTime?.4:1;}
+function submitForm(){
+  S.name=document.getElementById('fName').value.trim();S.date=document.getElementById('fDate').value;S.time=document.getElementById('fTime').value;
+  S.place=document.getElementById('fPlace').value.trim();S.refName=document.getElementById('fRefName').value.trim();
+  if(!S.name)  return err('errForm','A name to begin with — even one you like better than your own.');
+  if(!S.gender)return err('errForm','And how I should speak of you.');
+  if(!S.date)  return err('errForm','The day you arrived, first.');
+  if(!S.place) return err('errForm','And the city that held that sky.');
+  if(!S.you&&!S.ref) return err('errForm','One photograph to begin — yours, hers, or both.');
+  runThreshold();
+}
+const fileInput=document.getElementById('fileInput');
+function pickFile(which){fileTarget=which;fileInput.value='';fileInput.click();}
+fileInput.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{S[fileTarget]=r.result;const d=document.getElementById({you:'dYou',ref:'dRef',vibe:'dVibe'}[fileTarget]);d.classList.add('filled');
+    let img=d.querySelector('img');if(!img){img=document.createElement('img');d.insertBefore(img,d.firstChild);}img.src=r.result;};
+  r.readAsDataURL(f);};
+let acTimer=null;
+function searchPlace(q){const list=document.getElementById('acList');clearTimeout(acTimer);
+  if(q.trim().length<3){list.classList.remove('show');return;}
+  acTimer=setTimeout(async()=>{try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=en&q=${encodeURIComponent(q)}`,{headers:{'Accept':'application/json'}});
+    const d=await r.json();list.innerHTML=d.map(p=>`<div data-lat="${p.lat}" data-lon="${p.lon}" data-name="${p.display_name.replace(/"/g,'&quot;')}">${p.display_name}</div>`).join('');
+    list.classList.toggle('show',d.length>0);
+    list.querySelectorAll('div').forEach(row=>row.onclick=()=>{document.getElementById('fPlace').value=row.dataset.name.split(',').slice(0,2).join(', ');S.place=row.dataset.name;S.lat=+row.dataset.lat;S.lon=+row.dataset.lon;list.classList.remove('show');});
+  }catch(e){list.classList.remove('show');}},350);}
+document.addEventListener('click',e=>{if(!e.target.closest('#fPlace')&&!e.target.closest('#acList'))document.getElementById('acList').classList.remove('show');});
+function runThreshold(){go(2);
+  const msgs=['reading the geometry of your face…','listening for the language you share…','choosing colours from your own chart…','this was always yours.'];
+  let i=0;const m=document.getElementById('threshMsg');const tick=()=>{if(i<msgs.length){m.style.opacity=0;setTimeout(()=>{m.textContent=msgs[i++];m.style.opacity=1;},400);}};
+  tick();const iv=setInterval(()=>{if(i>=msgs.length){clearInterval(iv);return;}tick();},2100);window.ASTRO_PAYLOAD=S;}
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+# ALTIER · Page 1 — Python dependencies
+#
+# Python 3.11. NOT 3.12 or 3.13: mediapipe has no wheel for those, and body_engine needs it.
+# The face-parsing venv in this repo is 3.13 and can run the colour, palette, rules and
+# recommender engines but NOT the body engine — that is why page 1 wants its own 3.11 venv.
+#
+#   python3.11 -m venv page1/venv
+#   source page1/venv/bin/activate
+#   pip install -r page1/requirements.txt
+#
+# The BiSeNet face-parsing weights are a separate download, not a pip package:
+#   cd face-parsing && bash download.sh          (or curl the resnet34.onnx release asset)
+
+# --- colour engine (wraps face-parsing/) ---
+onnxruntime>=1.20          # BiSeNet segmentation on CPU; no GPU needed on an M1
+opencv-python>=4.10        # image decode, morphology, the grayscale cross-check
+numpy>=1.26
+pillow>=10.0
+
+# --- body engine (reuses cv-service/body_geometry.py) ---
+mediapipe>=0.10.14         # Pose landmarks + the selfie segmenter. Python 3.11 only.
+
+# --- taste engine ---
+torch>=2.2                 # runs on Apple MPS
+transformers>=4.40         # google/siglip2-base-patch16-224, loaded from the local HF cache
+
+# --- api ---
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+python-dotenv>=1.0         # loads GEMINI_API_KEY and the Supabase keys from .env
+requests>=2.31             # the Gemini REST call, via cv-service/gemini_util.py's retry wrapper
+supabase>=2.4              # auth + postgrest + pgvector storage
+
+# --- development ---
+pyflakes>=3.0

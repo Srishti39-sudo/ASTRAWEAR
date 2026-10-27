@@ -1,99 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personal Stylist | AstraWear</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="stylist.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal Stylist · AstraWear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9E1D1; --paper2:#F5F0E6; --tile:#EFE8DA;
+  --ink:#22201a; --stone:#8b8273; --line:#D6CBB6; --line2:#E4DBC9;
+  --sea:#3C6A62; --amber:#B67B18; --cherry:#8B1E2D;
+  --display:'Marcellus', serif; --serif:'Cormorant Garamond', Georgia, serif;
+  --body:'EB Garamond', Georgia, serif; --sans:'Archivo', system-ui, sans-serif;
+  --ease:cubic-bezier(.16,.7,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+  background-image:radial-gradient(60% 45% at 22% 26%, rgba(216,184,119,.10), transparent 60%),
+                   radial-gradient(50% 40% at 82% 78%, rgba(60,106,98,.07), transparent 60%);}
+
+/* ---- ASTRA site header ---- */
+.site{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 46px;border-bottom:1px solid var(--line);background:rgba(233,225,209,.9);backdrop-filter:blur(6px)}
+.site nav{display:flex;gap:26px;font-family:var(--serif);font-weight:500;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.site nav.right{justify-content:flex-end}
+.site nav a{color:var(--ink);text-decoration:none;cursor:pointer;transition:color .3s}
+.site nav a:hover{color:var(--sea)}
+.site nav a.on{color:var(--sea)}
+.brand{text-align:center}
+.brand .astra{font-family:var(--display);font-size:22px;letter-spacing:.4em;color:var(--ink);padding-left:.4em}
+.brand .tag{font-family:var(--serif);font-style:italic;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-top:1px}
+
+/* ---- layout ---- */
+.wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 6vw 60px;text-align:center}
+.eyebrow{font-family:var(--sans);font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--stone);margin-bottom:12px}
+.h{font-family:var(--serif);font-weight:400;font-size:clamp(33px,4.6vw,52px);line-height:1.06;color:var(--ink);margin-bottom:12px}
+.h em{font-style:italic;color:var(--sea)}
+.lead{font-family:var(--body);font-size:16.5px;font-style:italic;line-height:1.6;color:#5a5648;max-width:38ch;margin:0 auto 38px}
+
+/* ---- two option cards ---- */
+.cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+.card{width:300px;background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:34px 26px;cursor:pointer;text-align:left;
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.card:hover{transform:translateY(-3px);box-shadow:0 22px 46px rgba(34,32,26,.13);border-color:var(--sea)}
+.card .ic{font-family:var(--serif);font-size:26px;color:var(--sea);margin-bottom:12px}
+.card h3{font-family:var(--serif);font-weight:400;font-size:28px;color:var(--ink);margin:0 0 8px}
+.card p{font-family:var(--body);font-size:15px;line-height:1.5;color:#5a5648;margin:0}
+.card .go{font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--sea);margin-top:16px}
+
+/* ---- panels ---- */
+.panelx{display:none;width:min(540px,92vw)}
+.panelx.on{display:block}
+.back{font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);cursor:pointer;margin-bottom:22px;display:inline-block}
+.back:hover{color:var(--sea)}
+.field{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:10px 2px;
+  font-family:var(--serif);font-size:22px;color:var(--ink);outline:none;text-align:center;transition:border-color .25s var(--ease)}
+.field:focus{border-color:var(--sea)}
+.field::placeholder{color:var(--stone);font-style:italic;font-family:var(--body);font-size:18px}
+.btn{background:var(--sea);color:#F7F1E4;border:none;border-radius:999px;padding:13px 34px;margin-top:20px;
+  font-family:var(--serif);font-size:16px;letter-spacing:.04em;cursor:pointer;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn:not([disabled]):hover{transform:translateY(-1px)}
+.occ-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:4px 0 14px}
+.occ-chip{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);background:var(--paper2);
+  border:1px solid var(--line);border-radius:40px;padding:10px 20px;cursor:pointer;transition:all .2s var(--ease)}
+.occ-chip.sel{background:var(--sea);color:#F7F1E4;border-color:var(--sea)}
+.drop-mini{display:block;border:1.5px dashed var(--stone);border-radius:12px;padding:18px;cursor:pointer;color:var(--stone);
+  font-family:var(--body);font-style:italic;font-size:14.5px;margin-top:4px;background:var(--tile)}
+.drop-mini:hover{border-color:var(--sea)}
+.closet-count{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sea);margin-top:10px}
+
+/* ---- result card ---- */
+.rescard{margin-top:26px;background:var(--paper2);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:left}
+.ring{width:120px;height:120px;border-radius:50%;margin:2px auto 14px;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--pct)*1%), #e4dbc9 0)}
+.ring.ok{--c:var(--sea)} .ring.caution{--c:var(--amber)} .ring.skip{--c:var(--cherry)}
+.ring-in{width:94px;height:94px;border-radius:50%;background:var(--paper2);display:grid;place-items:center;text-align:center}
+.ring-in b{font-family:var(--display);font-size:30px;color:var(--ink)} .ring-in span{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone)}
+.verdict-t{text-align:center;font-family:var(--display);font-size:16px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.rline{padding:8px 0;border-top:1px solid var(--line2);font-family:var(--body);font-size:15px;line-height:1.45;color:var(--ink)}
+.rline:first-of-type{border-top:0}
+.muted{color:var(--stone);font-style:italic;font-family:var(--body);font-size:14px}
+.items-t{text-align:center;font-family:var(--serif);font-size:23px;color:var(--ink);margin-bottom:2px}
+.journey{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;margin:52px auto 0}
+.j-step{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;min-width:112px}
+.j-node{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper2);display:grid;place-items:center;font-family:var(--serif);font-size:20px;color:var(--stone);transition:all .2s var(--ease)}
+.j-step:hover .j-node{border-color:var(--sea);color:var(--sea)}
+.j-step.active .j-node{background:var(--sea);color:#F7F1E4;border-color:var(--sea)}
+.j-label{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone)}
+.j-step:hover .j-label,.j-step.active .j-label{color:var(--sea)}
+.j-line{width:46px;height:1px;background:var(--line);margin:0 2px 22px}
+</style>
 </head>
-<body class="stylist-bg">
-  <script type="module">
-    import { auth, onAuthStateChanged } from "./firebase-config.js";
-    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "auth.html"; });
-  </script>
+<body>
+  <header class="site">
+    <nav class="left"><a href="create-avatar.html">Avatar</a><a href="astrostylist-input.html">Astro</a><a class="on">Stylist</a></nav>
+    <div class="brand"><div class="astra">ASTRA</div><div class="tag">It's your right to be divinely beautiful</div></div>
+    <nav class="right"><a href="index.html">Home</a><a href="auth.html">Logout</a></nav>
+  </header>
 
-  <div class="stylist-input-wrapper">
-    <div class="stylist-card">
-
-      <div class="stylist-top-nav">
-        <a href="index.html" class="back-link">← Back Home</a>
+  <div class="wrap">
+    <!-- ===== LANDING ===== -->
+    <div class="panelx on" id="home">
+      <p class="eyebrow">Personal Stylist</p>
+      <h1 class="h">What do you <em>need</em>?</h1>
+      <p class="lead">Two ways to style you — decide on something you're eyeing, or get dressed for today.</p>
+      <div class="cards">
+        <div class="card" onclick="show('worth')">
+          <div class="ic">✧</div>
+          <h3>Worth It?</h3>
+          <p>Found something online? Paste the link and I'll tell you honestly — does it suit your body, your colours, and is it actually good quality.</p>
+          <div class="go">Paste a link →</div>
+        </div>
+        <div class="card" onclick="show('dress')">
+          <div class="ic">❋</div>
+          <h3>Dress Me</h3>
+          <p>Tell me the occasion and what you own — I'll style a look that flatters you, down to the neckline, hair and one statement piece.</p>
+          <div class="go">Style me →</div>
+        </div>
       </div>
+      <div class="journey">
+        <a class="j-step" href="create-avatar.html"><span class="j-node">✦</span><span class="j-label">Create Avatar</span></a>
+        <span class="j-line"></span>
+        <a class="j-step" href="astrostylist-input.html"><span class="j-node">✧</span><span class="j-label">AstroStylist</span></a>
+        <span class="j-line"></span>
+        <a class="j-step active" href="stylist-input.html"><span class="j-node">❋</span><span class="j-label">Personal Stylist</span></a>
+      </div>
+    </div>
 
-      <h1 class="stylist-title">Personal Stylist</h1>
-      <p class="stylist-subtitle">
-        Tell us the occasion, your wardrobe, and your vibe — we'll pick the perfect outfit from your closet.
-      </p>
+    <!-- ===== WORTH IT? ===== -->
+    <div class="panelx" id="worth">
+      <span class="back" onclick="show('home')">← back</span>
+      <h1 class="h">Worth It?</h1>
+      <p class="lead">Paste the product link — I'll check it against your body, your palette, and real reviews.</p>
+      <input class="field" id="urlIn" placeholder="https://…" autocomplete="off">
+      <br><button class="btn" id="worthBtn" onclick="checkUrl()">Give me the verdict</button>
+      <div id="worthOut"></div>
+    </div>
 
-      <form id="stylistForm" class="stylist-form">
-
-        <!-- GENDER -->
-        <div class="form-group">
-          <label>Gender</label>
-          <select id="gender" required>
-            <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <!-- OCCASION -->
-        <div class="form-group">
-          <label>What's the occasion?</label>
-          <input
-            type="text"
-            id="occasion"
-            placeholder="e.g. Monday board meeting with investors, first day at new startup..."
-            required
-          />
-          <span class="input-hint">Be specific — the more detail, the smarter the AI gets</span>
-        </div>
-
-        <!-- WARDROBE -->
-        <div class="form-group">
-          <label>What clothes do you own?</label>
-          <textarea
-            id="wardrobe"
-            rows="5"
-            placeholder="e.g. black blazer, white button-down shirt, grey trousers, navy turtleneck, beige chinos, brown loafers, white sneakers, silver watch..."
-            required
-          ></textarea>
-          <span class="input-hint">List everything — tops, bottoms, shoes, accessories</span>
-        </div>
-
-        <!-- STYLE VIBE -->
-        <div class="form-group">
-          <label>What vibe are you going for?</label>
-          <input
-            type="text"
-            id="styleVibe"
-            placeholder="e.g. old money, minimalist, dark academia, streetwear-meets-corporate..."
-            required
-          />
-        </div>
-
-        <!-- EXTRA CONTEXT (optional) -->
-        <div class="form-group">
-          <label>Anything else? <span class="optional">(optional)</span></label>
-          <input
-            type="text"
-            id="extraContext"
-            placeholder="e.g. it's hot outside, my company is strict about dress code, I want to stand out..."
-          />
-        </div>
-
-        <button type="submit" class="stylist-btn">
-          BUILD MY OUTFIT
-        </button>
-
-        <p id="formMessage" class="form-message"></p>
-
-      </form>
-
+    <!-- ===== DRESS ME ===== -->
+    <div class="panelx" id="dress">
+      <span class="back" onclick="show('home')">← back</span>
+      <h1 class="h">Dress Me</h1>
+      <p class="lead">Where are you headed?</p>
+      <div class="occ-row" id="occRow">
+        <span class="occ-chip" data-occ="casual">Casual</span>
+        <span class="occ-chip" data-occ="work">Work</span>
+        <span class="occ-chip" data-occ="going-out">Going out</span>
+        <span class="occ-chip" data-occ="festive">Festive</span>
+      </div>
+      <label class="drop-mini" for="clothIn">+ Add clothes you own — snap or upload, I'll tag them</label>
+      <input type="file" id="clothIn" accept="image/*" multiple hidden>
+      <div class="closet-count" id="closetCount"></div>
+      <br><button class="btn" id="dressBtn" onclick="styleMe()">Style me</button>
+      <div id="dressOut"></div>
     </div>
   </div>
 
-  <script src="stylist-input.js"></script>
+  <script>
+    const PS = `http://${location.hostname||'localhost'}:8090`;
+    function show(id){ document.querySelectorAll('.panelx').forEach(p=>p.classList.remove('on')); document.getElementById(id).classList.add('on'); window.scrollTo(0,0); }
+
+    async function checkUrl(){
+      const url = document.getElementById('urlIn').value.trim(); if(!url) return;
+      const btn = document.getElementById('worthBtn'), out = document.getElementById('worthOut');
+      btn.disabled = true; btn.textContent = 'Checking…'; out.innerHTML = '';
+      try{
+        const r = await fetch(PS+'/verdict-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+        const d = await r.json();
+        out.innerHTML = d.error ? `<p class="muted" style="margin-top:20px">${d.error}</p>` : verdictCard(d);
+      }catch(_){ out.innerHTML = `<p class="muted" style="margin-top:20px">Can't reach the stylist service (port 8090).</p>`; }
+      btn.disabled = false; btn.textContent = 'Give me the verdict';
+    }
+    function cls(v){ v=(v||'').toUpperCase(); return v.includes('SKIP')?'skip':v.includes('CAUTION')?'caution':'ok'; }
+    function verdictCard(d){
+      const s = d.summary||{}, k = cls(d.verdict);
+      const lines = ['neckline','structure','rise','colour','print','fabric','review_note'].filter(x=>s[x]).map(x=>`<div class="rline">${s[x]}</div>`).join('');
+      const flags = [...(d.fabric_flags||[]),...(d.trust_flags||[]),...(d.reputation_flags||[])].map(f=>`<div class="rline">⚑ ${f}</div>`).join('');
+      return `<div class="rescard">
+        <div class="ring ${k}" style="--pct:${d.match||0}"><div class="ring-in"><div><b>${d.match||'—'}</b><span>match</span></div></div></div>
+        <div class="verdict-t">${d.verdict||''}</div>${lines}${flags}</div>`;
+    }
+
+    let OCC = null;
+    document.getElementById('occRow').addEventListener('click', e=>{ const c=e.target.closest('.occ-chip'); if(!c)return;
+      document.querySelectorAll('.occ-chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); OCC=c.dataset.occ; });
+    let CLOSET = 0;
+    document.getElementById('clothIn').addEventListener('change', async e=>{
+      const files=[...e.target.files], cc=document.getElementById('closetCount');
+      for(const f of files){ cc.textContent='Tagging…';
+        const b64=await new Promise(res=>{const rd=new FileReader();rd.onload=()=>res(rd.result);rd.readAsDataURL(f)});
+        try{ const r=await fetch(PS+'/tag-garment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64})});
+             const d=await r.json(); if(d.count) CLOSET=d.count; }catch(_){}
+      }
+      cc.textContent = CLOSET ? `${CLOSET} pieces in your closet` : 'Add a couple of pieces to style you.';
+    });
+    async function styleMe(){
+      const btn=document.getElementById('dressBtn'), out=document.getElementById('dressOut');
+      btn.disabled=true; btn.textContent='Styling…'; out.innerHTML='';
+      try{
+        const q = OCC ? ('?occasion='+encodeURIComponent(OCC)) : '';
+        const r=await fetch(PS+'/todays-look'+q); const d=await r.json();
+        out.innerHTML = d.look ? lookCard(d.look,d) : `<p class="muted" style="margin-top:20px">${d.note||'Add a few pieces first.'}</p>`;
+      }catch(_){ out.innerHTML=`<p class="muted" style="margin-top:20px">Can't reach the stylist service (port 8090).</p>`; }
+      btn.disabled=false; btn.textContent='Style me';
+    }
+    function lookCard(lk,d){
+      const items = lk.items.map(i=>`${i.color||''} ${i.subtype||i.category||''}`.trim()).join(' + ');
+      const c = lk.card||{};
+      const tips=(c.styling_tips||[]).map(t=>`<div class="rline">${t}</div>`).join('');
+      const mk=(c.makeup_tips||[]).map(t=>`<div class="rline">💄 ${t}</div>`).join('');
+      return `<div class="rescard">
+        <div class="items-t">${items}</div>
+        <div style="text-align:center" class="muted">${lk.score}% you${d.occasion?' · '+d.occasion:''}</div>
+        <div style="margin-top:12px">${tips}
+          ${c.statement?`<div class="rline">✧ Statement — ${c.statement}</div>`:''}
+          ${c.hairstyle?`<div class="rline">✂ Hair — ${c.hairstyle}</div>`:''}${mk}</div></div>`;
+    }
+  </script>
 </body>
 </html>

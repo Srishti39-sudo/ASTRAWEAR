@@ -38,3 +38,45 @@ cv-service/you.png
 cv-service/her.png
 cv-service/vibe.png
 UHV_Summary_Sheet.pdf
+_someday-ideas.md
+cv-service/_trace_data.json
+cv-service/_styling_data.json
+cv-service/_trace_check.png
+cv-service/_mesh_all.png
+cv-service/_styling_check.png
+cv-service/blaze.task
+cv-service/_face1_data.json
+cv-service/_face1_eyecheck.png
+frontend/face_one.html
+frontend/you.png
+frontend/her.png
+cv-service/_face1_discover.png
+cv-service/_face1_check2.png
+cv-service/_face1_check3.png
+cv-service/_check_trace.png
+cv-service/_face1_scan.png
+cv-service/_face1_scan2.png
+cv-service/_face1_APPROVED_ui.html
+cv-service/_liner_zoom.png
+
+# Downloaded model files (each machine fetches its own) and index caches
+cv-service/pose_landmarker.task
+cv-service/selfie_multiclass_256x256.tflite
+*.tflite
+ALTIER/page1/data/looks_vecdb/
+ALTIER/page1/data/knowledge/
+
+# Her photo and scratch check images never go in the repo
+personal-stylist/data/
+cv-service/_*.png
+ALTIER/face-parsing/rece*
+ALTIER/face-parsing/*.jpeg
+ALTIER/face-parsing/*.jpg
+ALTIER/face-parsing/*_overlay.png
+ALTIER/face-parsing/*_skin.png
+ALTIER/face-parsing/*_hair.png
+ALTIER/face-parsing/*_grayscale.png
+
+# Her stored profile (body ratios, palette, wardrobe) is personal data; each install builds its own via /analyze
+personal-stylist/profile.json
+ALTIER/face-parsing/.git-upstream-empty/

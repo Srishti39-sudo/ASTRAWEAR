@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AstroStylist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Archivo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F4EEE3; --cream-2:#EFE7D7; --ink:#2C2822; --ink-soft:#5A5346;
+  --stone:#9A8F7B; --brass:#9B7A44; --brass-2:#B18E57; --gold:#C9A24F; --gold-hi:#E7C877; --line:#E4DBC9;
+  --serif:'Cormorant Garamond',Georgia,serif; --display:'Marcellus',Georgia,serif; --sans:'Archivo',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(130% 100% at 50% -10%,#F8F3EA 0%,var(--cream) 55%,#EFE7D8 100%);
+  color:var(--ink);font-family:var(--serif);min-height:100vh;-webkit-font-smoothing:antialiased;padding:40px 32px 48px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;mix-blend-mode:multiply;z-index:1;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
+
+.head{text-align:center;margin-bottom:34px;position:relative;z-index:2}
+.spark{color:var(--brass);font-size:11px}
+.wordmark{font-family:var(--display);font-size:16px;letter-spacing:9px;color:var(--ink);margin:7px 0 0;padding-left:9px}
+.wordmark-rule{width:38px;height:1px;background:var(--brass);opacity:.5;margin:11px auto 0}
+
+/* ---- upload gate ---- */
+#gate{max-width:560px;margin:2vh auto 0;position:relative;z-index:2;text-align:center}
+#gate .lead{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--ink-soft);margin:0 0 30px}
+.drops{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.drop{width:120px;height:150px;border:1px dashed var(--brass-2);border-radius:4px;cursor:pointer;position:relative;overflow:hidden;background:var(--cream-2);display:flex;align-items:center;justify-content:center;transition:all .3s;opacity:.92}
+.drop:hover{border-color:var(--brass);opacity:1}
+.drop .plus{font-family:var(--sans);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--stone);text-align:center;line-height:1.9}
+.drop .plus b{display:block;font-size:16px;color:var(--brass-2);margin-bottom:3px;font-weight:400}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop .tag{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(30,24,16,.55));color:var(--cream);font-family:var(--sans);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 6px 6px}
+.drop.filled .plus{display:none}.drop.filled{border-style:solid;opacity:1}
+#gate .note{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--stone);margin:16px 0 26px}
+.reveal{background:var(--ink);color:var(--cream);border:0;border-radius:2px;padding:14px 32px;font-family:var(--sans);font-size:11.5px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:background .3s}
+.reveal:hover{background:var(--brass)}
+#gate .err{font-family:var(--serif);font-style:italic;color:#AE5A38;font-size:15px;min-height:20px;margin-top:16px}
+#gate .load{font-family:var(--serif);font-style:italic;color:var(--stone);font-size:17px;margin-top:8px;display:none}
+#gate.busy .load{display:block}#gate.busy .drops,#gate.busy .reveal,#gate.busy .note{opacity:.4;pointer-events:none}
+
+/* ---- result (hidden until analysis) ---- */
+.result-wrap{display:none}
+body.ready .result-wrap{display:block}
+body.ready #gate{display:none}
+.shell{max-width:1000px;margin:0 auto;position:relative;z-index:2}
+.main{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative}
+.pcol{display:flex;flex-direction:column;gap:9px}
+.plabel{font-family:var(--sans);font-size:9px;letter-spacing:3.5px;text-transform:uppercase;color:var(--stone);text-align:center;font-weight:500}
+.frame{position:relative;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:#e7ddcb;box-shadow:0 16px 40px -22px rgba(70,52,24,.5)}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
+.frame canvas,.frame>svg{position:absolute;pointer-events:none}
+#fx{opacity:0;transition:opacity .6s ease;z-index:1}#fx.on{opacity:1}
+.frame .scrim{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;pointer-events:none;z-index:2}
+.frame .scan{z-index:3}
+.callout{position:absolute;z-index:5;left:50%;bottom:16px;transform:translateX(-50%) translateY(4px);opacity:0;
+  transition:all .5s ease .25s;pointer-events:none;text-align:center;line-height:1.3;
+  background:#FBF6EC;border:1px solid var(--gold);border-radius:18px;padding:6px 14px;font-family:var(--sans);
+  font-size:11.5px;letter-spacing:.3px;color:var(--ink);max-width:82%;box-shadow:0 6px 18px -6px rgba(120,90,30,.4)}
+.callout.in{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.share-h{font-family:var(--sans);font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:9px;margin:0 0 14px}
+.share-h .spark{font-size:10px}
+.group-l{font-family:var(--sans);font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--stone);margin:18px 0 2px}
+.rows{border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:14px;padding:13px 3px;border-bottom:1px solid var(--line);cursor:pointer;transition:padding-left .3s}
+.row:hover{padding-left:7px}
+.row .ic{width:32px;height:32px;border-radius:50%;background:var(--cream-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:all .3s}
+.row.sel .ic{border-color:var(--brass-2);background:#F3E9D6}
+.row .nm{flex:1;font-family:var(--display);font-size:15px;color:var(--ink);letter-spacing:.2px}
+.row.sel .nm{color:var(--brass)}
+.sw{width:34px;height:19px;border-radius:20px;background:#DED3BE;position:relative;flex:0 0 auto;transition:background .3s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--cream);box-shadow:0 1px 2px rgba(60,40,15,.3);transition:transform .3s}
+.sw.on{background:var(--brass)}.sw.on::after{transform:translateX(15px)}
+.row.energy .nm{font-style:italic}
+.presence{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--stone);padding:14px 3px 2px;line-height:1.4}
+.presence span{font-family:var(--sans);font-style:normal;font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--brass);display:block;margin-bottom:3px}
+
+.caption{max-width:1000px;margin:24px auto 0;position:relative;z-index:2;text-align:center;min-height:22px;opacity:0;transition:opacity .5s ease}
+.caption.in{opacity:1}
+.caption .sp{color:var(--brass);font-size:11px;margin-right:8px}
+.caption span.t{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--ink-soft)}
+.hint{text-align:center;font-family:var(--sans);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--stone);margin-top:8px;position:relative;z-index:2;opacity:0;transition:opacity .5s ease}
+.hint.in{opacity:.7}
+.controls{max-width:1000px;margin:24px auto 0;position:relative;z-index:2;display:flex;justify-content:space-between;font-family:var(--sans);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--stone)}
+.controls button{background:none;border:0;color:var(--stone);cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:color .3s}
+.controls button:hover{color:var(--ink)}
+
+@media(max-width:840px){.main{grid-template-columns:1fr;gap:30px}.shell{max-width:440px}body{padding:30px 20px 44px}}
+/* §24 colour drape — palette under the You photo */
+.palette{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:9px;opacity:0;transition:opacity .5s;pointer-events:none}
+.palette.in{opacity:1;pointer-events:auto}
+.palette .padvice{font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--stone);text-align:center;line-height:1.5;max-width:230px}
+.swatches{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:1.5px solid rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.12);transition:transform .2s,box-shadow .2s;position:relative}
+.swatch:hover{transform:scale(1.12)}
+.swatch.on{transform:scale(1.18);box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
+.swatch-name{font-family:var(--sans);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--stone);min-height:12px;text-align:center;transition:opacity .3s}
+</style>
+</head>
+<body>
+  <div class="head"><div class="spark">✦</div><div class="wordmark">ASTROSTYLIST</div><div class="wordmark-rule"></div></div>
+
+  <!-- UPLOAD GATE -->
+  <div id="gate">
+    <p class="lead">Upload your photo and the one you're drawn to.</p>
+    <div class="drops">
+      <div class="drop" id="dYou" onclick="pick('you')"><span class="plus"><b>＋</b>you</span><div class="tag">you</div></div>
+      <div class="drop" id="dRef" onclick="pick('ref')"><span class="plus"><b>＋</b>reference</span><div class="tag">reference</div></div>
+      <div class="drop" id="dVibe" onclick="pick('vibe')"><span class="plus"><b>＋</b>vibe</span><div class="tag">optional</div></div>
+    </div>
+    <p class="note">A clear, front-facing photo works best.</p>
+    <button class="reveal" onclick="analyze()">Reveal what you share</button>
+    <p class="load" id="load">reading the geometry of your face…</p>
+    <p class="err" id="gateErr"></p>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-wrap">
+    <div class="shell">
+      <div class="main">
+        <div class="photos">
+          <div class="pcol"><div class="plabel" id="youLabel">You</div>
+            <div class="frame" id="youFrame" ondblclick="resetAll()">
+              <img id="youImg" alt="you"><canvas id="fx"></canvas>
+              <div class="scrim" id="youScrim"></div><svg class="scan" id="youScan" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+              <div class="callout" id="youPill"></div>
+            </div>
+            <div class="palette" id="palette">
+              <div class="padvice" id="padvice"></div>
+              <div class="swatches" id="swatches"></div>
+              <div class="swatch-name" id="swatchName"></div>
+            </div></div>
+          <div class="pcol"><div class="plabel">Reference</div>
+            <div class="frame" id="refFrame" ondblclick="resetAll()">
+              <img id="refImg" alt="reference">
+              <div class="scrim" id="refScrim"></div><svg class="scan" id="refScan" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+              <div class="callout" id="refPill"></div>
+            </div></div>
+        </div>
+        <div class="shareside">
+          <div class="share-h"><span class="spark">✦</span> What you share</div>
+          <div class="rows" id="rows"></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" id="caption"><span class="sp">✦</span><span class="t" id="captionT"></span></div>
+    <p class="hint" id="hint"></p>
+    <div class="controls"><button id="glowBtn" onclick="toggleGlowup()">✦ Show my glow-up</button><button onclick="resetAll()">↩ Reset</button><button onclick="location.reload()">↺ Start over</button></div>
+  </div>
+
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<script>
+const CV = `http://${location.hostname||'localhost'}:8000/analyze`;
+const GLOW = `http://${location.hostname||'localhost'}:8000/glowup`;
+const CLOTHES = `http://${location.hostname||'localhost'}:8000/clothes`;
+// ---- §24 Colour drape: recolour the TOP she's wearing to a palette swatch (luminance-preserving) ----
+let drapeMaskImg=null, drapeFetching=false, drapeColor=null;
+function renderPalette(ca){
+  const wrap=document.getElementById('palette'), adv=document.getElementById('padvice'),
+        sw=document.getElementById('swatches'), nm=document.getElementById('swatchName');
+  const drape=((ca&&ca.palette&&ca.palette.drape)||[]);
+  if(!drape.length){wrap.classList.remove('in');return;}
+  adv.textContent=(ca.note||'')+' Tap a colour to see it on you.';
+  sw.innerHTML=''; nm.textContent='';
+  drape.forEach(c=>{const b=document.createElement('div');b.className='swatch';b.style.background=c.hex;b.title=c.name;
+    b.onclick=()=>clickSwatch(c,b);sw.appendChild(b);});
+  wrap.classList.add('in');
+}
+async function ensureMask(){
+  if(drapeMaskImg||drapeFetching)return drapeMaskImg;
+  drapeFetching=true;
+  try{
+    const r=await fetch(CLOTHES,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:IMG.you})});
+    const d=await r.json();
+    if(d.found&&d.mask){await new Promise((res,rej)=>{const im=new Image();im.onload=()=>{drapeMaskImg=im;res();};im.onerror=rej;im.src=d.mask;});}
+  }catch(e){/* no mask -> handled by caller */}
+  finally{drapeFetching=false;}
+  return drapeMaskImg;
+}
+function clickSwatch(c,el){
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('on'));
+  const nm=document.getElementById('swatchName');
+  if(drapeColor===c.hex){drapeColor=null;nm.textContent='';clearDrape();return;}
+  drapeColor=c.hex; el.classList.add('on'); nm.textContent=c.name;
+  applyDrape(c.hex);
+}
+async function applyDrape(hex){
+  if(glowOn)backToOriginal(); active.clear();
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
+  const nm=document.getElementById('swatchName'), prev=nm.textContent;
+  nm.textContent='finding your top…';
+  await ensureMask();
+  nm.textContent=prev;
+  if(!drapeMaskImg){cap('Couldn’t detect the top in this photo — try a clearer head-and-shoulders shot.');return;}
+  drawDrape(hex);
+}
+function drawDrape(hex){
+  ctx.clearRect(0,0,UW,UH);
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.filter='none';
+  ctx.drawImage(youImg,0,0,UW,UH);                         // photo onto the canvas so blends use its luminance
+  const t=document.createElement('canvas');t.width=fx.width;t.height=fx.height;
+  const tc=t.getContext('2d');tc.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  tc.fillStyle=hex;tc.fillRect(0,0,UW,UH);
+  tc.globalCompositeOperation='destination-in';tc.filter='blur(0.6px)';tc.drawImage(drapeMaskImg,0,0,UW,UH); // keep tint only on clothes
+  ctx.globalCompositeOperation='color';ctx.globalAlpha=0.85;ctx.drawImage(t,0,0,UW,UH);   // hue+chroma from swatch, keep fabric luminance
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=0.16;ctx.drawImage(t,0,0,UW,UH); // depth in the folds
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+  fx.classList.add('on');
+}
+function clearDrape(){drapeColor=null;document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('on'));document.getElementById('swatchName').textContent='';redraw();}
+// ---- Glow-up: send HER photo + the edit prompt to the model, show her photo WITH the styling (reversible) ----
+let glowSrc=null, glowOn=false, glowBusy=false;
+function backToOriginal(){ if(!glowOn)return; document.getElementById('youImg').src=IMG.you;
+  document.getElementById('youLabel').textContent='You'; glowOn=false;
+  document.getElementById('glowBtn').textContent='✦ Show my glow-up';
+  const yi=document.getElementById('youImg'); yi.complete?layout():(yi.onload=layout); }
+function applyGlow(){ resetAll();                               // clear CV overlays — the styling is baked into the image now
+  const yi=document.getElementById('youImg'); yi.src=glowSrc; glowOn=true;
+  document.getElementById('youLabel').textContent='You · glow-up';
+  document.getElementById('glowBtn').textContent='✦ Back to original';
+  const nar=((DATA.styling.edit_prompt||{}).narration||[]).map(n=>n.said).filter(Boolean);
+  cap(nar.length?('What we did — '+nar.join('   ·   ')):'Your glow-up.','double-click the photo to close');
+  yi.complete?layout():(yi.onload=layout); }
+async function toggleGlowup(){
+  const btn=document.getElementById('glowBtn');
+  if(glowOn){ backToOriginal(); return; }
+  if(glowSrc){ applyGlow(); return; }
+  const ep=DATA&&DATA.styling&&DATA.styling.edit_prompt;
+  if(!ep||!ep.instruction){ cap('The reference isn’t wearing makeup we can honestly add here.'); return; }
+  if(glowBusy)return; glowBusy=true; btn.disabled=true; btn.textContent='✦ Painting your glow-up…';
+  try{
+    const r=await fetch(GLOW,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_image:IMG.you,prompt:ep.instruction,negative_prompt:ep.negative||''})});
+    const d=await r.json();
+    if(!d.success) throw new Error(d.error||'generation failed');
+    glowSrc=d.image; applyGlow();
+  }catch(e){ cap('Glow-up unavailable — '+e.message); btn.textContent='✦ Show my glow-up'; }
+  finally{ glowBusy=false; btn.disabled=false; }
+}
+const IMG={you:null,ref:null,vibe:null};
+let fileTarget=null;
+const fileInput=document.getElementById('fileInput');
+function pick(w){fileTarget=w;fileInput.value='';fileInput.click();}
+fileInput.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{IMG[fileTarget]=r.result;const d=document.getElementById({you:'dYou',ref:'dRef',vibe:'dVibe'}[fileTarget]);
+    d.classList.add('filled');let img=d.querySelector('img');if(!img){img=document.createElement('img');d.insertBefore(img,d.firstChild);}img.src=r.result;};
+  r.readAsDataURL(f);};
+
+async function analyze(){
+  const gate=document.getElementById('gate'),err=document.getElementById('gateErr');err.textContent='';
+  if(!IMG.you||!IMG.ref){err.textContent='Add your photo and a reference to begin.';return;}
+  gate.classList.add('busy');
+  try{
+    const r=await fetch(CV,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({user_image:IMG.you,reference_image:IMG.ref,vibe_image:IMG.vibe})});
+    if(!r.ok) throw new Error('analyzer '+r.status);
+    const d=await r.json();
+    if(!d.styling||!d.styling.anchors) throw new Error('no face detected — try a clearer, front-facing photo');
+    document.getElementById('youImg').src=IMG.you;document.getElementById('refImg').src=IMG.ref;
+    boot(d);
+  }catch(e){
+    gate.classList.remove('busy');
+    err.textContent = String(e.message||e).includes('Failed to fetch')
+      ? 'Can’t reach the analyzer. Make sure the CV service is running on port 8000.'
+      : ('Something went off: '+(e.message||e));
+  }
+}
+
+/* ================= the approved Face One experience ================= */
+let DATA=null,A=null,F=null,RA=null,PHYS=[],ENERGY=[],TIP={};
+const NAMES={eyes:'Eyes',cheeks:'Cheekbones',lips:'Lips',brows:'Brows',concealer:'Under-eye',hair:'Hair'};
+const IC={
+  eyes:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M2 12C5 7 19 7 22 12C19 17 5 17 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  cheeks:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M12 3C7.5 3 5 7 5 11C5 16 8.5 21 12 21C15.5 21 19 16 19 11C19 7 16.5 3 12 3Z"/><path d="M8 13.5C9 15 10 15.4 11 15.2" stroke-width="1"/></svg>',
+  lips:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M3 11C6 8 8 10 12 10C16 10 18 8 21 11C18 15 15 15 12 15C9 15 6 15 3 11Z"/></svg>',
+  energy:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
+  concealer:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M4 10c3 4 13 4 16 0" stroke-width="1"/><path d="M6 13c2 2.5 10 2.5 12 0" opacity=".6"/></svg>',
+  hair:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9B7A44" stroke-width="1.1"><path d="M6 20V10a6 6 0 0 1 12 0v10"/><path d="M6 11c0-5 3-8 6-8s6 3 6 8" opacity=".6"/></svg>',
+};
+const svgNS='http://www.w3.org/2000/svg';
+const fx=document.getElementById('fx'),ctx=fx.getContext('2d');
+const youImg=document.getElementById('youImg'),refImg=document.getElementById('refImg');
+let UW=0,UH=0;
+function coverRect(img){const cw=img.clientWidth,ch=img.clientHeight,iw=img.naturalWidth||3,ih=img.naturalHeight||4;const s=Math.max(cw/iw,ch/ih),w=iw*s,h=ih*s;return{left:(cw-w)/2,top:(ch-h)/2,w,h};}
+function place(el,r){el.style.left=r.left+'px';el.style.top=r.top+'px';el.style.width=r.w+'px';el.style.height=r.h+'px';}
+function layout(){const ur=coverRect(youImg);UW=ur.w;UH=ur.h;place(fx,ur);fx.width=UW*devicePixelRatio;fx.height=UH*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  place(document.getElementById('youScan'),ur);place(document.getElementById('refScan'),coverRect(refImg));redraw();}
+const PX=p=>[p[0]*UW,p[1]*UH];
+
+function mid(r){let x=0,y=0;r.forEach(p=>{x+=p[0];y+=p[1];});return[x/r.length,y/r.length];}
+function eyeOutline(up,lo){return up.slice().reverse().concat(lo);}
+function featPts(anch,f){if(f==='eyes'||f==='concealer')return eyeOutline(anch.r_eye_upper,anch.r_eye_lower).concat(eyeOutline(anch.l_eye_upper,anch.l_eye_lower));if(f==='lips')return anch.lips_outer;if(f==='cheeks')return anch.cheek_centers;if(f==='hair')return anch.face_oval||anch.lips_outer;return anch.lips_outer;}
+function centroidN(pts){let x=0,y=0;pts.forEach(p=>{x+=p[0];y+=p[1];});return[x/pts.length,y/pts.length];}
+function highlightRings(anch,f){
+  if(f==='eyes')return [eyeOutline(anch.r_eye_upper,anch.r_eye_lower),eyeOutline(anch.l_eye_upper,anch.l_eye_lower)].map(r=>[r,1]);
+  if(f==='lips')return [[anch.lips_outer,1]];
+  if(f==='cheeks'){const c=anch.cheek_centers,t=anch.cheek_temples;return c.map((cc,i)=>[[t[i],[(cc[0]+t[i][0])/2,(cc[1]+t[i][1])/2-0.01],cc],0]);}
+  if(f==='concealer')return [[anch.r_eye_lower,0],[anch.l_eye_lower,0]];   // under-eye line
+  if(f==='hair'){const fo=anch.face_oval||[];if(fo.length<6)return [];const cx=fo.reduce((s,p)=>s+p[0],0)/fo.length;
+    const L=fo.filter(p=>p[0]<cx).sort((a,b)=>a[1]-b[1]), R=fo.filter(p=>p[0]>=cx).sort((a,b)=>a[1]-b[1]);
+    return [[L,0],[R,0]];}                                                  // face-framing sides
+  return [];
+}
+function schematic(anch){
+  const rO=anch.r_eye_upper[0],rI=anch.r_eye_upper.at(-1),lO=anch.l_eye_upper[0],lI=anch.l_eye_upper.at(-1);
+  const rB=mid(anch.r_brow),lB=mid(anch.l_brow),mL=anch.lips_outer[0],mR=anch.lips_outer[10]||anch.lips_outer.at(-1);
+  const nose=[(rI[0]+lI[0])/2,(rI[1]+lI[1])/2+0.055],chin=[(mL[0]+mR[0])/2,Math.max(mL[1],mR[1])+0.055],cR=anch.cheek_centers[0],cL=anch.cheek_centers[1];
+  return{P:[rO,rI,lI,lO,rB,lB,mL,mR,nose,cR,cL,chin],E:[[0,1],[2,3],[1,8],[2,8],[8,6],[8,7],[6,7],[6,11],[7,11],[4,0],[4,1],[5,2],[5,3],[1,9],[2,10],[9,6],[10,7],[9,11],[10,11],[4,5]]};
+}
+function bboxOf(P){let x0=1,y0=1,x1=0,y1=0;P.forEach(p=>{x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);});return[x0,y0,x1,y1];}
+function scanInto(svgId,anch,f){
+  const svg=document.getElementById(svgId);svg.innerHTML='';const {P,E}=schematic(anch);
+  E.forEach(([a,b])=>{const l=document.createElementNS(svgNS,'line');l.setAttribute('x1',P[a][0]);l.setAttribute('y1',P[a][1]);l.setAttribute('x2',P[b][0]);l.setAttribute('y2',P[b][1]);
+    l.setAttribute('stroke','#c9a24f');l.setAttribute('stroke-width','.8');l.setAttribute('vector-effect','non-scaling-stroke');l.setAttribute('opacity','0');l.style.transition='opacity .5s ease';svg.appendChild(l);setTimeout(()=>l.setAttribute('opacity','.55'),40+P[a][1]*500);});
+  P.forEach(p=>{const c=document.createElementNS(svgNS,'circle');c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r','.007');c.setAttribute('fill','#e7c877');c.setAttribute('opacity','0');c.style.transition='opacity .5s ease';svg.appendChild(c);setTimeout(()=>c.setAttribute('opacity','.9'),40+p[1]*500);});
+  const [x0,y0,x1,y1]=bboxOf(P),pad=.04,L=.05;
+  [[x0-pad,y0-pad,1,1],[x1+pad,y0-pad,-1,1],[x0-pad,y1+pad,1,-1],[x1+pad,y1+pad,-1,-1]].forEach(([x,y,sx,sy])=>{const p=document.createElementNS(svgNS,'path');p.setAttribute('d',`M ${x+sx*L} ${y} L ${x} ${y} L ${x} ${y+sy*L}`);p.setAttribute('fill','none');p.setAttribute('stroke','#e7c877');p.setAttribute('stroke-width','1.5');p.setAttribute('vector-effect','non-scaling-stroke');p.setAttribute('opacity','0');p.style.transition='opacity .6s ease .15s';svg.appendChild(p);requestAnimationFrame(()=>p.setAttribute('opacity','.9'));});
+  setTimeout(()=>highlightRings(anch,f).forEach(([ring,close],i)=>{const p=document.createElementNS(svgNS,'path');p.setAttribute('d','M '+ring.map(q=>q[0].toFixed(4)+' '+q[1].toFixed(4)).join(' L ')+(close?' Z':''));p.setAttribute('fill','none');p.setAttribute('stroke','#f4dc9a');p.setAttribute('stroke-width','2');p.setAttribute('vector-effect','non-scaling-stroke');p.setAttribute('stroke-linecap','round');p.style.filter='drop-shadow(0 0 3px rgba(244,220,154,.95))';svg.appendChild(p);const Ln=p.getTotalLength();p.style.strokeDasharray=Ln;p.style.strokeDashoffset=Ln;p.style.transition='stroke-dashoffset .8s ease';setTimeout(()=>p.style.strokeDashoffset=0,60+i*150);},380));
+}
+function callout(shape){[document.getElementById('youPill'),document.getElementById('refPill')].forEach(p=>{p.textContent=shape;p.classList.add('in');});}
+function auraOn(word){['youScrim','refScrim'].forEach(id=>{const s=document.getElementById(id);s.style.background='radial-gradient(circle at 50% 42%, rgba(233,200,120,.28), rgba(24,17,8,.22) 75%)';s.style.opacity=1;});callout(word);}
+function scrimDim(on){['youScrim','refScrim'].forEach(id=>{const s=document.getElementById(id);s.style.background='rgba(24,17,8,.22)';s.style.opacity=on?1:0;});}
+function clearScan(){document.getElementById('youScan').innerHTML='';document.getElementById('refScan').innerHTML='';document.getElementById('youPill').classList.remove('in');document.getElementById('refPill').classList.remove('in');}
+
+function dist(a,b){a=PX(a);b=PX(b);return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+function smooth(pts,close){ctx.beginPath();ctx.moveTo(...PX(pts[0]));for(let i=1;i<pts.length-1;i++){const a=PX(pts[i]),b=PX(pts[i+1]);ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}const l=PX(pts[pts.length-1]);ctx.lineTo(l[0],l[1]);if(close)ctx.closePath();}
+/* ---- realistic eyeliner: layered pigment on the user's real lash line (no vector look) ---- */
+function _rgb(h){h=(h||'#5a3d28').replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function rgba(h,a){const[r,g,b]=_rgb(h);return `rgba(${r},${g},${b},${a})`;}
+function strokeSmooth(pts,width,col,alpha,blur){ctx.save();ctx.globalCompositeOperation='multiply';ctx.filter=blur>0?`blur(${blur}px)`:'none';
+  ctx.strokeStyle=rgba(col,alpha);ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();ctx.moveTo(...PX(pts[0]));
+  for(let i=1;i<pts.length-1;i++){const a=PX(pts[i]),b=PX(pts[i+1]);ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}
+  const l=PX(pts[pts.length-1]);ctx.lineTo(l[0],l[1]);ctx.stroke();ctx.restore();}
+function eyeWH(up,lo){const w=dist(up[0],up[up.length-1]);const mu=up[Math.floor(up.length/2)],ml=lo[Math.floor(lo.length/2)];return [w,dist(mu,ml)];}
+function taperedCoreW(pts,coreW,col,alpha,soft){ctx.save();ctx.globalCompositeOperation='multiply';ctx.filter=`blur(${soft?Math.max(.5,coreW*0.35):Math.max(.3,coreW*0.15)}px)`;ctx.lineCap='round';ctx.lineJoin='round';
+  for(let i=0;i<pts.length-1;i++){const t=i/(pts.length-1);/* 0 outer ->1 inner */ const w=Math.max(.7,coreW*(1-0.72*t));
+    ctx.strokeStyle=rgba(col,alpha*(1-0.45*t));ctx.lineWidth=w;const a=PX(pts[i]),b=PX(pts[i+1]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+  ctx.restore();}
+function drawEyes(rec){
+  // RELATIVE ratios from the reference; every dimension scales to the USER's own eye geometry.
+  const P=(F.eyes&&F.eyes.user_translation&&F.eyes.user_translation.params)||{};
+  if(P.skip){return;}   // reference has no eye makeup -> don't invent any
+  const cov=P.coverage!=null?P.coverage:0.66;
+  const thR=P.thickness_ratio!=null?P.thickness_ratio:0.06;   // ÷ eye HEIGHT
+  const wR=P.wing_ratio!=null?P.wing_ratio:0.08;              // ÷ eye WIDTH
+  const wAng=(P.wing_angle!=null?P.wing_angle:8)*Math.PI/180;
+  const op=P.opacity!=null?P.opacity:0.6;
+  const outer=P.outer_emphasis!==false, soft=(P.edge||'soft')!=='sharp';
+  const col=rec.hex||'#5a3d28';
+  [[A.r_eye_upper,A.r_eye_lower],[A.l_eye_upper,A.l_eye_lower]].forEach(([up,lo])=>{
+    const [w,h]=eyeWH(up,lo);                 // USER eye width + height (px)
+    const core=Math.max(0.8, thR*h);          // thickness scales with USER eye HEIGHT
+    const bl=soft?Math.max(1,core*1.3):Math.max(.4,core*0.5);
+    const pts=up.slice(0,Math.max(3,Math.ceil(up.length*cov)));  // outer 'cov' fraction of the real lash line
+    strokeSmooth(pts, core*2.4, col, 0.09*op, bl*1.8);   // L1 diffusion (soft haze)
+    strokeSmooth(pts, core*1.3, col, 0.18*op, bl*0.9);   // L2 soft body
+    taperedCoreW(pts, core, col, 0.6*op, soft);          // L3 fine lash-line core, tapered
+    const o=PX(up[0]),n=PX(up[1]);const ang=Math.atan2(o[1]-n[1],o[0]-n[0])-wAng;  // lift relative to USER outer corner
+    if(wR>0.01){const wl=wR*w, tip=[o[0]+Math.cos(ang)*wl,o[1]+Math.sin(ang)*wl];  // wing length ÷ USER eye WIDTH
+      ctx.save();ctx.globalCompositeOperation='multiply';ctx.filter=`blur(${bl*0.7}px)`;ctx.lineCap='round';
+      ctx.strokeStyle=rgba(col,0.6*op);ctx.lineWidth=Math.max(.7,core*0.8);ctx.beginPath();ctx.moveTo(o[0],o[1]);ctx.lineTo(tip[0],tip[1]);ctx.stroke();ctx.restore();}
+    if(outer){ctx.save();ctx.globalCompositeOperation='multiply';ctx.filter=`blur(${Math.max(1,core*1.6)}px)`;ctx.fillStyle=rgba(col,0.14*op);
+      ctx.beginPath();ctx.ellipse(o[0],o[1],core*2.1,core*1.2,ang,0,7);ctx.fill();ctx.restore();}  // outer-corner emphasis
+    if(P.mascara){ctx.save();ctx.globalCompositeOperation='multiply';ctx.filter=`blur(${Math.max(.4,core*0.5)}px)`;ctx.lineCap='round';ctx.strokeStyle=rgba(col,0.5*op);  // subtle mascara lashes
+      const stp=Math.max(1,Math.floor(pts.length/6));
+      for(let i=0;i<pts.length;i+=stp){const a=PX(pts[i]);const t=i/(pts.length-1);const fl=h*0.14*(1-0.3*t);ctx.lineWidth=Math.max(.5,core*0.4);
+        ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(a[0]+Math.cos(ang)*fl*0.25,a[1]-fl);ctx.stroke();}ctx.restore();}
+  });
+  ctx.filter='none';
+}
+function drawCheeks(rec){
+  const P=(F.cheeks&&F.cheeks.user_translation&&F.cheeks.user_translation.params)||{};
+  const place=P.placement||'high', inten=P.intensity!=null?P.intensity:0.3, covr=P.coverage!=null?P.coverage:0.2;
+  const fw=dist(A.cheek_temples[0],A.cheek_temples[1]);
+  A.cheek_centers.forEach((c,i)=>{const cc=PX(c),tt=PX(A.cheek_temples[i]);
+    // sit ON the cheekbone and sweep UP toward the temple (never centered)
+    const along=place==='high'?0.5:0.32, lift=place==='high'?fw*0.07:fw*0.035;
+    const m=[cc[0]+(tt[0]-cc[0])*along, cc[1]+(tt[1]-cc[1])*along-lift];
+    const ang=Math.atan2(tt[1]-cc[1], tt[0]-cc[0]);   // cheekbone direction (out toward temple)
+    const r=fw*(0.15+covr*0.5);
+    ctx.save();ctx.translate(m[0],m[1]);ctx.rotate(ang);ctx.scale(1,0.5);   // diagonal ellipse along the bone
+    ctx.globalCompositeOperation='multiply';ctx.globalAlpha=inten;
+    const g=ctx.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,rec.hex);g.addColorStop(.5,rec.hex+'66');g.addColorStop(1,rec.hex+'00');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill();ctx.restore();
+    // luminous lift slightly higher on the bone
+    const hp=[m[0]+(tt[0]-cc[0])*0.12, m[1]+(tt[1]-cc[1])*0.12-fw*0.02];
+    ctx.save();ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=inten*0.55;
+    const hg=ctx.createRadialGradient(hp[0],hp[1],0,hp[0],hp[1],r*.45);hg.addColorStop(0,'rgba(255,250,240,.75)');hg.addColorStop(1,'rgba(255,250,240,0)');
+    ctx.fillStyle=hg;ctx.beginPath();ctx.arc(hp[0],hp[1],r*.45,0,7);ctx.fill();ctx.restore();
+  });}
+function drawLips(rec){
+  const P=(F.lips&&F.lips.user_translation&&F.lips.user_translation.params)||{};
+  const col=P.color||rec.hex, finish=P.finish||'satin';
+  const xs=A.lips_outer.map(p=>p[0]),ys=A.lips_outer.map(p=>p[1]);
+  const lw=(Math.max(...xs)-Math.min(...xs))*UW, lh=(Math.max(...ys)-Math.min(...ys))*UH;
+  const feather=Math.max(0.8,lw*0.012);
+  // Is the target shade lighter or darker than a typical lip? decides how we push luminance.
+  const cr=parseInt(col.slice(1,3),16),cg=parseInt(col.slice(3,5),16),cb=parseInt(col.slice(5,7),16);
+  const shadeLum=0.299*cr+0.587*cg+0.114*cb;   // 0..255
+
+  // ---- CORE: recolor, keep HER luminance -> her own texture/shadow/shine survive (the anti-paint move) ----
+  ctx.save();smooth(A.lips_outer,true);ctx.clip();                 // stay strictly inside the lip
+  ctx.filter=`blur(${feather}px)`;                                 // feather ONLY the seam, not the fill
+  // 1) hue+chroma from the shade, luminance from the photo underneath
+  ctx.globalCompositeOperation='color';ctx.globalAlpha=finish==='matte'?0.9:0.82;
+  ctx.fillStyle=col;smooth(A.lips_outer,true);ctx.fill();
+  // 2) depth: multiply darkens in proportion to existing shadow, never flattens highlights
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=finish==='matte'?0.28:0.18;
+  ctx.fillStyle=col;smooth(A.lips_outer,true);ctx.fill();
+  // 3) if the shade is LIGHTER than her bare lip, lift luminance a touch (multiply alone can't go lighter)
+  if(shadeLum>150){ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=(shadeLum-150)/255*0.9;
+    ctx.fillStyle=col;smooth(A.lips_outer,true);ctx.fill();}
+  ctx.restore();
+
+  // ---- SHEEN: only for an actual gloss finish, and only as a faint soft-light lift (never a white blob) ----
+  if(finish==='gloss'){
+    const cx=(Math.min(...xs)+Math.max(...xs))/2*UW;
+    const cy=(Math.min(...ys)+Math.max(...ys))/2*UH+lh*0.24;       // low on the lower-lip pillow
+    const rw=lw*0.30, rh=lh*0.10;                                  // wide + very flat, follows the lip, not a dot
+    ctx.save();smooth(A.lips_outer,true);ctx.clip();
+    ctx.filter=`blur(${Math.max(1.5,lh*0.05)}px)`;
+    ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=0.30; // soft-light = brightens what's there, no paint
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(rw,rh));
+    g.addColorStop(0,'rgba(255,248,240,.7)');g.addColorStop(1,'rgba(255,248,240,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,cy,rw,rh,0,0,7);ctx.fill();
+    ctx.restore();
+  }
+  ctx.filter='none';
+}
+function drawConcealer(rec){
+  const P=(F.concealer&&F.concealer.user_translation&&F.concealer.user_translation.params)||{};
+  const region=P.region||'under_eye', op=P.opacity!=null?P.opacity:0.26, col=P.color||rec.hex||'#fbeee0';
+  [[A.r_eye_upper,A.r_eye_lower],[A.l_eye_upper,A.l_eye_lower]].forEach(([up,lo])=>{
+    const mu=PX(up[Math.floor(up.length/2)]), ml=PX(lo[Math.floor(lo.length/2)]);
+    const eyeH=Math.hypot(ml[0]-mu[0],ml[1]-mu[1]);
+    let cx=ml[0], cy=ml[1]+eyeH*0.95;
+    if(region==='inner'){const inner=PX(lo[lo.length-1]);cx=ml[0]*0.4+inner[0]*0.6;}
+    const rw=eyeH*(region==='inner'?1.1:1.8), rh=eyeH*1.05;
+    ctx.save();ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=op;    // texture-preserving brightening
+    let g=ctx.createRadialGradient(cx,cy,0,cx,cy,rw);g.addColorStop(0,col);g.addColorStop(1,col+'00');
+    ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,cy,rw,rh,0,0,7);ctx.fill();ctx.restore();
+    ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=op*0.4;    // faint lift
+    let g2=ctx.createRadialGradient(cx,cy,0,cx,cy,rw*0.7);g2.addColorStop(0,'rgba(255,248,238,.6)');g2.addColorStop(1,'rgba(255,248,238,0)');
+    ctx.fillStyle=g2;ctx.beginPath();ctx.ellipse(cx,cy,rw*0.7,rh*0.7,0,0,7);ctx.fill();ctx.restore();
+  });
+}
+function drawHair(rec){   // face-framing GUIDE (soft band along the face sides), not generated hair
+  const fo=A.face_oval; if(!fo||fo.length<6)return;
+  const cx=fo.reduce((s,p)=>s+p[0],0)/fo.length;
+  const L=fo.filter(p=>p[0]<cx).sort((a,b)=>a[1]-b[1]), R=fo.filter(p=>p[0]>=cx).sort((a,b)=>a[1]-b[1]);
+  [L,R].forEach(side=>{ if(side.length<3)return;
+    ctx.save();ctx.globalCompositeOperation='multiply';ctx.globalAlpha=0.16;ctx.strokeStyle=rec.hex||'#3a2c20';
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=Math.max(6,UW*0.035);ctx.filter=`blur(${Math.max(3,UW*0.022)}px)`;
+    ctx.beginPath();ctx.moveTo(...PX(side[0]));side.forEach(p=>ctx.lineTo(...PX(p)));ctx.stroke();ctx.restore();
+  });
+  ctx.filter='none';
+}
+const RENDER={eyes:drawEyes,cheeks:drawCheeks,lips:drawLips,concealer:drawConcealer,hair:drawHair};
+const active=new Set();let selected=null;
+function redraw(){if(!A)return;ctx.clearRect(0,0,UW,UH);active.forEach(f=>{if(RENDER[f]&&F[f])RENDER[f](F[f].recommendation);});fx.classList.toggle('on',active.size>0);}
+
+function cap(main,hint){const c=document.getElementById('caption'),t=document.getElementById('captionT'),h=document.getElementById('hint');
+  if(!main){c.classList.remove('in');}else{t.textContent=main;c.classList.add('in');}
+  if(hint){h.textContent=hint;h.classList.add('in');}else h.classList.remove('in');}
+function isPhys(id){return PHYS.some(p=>p.id===id);}
+function shapeOf(id){return (F[id]&&F[id].descriptor)||id;}
+function tipOf(id){return (F[id]&&F[id].advice&&F[id].advice.on)||'';}
+function selectFeature(id){
+  if(selected===id && !active.has(id)){resetAll();return;}
+  selected=id;document.querySelectorAll('.row').forEach(r=>r.classList.toggle('sel',r.dataset.f===id));clearScan();
+  if(isPhys(id)){
+    if(active.has(id)){scrimDim(false);cap(tipOf(id),'double-click the photo to close');return;}
+    scrimDim(true);scanInto('youScan',A,id);if(RA)scanInto('refScan',RA,id);
+    setTimeout(()=>callout(shapeOf(id)),420);cap(null);document.getElementById('hint').textContent='flip the toggle to see it on you';document.getElementById('hint').classList.add('in');
+  } else { const q=ENERGY.find(x=>x.id===id); scrimDim(false); auraOn(q?q.name:id);
+    cap(q&&q.desc?q.desc:null, q&&q.how?q.how:null); }
+}
+function toggle(id){if(glowOn)backToOriginal();if(drapeColor)clearDrape();const on=active.has(id);if(on)active.delete(id);else active.add(id);
+  document.querySelector(`.sw[data-f="${id}"]`).classList.toggle('on',!on);
+  selected=id;document.querySelectorAll('.row').forEach(r=>r.classList.toggle('sel',r.dataset.f===id));clearScan();
+  if(!on){scrimDim(false);cap(tipOf(id),'double-click the photo to close');}
+  else{scrimDim(true);scanInto('youScan',A,id);if(RA)scanInto('refScan',RA,id);setTimeout(()=>callout(shapeOf(id)),420);cap(null);}
+  redraw();}
+function resetAll(){active.clear();selected=null;drapeColor=null;document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('on'));document.getElementById('swatchName').textContent='';document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.row').forEach(r=>r.classList.remove('sel'));clearScan();scrimDim(false);redraw();cap(null);}
+
+function titleCase(s){return s.replace(/\b\w/g,c=>c.toUpperCase());}
+function boot(d){
+  glowSrc=null;glowOn=false;glowBusy=false;
+  drapeMaskImg=null;drapeColor=null;drapeFetching=false;   // new photo -> new mask
+  const gb=document.getElementById('glowBtn');if(gb){gb.textContent='✦ Show my glow-up';gb.disabled=false;}
+  const yl=document.getElementById('youLabel');if(yl)yl.textContent='You';
+  DATA=d;A=d.styling.anchors;F=d.styling.features;RA=d.styling.ref_anchors||null;
+  renderPalette(d.color_analysis);
+  PHYS=['eyes','cheeks','lips','concealer','hair'].filter(id=>F[id]).map(id=>({id,name:NAMES[id]}));
+  const eq=(d.energy&&d.energy.qualities)||[];
+  if(eq.length) ENERGY=eq.map(q=>({id:q.name,name:q.title,desc:q.description,how:q.how_to}));
+  else {const vl=(d.aesthetic&&d.aesthetic.visual_language)||[];ENERGY=vl.slice(0,2).map(x=>({id:x.concept,name:titleCase(x.concept),desc:'',how:''}));}
+  if(!ENERGY.length)ENERGY=[{id:'quiet confidence',name:'Quiet confidence',desc:'',how:''}];
+  const rows=document.getElementById('rows');rows.innerHTML='';
+  const g1=document.createElement('div');g1.className='group-l';g1.textContent='Physical';rows.appendChild(g1);
+  PHYS.forEach(p=>{const row=document.createElement('div');row.className='row';row.dataset.f=p.id;
+    row.innerHTML=`<span class="ic">${IC[p.id]}</span><span class="nm">${p.name}</span><span class="sw" data-f="${p.id}"></span>`;
+    row.onclick=e=>{if(e.target.closest('.sw'))return;selectFeature(p.id);};row.querySelector('.sw').onclick=()=>toggle(p.id);rows.appendChild(row);});
+  const g2=document.createElement('div');g2.className='group-l';g2.textContent='Energy';rows.appendChild(g2);
+  ENERGY.forEach(p=>{const row=document.createElement('div');row.className='row energy';row.dataset.f=p.id;
+    row.innerHTML=`<span class="ic">${IC.energy}</span><span class="nm">${p.name}</span>`;row.onclick=()=>selectFeature(p.id);rows.appendChild(row);});
+  if(d.energy&&d.energy.rising){const pr=document.createElement('div');pr.className='presence';pr.innerHTML=`<span>Presence · ${d.energy.rising.sign} rising</span>${d.energy.rising.presence_tip}`;rows.appendChild(pr);}
+  document.body.classList.add('ready');
+  const go=()=>layout();if(youImg.complete&&refImg.complete)go();else{youImg.onload=go;refImg.onload=go;}
+}
+function reapply(){if(selected&&isPhys(selected)&&!active.has(selected)){scanInto('youScan',A,selected);if(RA)scanInto('refScan',RA,selected);callout(shapeOf(selected));}}
+window.addEventListener('resize',()=>{if(A){layout();reapply();}});
+</script>
+</body>
+</html>

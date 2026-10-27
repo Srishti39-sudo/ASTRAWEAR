@@ -1,0 +1,68 @@
+#astra-card {
+  position: fixed; top: 84px; right: 20px; z-index: 2147483647;
+  width: 320px; max-height: 70vh; overflow-y: auto;
+  background: #F5F0E6; color: #22201a; border: 1px solid #D6CBB6; border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(34,32,26,.22);
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 13px; line-height: 1.5;
+  padding: 14px 15px;
+}
+#astra-card .astra-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+#astra-card .astra-logo { font-weight: 700; letter-spacing: .18em; font-size: 12px; color: #22201a; }
+#astra-card .astra-verdict {
+  font-weight: 700; font-size: 11px; letter-spacing: .12em; padding: 3px 10px; border-radius: 20px; color: #fff;
+}
+#astra-card .astra-verdict.skip { background: #8B1E2D; }
+#astra-card .astra-verdict.caution { background: #B67B18; }
+#astra-card .astra-verdict.ok { background: #3C6A62; }
+#astra-card .astra-x { margin-left: auto; cursor: pointer; font-size: 18px; color: #8b8273; }
+#astra-card .astra-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+#astra-card .astra-sub { color: #8b8273; font-size: 11.5px; margin-bottom: 10px; }
+/* circular match ring */
+#astra-card .astra-ring {
+  width: 116px; height: 116px; border-radius: 50%; margin: 6px auto 12px;
+  display: grid; place-items: center;
+  background: conic-gradient(var(--c) calc(var(--pct) * 1%), #e4dbc9 0);
+}
+#astra-card .astra-ring.ok { --c: #3C6A62; }
+#astra-card .astra-ring.caution { --c: #B67B18; }
+#astra-card .astra-ring.skip { --c: #8B1E2D; }
+#astra-card .astra-ring-in {
+  width: 92px; height: 92px; border-radius: 50%; background: #F5F0E6;
+  display: grid; place-items: center; text-align: center;
+}
+#astra-card .astra-pct { display: block; font-size: 30px; font-weight: 700; color: #22201a; line-height: 1; }
+#astra-card .astra-pct-l { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #8b8273; }
+#astra-card .astra-name { text-align: center; font-weight: 600; font-size: 14px; line-height: 1.25; }
+#astra-card .astra-brandprice { text-align: center; color: #8b8273; font-size: 12px; margin-bottom: 12px; }
+#astra-card .astra-facts { border-top: 1px solid #e4dbc9; padding-top: 8px; }
+#astra-card .astra-line { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 12.5px; }
+#astra-card .astra-line span { color: #8b8273; }
+#astra-card .astra-line b { color: #22201a; text-align: right; }
+#astra-card .astra-reviewnote { margin-top: 8px; font-size: 12px; color: #5a5648; font-style: italic; }
+#astra-card .astra-flag { border-radius: 8px; padding: 8px 10px; margin-top: 8px; font-size: 12px; background: #f6e6c7; border: 1px solid #e6cf9a; }
+/* --- agent: notes, actions, try-on, chat --- */
+#astra-card .astra-note { margin-top: 6px; font-size: 12px; color: #3d3a30; padding-left: 2px; }
+#astra-card .astra-actions { display: flex; gap: 6px; margin-top: 12px; }
+#astra-card .astra-btn {
+  flex: 1; border: 1px solid #D6CBB6; background: #fff; color: #22201a; border-radius: 9px;
+  padding: 7px 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+#astra-card .astra-btn.skip { border-color: #8B1E2D; color: #8B1E2D; }
+#astra-card .astra-btn.ok { border-color: #3C6A62; color: #3C6A62; }
+#astra-card .astra-btn.tryon { background: #22201a; color: #F5F0E6; border-color: #22201a; }
+#astra-card .astra-btn:hover { filter: brightness(.96); }
+#astra-card .astra-tryon img { width: 100%; border-radius: 10px; margin-top: 10px; display: block; }
+#astra-card .astra-chat { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 220px; overflow-y: auto; }
+#astra-card .astra-msg { padding: 7px 10px; border-radius: 12px; font-size: 12.5px; max-width: 92%; white-space: pre-wrap; }
+#astra-card .astra-msg.user { align-self: flex-end; background: #22201a; color: #F5F0E6; border-bottom-right-radius: 3px; }
+#astra-card .astra-msg.agent { align-self: flex-start; background: #fff; border: 1px solid #e4dbc9; border-bottom-left-radius: 3px; }
+#astra-card .astra-ask { display: flex; gap: 6px; margin-top: 10px; }
+#astra-card .astra-ask input {
+  flex: 1; border: 1px solid #D6CBB6; border-radius: 9px; padding: 8px 10px; font-size: 12.5px;
+  background: #fff; color: #22201a; font-family: inherit; outline: none;
+}
+#astra-card .astra-ask input:focus { border-color: #22201a; }
+#astra-card .astra-ask button { border: 0; background: #22201a; color: #F5F0E6; border-radius: 9px; padding: 0 12px; cursor: pointer; font-size: 14px; }
+#astra-card .astra-impact { margin-top: 10px; font-size: 11.5px; color: #3C6A62; font-weight: 600; }
+
+#astra-card .astra-honesty { margin-top: 10px; font-size: 10.5px; line-height: 1.4; color: #8b8273; border-top: 1px dashed #e4dbc9; padding-top: 7px; }

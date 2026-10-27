@@ -37,6 +37,11 @@ AESTHETIC_VOCAB = {
     "warm":              "warm aesthetic, golden light, cozy inviting tones, gentle glowing atmosphere",
     "delicate":          "delicate aesthetic, fine features, light fabrics, soft muted tones, fragile gracefulness",
     "powerful":          "powerful aesthetic, strong posture, bold structure, imposing confident authority",
+    "edgy":              "edgy aesthetic, sharp modern styling, cool confident attitude, street-inspired, hard-soft contrast, unexpected details",
+    "bold":              "bold aesthetic, strong saturated colour, graphic confident statement, unapologetic striking presence",
+    "sleek":             "sleek modern aesthetic, glossy clean lines, sharp minimal tailoring, cool contemporary polish",
+    "sporty":            "sporty aesthetic, athletic ease, relaxed functional styling, energetic casual confidence, clean movement",
+    "androgynous":       "androgynous aesthetic, tailored menswear-inspired lines, cool structured minimalism, sharp confident neutrality",
 }
 
 SHARE_T = 0.30   # a concept is "shared" if BOTH images score above this (tune to your data)
@@ -113,8 +118,9 @@ def _discover_concepts(pil, k=5):
     body = {"contents": [{"parts": [{"text": prompt}, {"inline_data": {"mime_type": "image/jpeg", "data": b}}]}],
             "generationConfig": {"responseMimeType": "application/json", "responseSchema": schema, "temperature": 0.5}}
     try:
-        r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{_GEMINI_MODEL}:generateContent",
-                          headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body, timeout=60)
+        from gemini_util import gemini_post
+        r = gemini_post(f"https://generativelanguage.googleapis.com/v1beta/models/{_GEMINI_MODEL}:generateContent",
+                        headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body, timeout=12)
         if not r.ok:
             print("⚠️ discover_concepts:", r.status_code, r.text[:150]); return {}
         text = "".join(p.get("text", "") for p in r.json().get("candidates", [{}])[0].get("content", {}).get("parts", []))

@@ -56,6 +56,91 @@ try:
 except Exception:
     aesthetic_engine = None
 
+try:
+    from styling import style_engine, anchors_from_mesh   # existing mesh -> Styling KB -> personalized styling JSON
+except Exception:
+    style_engine = None; anchors_from_mesh = None
+
+try:
+    import reference_styling as ref_styling   # Pipelines I/J/K — reference's ACTUAL styling -> user translation
+except Exception:
+    ref_styling = None
+
+try:
+    import face_shape as FS   # deterministic face-shape -> hairstyle (women) / beard (men)
+except Exception:
+    FS = None
+
+try:
+    import contrast_engine as CE   # facial contrast (Russell) -> makeup lift vs define
+except Exception:
+    CE = None
+
+try:
+    from energy import energy_engine   # Pipelines O/P/Q/S — top-2 energy from vibe∩reference (× Venus) + rising tip
+except Exception:
+    energy_engine = None
+
+try:
+    import prompt_builder   # styling features -> ONE precise image-edit instruction (same face, styling added)
+except Exception:
+    prompt_builder = None
+
+try:
+    import fal_glowup        # her photo + edit prompt -> her photo WITH styling (Qwen-Image-Edit-2511 on fal)
+except Exception:
+    fal_glowup = None
+
+try:
+    import gemini_glowup     # same, via Gemini Nano Banana (uses existing GEMINI_API_KEY)
+except Exception:
+    gemini_glowup = None
+
+try:
+    import remote_glowup     # same, via self-hosted Qwen-Image-Edit on a free Kaggle/Colab GPU (default)
+except Exception:
+    remote_glowup = None
+
+try:
+    import color_analysis    # §15 — skin undertone -> curated flattering palette (clothing colours)
+except Exception:
+    color_analysis = None
+
+try:
+    import authentic_vibe    # her STABLE aesthetic identity (vibe word + reference concepts + Venus) — feeds Pillar 2
+except Exception:
+    authentic_vibe = None
+
+try:
+    import opportunity       # §17–19 — style candidates -> ranked TOP 5 tips the user sees
+except Exception:
+    opportunity = None
+
+try:
+    import nonshared         # §11 — non-shared features styled as "her version", not a reference copy
+except Exception:
+    nonshared = None
+
+try:
+    import clothes           # §24 — clothes mask (MediaPipe multiclass) for the colour drape
+except Exception:
+    clothes = None
+
+try:
+    import discoveries       # FINAL OUTPUT PAGE — assembles the 3+2 discovery contract + astrology cards
+except Exception:
+    discoveries = None
+
+try:
+    import style_decision    # Style Decision Object -> render prompt (source of truth, no info loss)
+except Exception:
+    style_decision = None
+
+try:
+    import composite         # Path B — paste ONLY edited regions of the generated image onto the original
+except Exception:
+    composite = None
+
 app = FastAPI(title="AstroStylist CV")
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
@@ -400,9 +485,10 @@ def stage8_labels(matched_ids, structure_tags, user_crop, ref_crop):
     body = {"contents": [{"parts": parts}],
             "generationConfig": {"responseMimeType": "application/json", "responseSchema": LABELS_SCHEMA, "temperature": 0.4}}
     try:
-        r = requests.post(
+        from gemini_util import gemini_post
+        r = gemini_post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent",
-            headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body, timeout=60)
+            headers={"x-goog-api-key": key, "Content-Type": "application/json"}, json=body, timeout=12)
         if not r.ok:
             print("⚠️ Stage 8 error:", r.status_code, r.text[:200]); return {}
         text = "".join(p.get("text", "") for p in r.json().get("candidates", [{}])[0].get("content", {}).get("parts", []))
@@ -421,11 +507,104 @@ def analyze_face(img: Optional[np.ndarray]) -> dict:
     return out
 
 
+# ------------------------------------------------------------------ /analyze-avatar (Create Avatar)
+try:
+    import avatar_engine
+    import avatar_generate
+except Exception:
+    avatar_engine = None
+    avatar_generate = None
+
+
+class AvatarIn(BaseModel):
+    front_image: str
+    side_image: Optional[str] = None
+    height_cm: Optional[float] = None      # optional — enables calibrated cm estimates for sizing
+    gender: Optional[str] = "female"       # female / male — routes the deterministic ruleset
+
+
+@app.post("/analyze-avatar")
+def analyze_avatar(body: AvatarIn):
+    """Create Avatar: two photos -> body_profile (+ regeneration prompt).
+    Preferred path is geometry (pose+segmentation ratios -> height calibration); Gemini is only a fallback."""
+    if avatar_engine is None:
+        return {"error": "avatar engine unavailable"}
+    # GEOMETRY first — MediaPipe now runs in an isolated subprocess, so a crash returns an error (server
+    # survives) rather than aborting. Gemini visual classification is the fallback.
+    prof = avatar_engine.analyze_from_geometry(body.front_image, body.side_image, body.height_cm, body.gender)
+    if prof.get("error"):
+        print("ℹ️ geometry fell back to Gemini:", prof["error"])
+        prof = avatar_engine.analyze_body(body.front_image, body.side_image, body.gender)
+    if prof.get("error"):
+        return {"error": prof["error"]}
+    out = {"body_profile": prof}
+    if avatar_generate is not None:
+        out["generation_prompt"] = avatar_generate.build_generation_prompt(prof)  # Phase 4-5
+    return out
+
+
 # ------------------------------------------------------------------ /analyze
 class AnalyzeIn(BaseModel):
     user_image: str
     reference_image: Optional[str] = None
     vibe_image: Optional[str] = None   # the "unforgettable image" — aspirational aesthetic (any subject)
+    vibe_word: Optional[str] = None    # how she wants to FEEL (the word she wanna listen) — most "her" signal
+    never: Optional[str] = None        # "what has never felt like you" — a HARD NO (e.g. "bob cut", "dark colours")
+    venus_sign: Optional[str] = None   # optional astrology inputs (energy nudge + colour direction)
+    rising_sign: Optional[str] = None
+    gender: Optional[str] = "female"   # female / male — routes hairstyle (women) vs beard (men)
+
+
+def _beauty_profile(styled, ca=None):
+    """Pull AstroStylist's resolved hair + makeup into the clean profile the Personal Stylist look-card
+    consumes (look.enrich `beauty`). hairstyle from the hair feature; 2 makeup tips from lips/cheeks/eyes."""
+    feats = (styled or {}).get("features") or {}
+
+    def _on(k):
+        return ((feats.get(k) or {}).get("advice") or {}).get("on")
+
+    tips = [t for t in (_on("lips"), _on("cheeks"), _on("eyes")) if t]
+    hair = _on("hair")
+    if not hair and not tips:
+        return None
+    return {"hairstyle": hair, "makeup_tips": tips[:2]}
+
+
+def _style_profile(ca, av):
+    """Assemble AstroStylist's colour (color_analysis) + authentic vibe into the flat profile
+    Buy-or-Not Pillar 2 (vibe.py) consumes. Colour is grounded in her real skin; vibe is stably hers."""
+    ca = ca or {}
+    av = av or {}
+    pal = ca.get("palette") or {}
+    best = [c.get("name") for c in pal.get("best", []) if isinstance(c, dict) and c.get("name")]
+    avoid = [c.get("name") for c in pal.get("care", []) if isinstance(c, dict) and c.get("name")]
+    return {
+        "undertone": ca.get("undertone"),
+        # depth, contrast and the white-balanced skin hex: Buy-or-Not's contrast read (vibe.py)
+        # and the makeup shade match (makeup.py) key on these. Hex lists let the verdict use
+        # CIELAB ΔE instead of colour-name matching.
+        "depth": ca.get("depth"),
+        "contrast": ca.get("contrast"),
+        "skin_hex": ca.get("skin_hex"),
+        "season": ca.get("season_lean"),
+        "palette": {"best": best, "avoid": avoid,
+                    "best_hex": [c.get("hex") for c in pal.get("best", []) if isinstance(c, dict) and c.get("hex")],
+                    "avoid_hex": [c.get("hex") for c in pal.get("care", []) if isinstance(c, dict) and c.get("hex")]},
+        "vibe": av.get("vibe", []),
+        "best_prints": av.get("best_prints", []),
+        "vibe_line": av.get("line"),
+    }
+
+
+class TagIn(BaseModel):
+    image: str
+
+
+@app.post("/tag-garment")
+def tag_garment_ep(body: TagIn):
+    """Wardrobe auto-tagger — a garment photo -> the shared tag schema (for Wardrobe Memory / the bank)."""
+    import garment_tagger
+    return garment_tagger.tag_garment(body.image)
 
 
 @app.post("/analyze")
@@ -433,6 +612,8 @@ def analyze(body: AnalyzeIn):
     u_img = decode_image(body.user_image)
     user = analyze_face(u_img)
     result = {"stage": 6, "user": user}
+    if body.never:
+        result["never"] = body.never          # the HARD NO — exposed for base_energy + Pillar 2
     if body.reference_image:
         r_img = decode_image(body.reference_image)
         ref = analyze_face(r_img)
@@ -452,19 +633,263 @@ def analyze(body: AnalyzeIn):
                         m["labels"] = lab[m["id"]]["labels"]
                         m["line"] = lab[m["id"]]["line"]
             # Aesthetic / energy engine (separate pipeline — user anchor + reference + optional vibe image)
+            aes = None
             if aesthetic_engine is not None:
                 vibe_img = decode_image(body.vibe_image) if body.vibe_image else None
                 aes = aesthetic_engine(u_img, r_img, vibe_img)
                 if aes:
                     result["aesthetic"] = aes
+            # Energy layer — runs even WITHOUT the aesthetic engine so Venus/Rising still emit (torch optional)
+            if energy_engine is not None:
+                en = energy_engine(aes, body.venus_sign, body.rising_sign)
+                if en:
+                    result["energy"] = en
+                # BASE energy — her stable authentic anchor (own photo + vibe img + Venus − never)
+                try:
+                    import energy as _energy_mod
+                    be = _energy_mod.base_energy_engine(aes, body.venus_sign, body.never)
+                    if be:
+                        result.setdefault("energy", {})["base"] = be
+                except Exception as _e:
+                    print("⚠️ base_energy:", _e)
+    # Styling layer — reuse the USER's existing mesh + matches + visual language -> personalized styling JSON.
+    # Runs whenever we have the user's mesh (colour palette falls back to default without a reference/aesthetic).
+    if style_engine is not None:
+        umesh = ((user.get("mesh") or {}).get("mesh_n"))
+        if umesh:
+            vlang = ((result.get("aesthetic") or {}).get("visual_language"))
+            styled = style_engine(umesh, result.get("matches"), vlang)
+            if styled:
+                # §15 Color analysis — grounded in HER real skin; vibe/Venus only nudge the mood. Runs w/o reference.
+                if color_analysis is not None and ref_styling is not None:
+                    u_skin = ref_styling.sample_skin(u_img, umesh)
+                    if u_skin:
+                        _vibe_q = [q.get("name") for q in ((result.get("energy") or {}).get("qualities") or []) if q.get("name")]
+                        _wb = color_analysis.estimate_wb_gains(u_img, umesh)   # sclera -> lighting correction
+                        _hair = ref_styling.sample_hair(u_img, umesh)          # hair vs skin -> colouring-contrast dial
+                        ca = color_analysis.analyze(u_skin, hair_rgb=_hair, vibe=_vibe_q, venus=body.venus_sign, wb=_wb)
+                        if ca:
+                            result["color_analysis"] = ca
+                # STYLE PROFILE — the clean contract Buy-or-Not Pillar 2 consumes (colour + stable vibe).
+                if authentic_vibe is not None:
+                    _concepts = [p.get("concept") for p in
+                                 (((result.get("aesthetic") or {}).get("visual_language")) or [])
+                                 if isinstance(p, dict) and p.get("concept")]
+                    _base = ((result.get("energy") or {}).get("base") or {}).get("anchor")
+                    av = authentic_vibe.build(vibe_word=body.vibe_word, vibe_concepts=_concepts,
+                                              venus_sign=body.venus_sign, base=_base, never=body.never)
+                    sp = _style_profile(result.get("color_analysis"), av)
+                    if body.never:
+                        sp["never"] = body.never       # hard exclude carried into Pillar 2
+                    result["style_profile"] = sp
+                # Pipelines I+J+K — reference's ACTUAL styling read from the reference face,
+                # then translated onto the user's own geometry (reference-driven advice).
+                if ref_styling is not None and body.reference_image:
+                    rstyle = ref_styling.extract_reference_styling(r_img)
+                    if rstyle:
+                        result["reference_styling_raw"] = rstyle   # persist the underlying signal
+                    # CV read of the reference's real eye makeup (colour/thickness/coverage/mascara) — reference-specific
+                    rmesh_n = (ref.get("mesh") or {}).get("mesh_n")
+                    eye_cv = ref_styling.extract_reference_eye_cv(r_img, rmesh_n)
+                    cheek_cv = ref_styling.extract_reference_cheek_cv(r_img, rmesh_n)
+                    lip_cv = ref_styling.extract_reference_lip_cv(r_img, rmesh_n)
+                    if eye_cv:
+                        result["reference_eye_cv"] = eye_cv
+                    if cheek_cv:
+                        result["reference_cheek_cv"] = cheek_cv
+                    if lip_cv:
+                        result["reference_lip_cv"] = lip_cv
+                    # skin-aware blush: apply HER blush pigment onto the USER's own skin tone (warm, complexion-correct)
+                    if cheek_cv and cheek_cv.get("delta") is not None:
+                        user_skin = ref_styling.sample_skin(u_img, umesh)
+                        if user_skin:
+                            cheek_cv["color"] = ref_styling.adapt_blush_to_skin(user_skin, cheek_cv["delta"])
+                            cheek_cv["intensity"] = round(min(0.5, cheek_cv.get("intensity", 0.3) * 1.35), 2)
+                            result["reference_cheek_cv"] = cheek_cv
+                    _cv = {"eyes": eye_cv, "cheeks": cheek_cv, "lips": lip_cv}
+                    for feat, fo in (styled.get("features") or {}).items():
+                        blk = ref_styling.build_feature(feat, fo.get("attributes"), rstyle, _cv.get(feat))
+                        fo.update(blk)   # descriptor, reference_styling, user_translation, advice{off,on}, recommendation.hex
+                    # optional concealer feature — only when the reference actually brightens under-eye
+                    concealer_cv = ref_styling.extract_reference_concealer_cv(r_img, rmesh_n)
+                    conc = ref_styling.concealer_feature(concealer_cv)
+                    if conc:
+                        styled["features"]["concealer"] = conc
+                    # FACIAL CONTRAST (Russell) — measured off HER face -> makeup lift/define guidance
+                    if CE is not None:
+                        _fc = CE.measure_contrast(u_img, umesh)
+                        if _fc:
+                            _fc["guidance"] = CE.contrast_guidance(_fc["level"])
+                            result["facial_contrast"] = _fc
+                            _eyes = (styled.get("features") or {}).get("eyes")
+                            if isinstance(_eyes, dict):
+                                _eyes["contrast_tip"] = _fc["guidance"]["note"]   # light touch on the eyes card
+                    # FACE-SHAPE-driven hair (women) / beard (men) — deterministic, from her 478 landmarks
+                    face_rec = None
+                    if FS is not None:
+                        _fs = FS.classify_face_shape(umesh, image_wh=(u_img.shape[1], u_img.shape[0]) if u_img is not None else None)
+                        if _fs:
+                            result["face_shape"] = _fs
+                            face_rec = FS.recommend(_fs["shape"], body.gender)
+                    styled["features"]["hair"] = ref_styling.hair_feature(rstyle, face_rec)
+                    # BEAUTY PROFILE — hair + makeup for the Personal Stylist look-card (Daily Outfit Generator)
+                    bp = _beauty_profile(styled, result.get("color_analysis"))
+                    if bp:
+                        result["beauty_profile"] = bp
+                    # §11 — for features NOT shared with the reference, replace the copied look with
+                    # "her version" from vibe + colour (not a paste of the reference).
+                    if nonshared is not None:
+                        rt = nonshared.retune(styled.get("features"), result.get("energy"), result.get("color_analysis"))
+                        if rt:
+                            styled["retuned_features"] = rt
+                    # Edit-prompt layer — turn the styling into ONE precise image-edit instruction
+                    # (same face, only styling added). Model renders; identity/lighting stay fixed.
+                    if prompt_builder is not None:
+                        pkg = prompt_builder.build(styled.get("features"), result.get("energy"),
+                                                   result.get("color_analysis"),
+                                                   body.venus_sign, body.rising_sign)
+                        if pkg:
+                            styled["edit_prompt"] = pkg
+                    # Style Decision Object — the source of truth; prompt is a DIRECT projection of it.
+                    if style_decision is not None:
+                        sd = style_decision.build(styled.get("features"), result.get("color_analysis"),
+                                                  result.get("energy"), body.venus_sign, body.rising_sign)
+                        styled["style_decision"] = sd["style_decision"]
+                        styled.setdefault("edit_prompt", {})
+                        styled["edit_prompt"]["instruction"] = sd["instruction"]      # SDO-derived (primary)
+                        styled["edit_prompt"]["negative"] = sd["negative"]
+                        styled["edit_prompt"]["validation"] = sd["validation"]
+                    # HARD NO — whatever the user said has NEVER felt like them (bob cut, dark colours, …).
+                    # Additive only: we don't touch the resolved prompt, we prepend an absolute exclusion that overrides it.
+                    if body.never and styled.get("edit_prompt"):
+                        ep = styled["edit_prompt"]
+                        no = (f"ABSOLUTE EXCLUSION (overrides everything below): the user has said this has NEVER "
+                              f"felt like them — never recommend, apply, or render anything resembling: {body.never}. "
+                              f"If any resolved styling conflicts with this, drop that styling.")
+                        ep["instruction"] = no + "\n\n" + (ep.get("instruction") or "")
+                        ep["negative"] = (ep.get("negative") or "") + f"; anything resembling {body.never}"
+                        ep["never"] = body.never
+                # §17–19 — rank all real styling opportunities into the TOP 5 tips the user sees
+                if opportunity is not None:
+                    top5 = opportunity.build_top5(styled.get("features"),
+                                                  result.get("color_analysis"), result.get("energy"))
+                    if top5:
+                        styled["top5"] = top5
+                # FINAL OUTPUT PAGE contract — 3 face + 2 vibe discoveries, palette, astrology cards
+                if discoveries is not None:
+                    result["face_one"] = discoveries.build(
+                        styled.get("features"), result.get("color_analysis"), result.get("energy"),
+                        venus_sign=body.venus_sign, rising_sign=body.rising_sign)
+                # reference anchors so the scan/trace can run on HER photo too
+                if anchors_from_mesh is not None and body.reference_image:
+                    rmesh = ((ref.get("mesh") or {}).get("mesh_n"))
+                    if rmesh:
+                        styled["ref_anchors"] = anchors_from_mesh(rmesh)
+                result["styling"] = styled
     # strip internal embeddings from the response (kept only for the similarity math)
     for k in ("user", "reference"):
         if isinstance(result.get(k), dict):
             result[k].pop("_embedding", None)
-    return result
+    return _to_native(result)   # convert any numpy floats/ints/arrays -> JSON-safe Python
+
+
+def _to_native(o):
+    """Recursively convert numpy types to native Python so FastAPI can JSON-encode the result."""
+    if isinstance(o, dict):
+        return {k: _to_native(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_to_native(v) for v in o]
+    if isinstance(o, np.generic):     # np.float32/float64/int64/bool_ ...
+        return o.item()
+    if isinstance(o, np.ndarray):
+        return o.tolist()
+    return o
+
+
+# ------------------------------------------------------------------ /glowup  (her photo + edit prompt -> her photo WITH styling)
+class GlowupIn(BaseModel):
+    user_image: str                        # HER photo (data URI) — the SAME canonical photo
+    prompt: str                            # identity-locked edit instruction (from styling.edit_prompt.instruction)
+    negative_prompt: Optional[str] = ""    # from styling.edit_prompt.negative
+    renderer: Optional[str] = "remote"     # "remote" (free Kaggle GPU, default), "gemini", or "fal"
+    composite: Optional[bool] = True       # Path B — paste ONLY edited regions back onto the original
+    guidance_scale: Optional[float] = 4.0  # fal only
+    num_inference_steps: Optional[int] = 28  # fal only
+    seed: Optional[int] = None
+
+
+def _glow_render(name):
+    return {"remote": remote_glowup, "gemini": gemini_glowup, "fal": fal_glowup}.get(name)
+
+
+def _composite_back(user_image, generated_data_uri):
+    """Path B: keep only the edited makeup regions of the generated image; rest stays the original photo."""
+    try:
+        u_bgr = decode_image(user_image)
+        g_bgr = decode_image(generated_data_uri)
+        mesh = ((stage2_mesh(u_bgr) or {}).get("mesh_n")) if u_bgr is not None else None
+        top_mask = clothes.clothes_mask_array(u_bgr) if clothes is not None else None  # bring the neutral top across
+        out = composite.apply(u_bgr, g_bgr, mesh, extra_mask=top_mask)
+        if out is None:
+            return None
+        ok, buf = cv2.imencode(".png", out)
+        if not ok:
+            return None
+        return "data:image/png;base64," + base64.b64encode(buf.tobytes()).decode()
+    except Exception:
+        return None
+
+
+@app.post("/glowup")
+def glowup(body: GlowupIn):
+    """Render HER photo with the styling applied. Same face; styling added. Default renderer: remote Kaggle GPU."""
+    mod = _glow_render(body.renderer or "remote")
+    if mod is None:
+        return {"success": False, "error": f"renderer '{body.renderer}' unavailable", "fallback_available": True}
+    if mod is fal_glowup:
+        res = fal_glowup.generate(
+            user_image=body.user_image, prompt=body.prompt, negative_prompt=body.negative_prompt or "",
+            guidance_scale=body.guidance_scale if body.guidance_scale is not None else 4.0,
+            num_inference_steps=body.num_inference_steps or 28, seed=body.seed,
+        )
+    else:
+        # remote + gemini share the simple (user_image, prompt, negative_prompt) signature
+        res = mod.generate(user_image=body.user_image, prompt=body.prompt,
+                           negative_prompt=body.negative_prompt or "")
+    # Path B — composite the edited regions back onto the ORIGINAL so only makeup areas come from the model
+    if res.get("success") and res.get("image") and body.composite and composite is not None:
+        comp = _composite_back(body.user_image, res["image"])
+        if comp:
+            res["image_generated"] = res["image"]   # keep the raw generation for comparison/debug
+            res["image"] = comp
+            res["composited"] = True
+        else:
+            res["composited"] = False
+    return res
+
+
+# ------------------------------------------------------------------ /clothes  (§24 — mask of the top, for the colour drape)
+class ClothesIn(BaseModel):
+    image: str        # the photo whose top we recolour (her uploaded photo, or the glow-up)
+
+
+@app.post("/clothes")
+def clothes_mask(body: ClothesIn):
+    if clothes is None:
+        return {"found": False, "error": "clothes module unavailable"}
+    return clothes.clothes_mask_b64(decode_image(body.image))
+
+
+@app.get("/glowup/status")
+def glowup_status():
+    """Which glow-up renderers are wired up?"""
+    return {"remote": (remote_glowup.available() if remote_glowup else {"ready": False}),
+            "gemini": (gemini_glowup.available() if gemini_glowup else {"ready": False}),
+            "fal": (fal_glowup.available() if fal_glowup else {"ready": False})}
 
 
 @app.get("/health")
 def health():
     return {"ok": True, "stage": 6, "detector": "SCRFD-10GF (buffalo_l)",
-            "mesh": "mediapipe-facelandmarker-478", "similarity": "arcface + per-feature procrustes"}
+            "mesh": "mediapipe-facelandmarker-478", "similarity": "arcface + per-feature procrustes",
+            "glowup": (gemini_glowup.available() if gemini_glowup else {"ready": False})}
