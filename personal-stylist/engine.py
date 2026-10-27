@@ -160,6 +160,14 @@ def analyze(product: dict) -> dict:
 
     if is_makeup:
         # ---------------- MAKEUP: the shade against her measured colouring. No body, no closet.
+        if product.get("shades"):
+            try:
+                import shades as SH
+                cat = SH.load()
+                if SH.add_shades(cat, product.get("brand"), product.get("title"), product["shades"]):
+                    SH.save(cat)
+            except Exception:
+                pass
         mk = MK.makeup_read(style, product) if style else MK.makeup_read({}, product)
         score = round(0.45 * product_score + 0.55 * mk["score"]) if style else product_score
         value = _makeup_value(product, product.get("budget"))
@@ -167,7 +175,25 @@ def analyze(product: dict) -> dict:
     else:
         # ---------------- CLOTHES: Pillar 1 body, Pillar 2 colouring, closet, value, lifespan.
         sizing_hint = "small" if any("small" in r.lower() for r in (product.get("reviews") or [])) else None
+        sizing_source = "reviews" if sizing_hint else None
+        if product.get("fit_log") and product.get("brand"):
+            import sizing_memory
+            own, own_detail = sizing_memory.brand_hint(product["fit_log"], product["brand"],
+                                                      product.get("category") or product.get("category_hint"))
+            if own_detail.get("events", 0) >= 2:
+                sizing_hint, sizing_source = own, "your own fit history"
+                own_note = own_detail.get("note")
+            else:
+                own_note = None
+        else:
+            own_note = None
         struct = ST.structure_read(body, product, sizing_hint) if body else None
+        if struct and own_note:
+            # the hint came from HER buys, so the sentence must not credit reviewers
+            base = (struct["size"]["note"].replace("Reviews say it runs", "Your own buys from this brand ran")
+                    .replace("reviews say it runs", "your own buys from this brand ran"))
+            struct["size"]["note"] = f"{base} ({own_note})"
+            struct["size"]["source"] = sizing_source
         vib = VB.vibe_read(style, product) if style else None
         if struct and vib:
             score = round(0.30 * product_score + 0.40 * struct["score"] + 0.30 * vib["score"])

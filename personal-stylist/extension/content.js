@@ -84,6 +84,26 @@ function rgbToHex(css) {
   if (!m || (m[4] !== undefined && parseFloat(m[4]) === 0)) return null;
   return "#" + [m[1], m[2], m[3]].map((n) => (+n).toString(16).padStart(2, "0")).join("");
 }
+function extractShades() {
+  // Every shade chip on the page with its name and swatch colour -> the catalogue grows as she browses.
+  const out = [];
+  const seen = new Set();
+  const chips = [...document.querySelectorAll('[class*="shade" i], [class*="swatch" i], [class*="variant" i], [role="radio"], [role="option"]')];
+  for (const el of chips) {
+    const name = (el.getAttribute("aria-label") || el.getAttribute("title") || el.getAttribute("data-name") ||
+                  (el.querySelector("img") || {}).alt || el.innerText || "").trim().slice(0, 60);
+    let hex = rgbToHex(getComputedStyle(el).backgroundColor);
+    if (!hex || hex === "#ffffff" || hex === "#000000") {
+      hex = [...el.querySelectorAll("*")].map((c) => rgbToHex(getComputedStyle(c).backgroundColor))
+        .find((h) => h && h !== "#ffffff" && h !== "#000000" && h !== "#f5f5f5") || null;
+    }
+    if (!name || !hex || seen.has(name)) continue;
+    seen.add(name);
+    out.push({ name, hex });
+    if (out.length >= 80) break;
+  }
+  return out;
+}
 function extractShadeHex() {
   // Nykaa / Myntra Beauty / Amazon render shade pickers as small coloured chips; the chosen one carries a
   // selected/active class or aria state. Read its computed background — a MEASURED value, not the shade name.
@@ -131,6 +151,7 @@ function buildProduct() {
   return {
     shade_hex: isMakeup ? extractShadeHex() : null,
     shade_name: specs.shade || null,
+    shades: isMakeup ? extractShades() : [],
     category_hint: hint,
     url: location.href,
     title: extractTitle(),
@@ -240,6 +261,28 @@ async function decide(decision) {
   }).then((r) => r.json()).catch(() => null);
   if (r && r.say) { setImpact(r); bubble("agent", decision === "skipped" ? "Skip logged — a skip is a win." : "Logged. Wear it well."); }
   (r && r.patterns || []).forEach((p) => bubble("agent", p));
+  if (decision === "bought") askFit();
+}
+
+// "Did it fit?" — the one tap that turns her buys into her own size model
+function askFit() {
+  const box = document.querySelector("#astra-card .astra-chat");
+  if (!box || box.querySelector(".astra-fit")) return;
+  const row = document.createElement("div");
+  row.className = "astra-fit";
+  row.innerHTML = `<span>When it arrives — did it fit?</span>
+    <button data-f="fit">Fit</button><button data-f="small">Ran small</button><button data-f="big">Ran big</button>`;
+  row.querySelectorAll("button").forEach((b) => (b.onclick = async () => {
+    const r = await fetch(BASE + "/fit", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product, fit: b.dataset.f }),
+    }).then((r) => r.json()).catch(() => null);
+    row.remove();
+    const d = r && r.detail || {};
+    bubble("agent", d.note || `Noted — ${r && r.summary ? r.summary.note : "thanks"}. From two consistent taps on, ${product.brand || "this brand"}'s size advice is yours, not reviewers'.`);
+  }));
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
 }
 
 async function ask(input) {

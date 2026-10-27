@@ -181,6 +181,17 @@ def makeup_read(style, product):
             if i["verdict"] != "unknown":
                 notes.append(i["note"])
 
+    # the page's own shade chips: which one is nearest HER skin, whatever she has selected
+    skin = style.get("skin_hex")
+    if product.get("shades") and skin and cat in ("foundation", "concealer"):
+        import shades as SH
+        best = SH.nearest({}, skin, k=1, shades=product["shades"])
+        if best:
+            b = best[0]
+            out["closest_in_range"] = b
+            same = shade.get("name") and b["name"].lower() in str(shade["name"]).lower()
+            if not same:
+                notes.append(f"Closest shade in this range to your skin: {b['name']} (ΔE {b['delta_e']}, {b['direction']}) — by the brand's swatches.")
     if not shade["hex"]:
         notes.append("No shade could be read from this page — pick a shade swatch and the card updates.")
     elif shade["source"] == "name":

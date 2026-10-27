@@ -612,6 +612,20 @@ def analyze(body: AnalyzeIn):
     u_img = decode_image(body.user_image)
     user = analyze_face(u_img)
     result = {"stage": 6, "user": user}
+    # Capture quality — is the light good enough to read colour from? Computed first so a dark or
+    # blown-out selfie is reported as such instead of silently producing a wrong undertone.
+    try:
+        import capture_quality
+        _mesh_n = ((user.get("mesh") or {}).get("mesh_n")) if user.get("detected") else None
+        _gains = None
+        if _mesh_n and color_analysis is not None:
+            try:
+                _gains = color_analysis.estimate_wb_gains(u_img, _mesh_n)
+            except Exception:
+                _gains = None
+        result["capture_quality"] = capture_quality.assess(u_img, _mesh_n, _gains)
+    except Exception as _e:
+        print("⚠️ capture_quality:", _e)
     if body.never:
         result["never"] = body.never          # the HARD NO — exposed for base_energy + Pillar 2
     if body.reference_image:

@@ -68,7 +68,10 @@ import numpy as np
 from .vectors import cosine_similarity, mean_vector, normalise, normalise_rows, top_k
 
 #: The image encoder. Swap for a CLIP checkpoint if you prefer — nothing else changes.
-MODEL_ID = "google/siglip2-base-patch16-224"
+#: Swap for a fashion fine-tune by setting ALTIER_EMBED_MODEL (e.g. "Marqo/marqo-fashionSigLIP",
+#: same 768-d shape, trained on garment data). Every cached vector records the model that made it
+#: and LookIndex / LookStore refuse to mix models, so a swap means re-embedding — by design.
+MODEL_ID = os.environ.get("ALTIER_EMBED_MODEL", "google/siglip2-base-patch16-224")
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
 
@@ -97,8 +100,9 @@ def load_model(model_id=None):
         import torch
         from transformers import AutoModel, AutoProcessor
         mid = model_id or MODEL_ID
-        _PROCESSOR = AutoProcessor.from_pretrained(mid)
-        _MODEL = AutoModel.from_pretrained(mid, dtype=torch.float32).to(_device()).eval()
+        remote = mid.startswith("Marqo/")                 # Marqo's fashion models ship their own code
+        _PROCESSOR = AutoProcessor.from_pretrained(mid, trust_remote_code=remote)
+        _MODEL = AutoModel.from_pretrained(mid, dtype=torch.float32, trust_remote_code=remote).to(_device()).eval()
     return _MODEL, _PROCESSOR
 
 

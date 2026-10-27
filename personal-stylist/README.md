@@ -31,6 +31,9 @@ Chrome extension (Myntra · Amazon · Nykaa · Ajio)  ──POST /verdict──�
 | Makeup (`makeup.py`) | foundation/concealer: ΔE to her skin hex; lip/blush/liner: temperature vs undertone, pigment vs contrast | ΔE measured; cut-offs convention; needs the selected swatch for a real read |
 | Closet (`pairing.py`) | her wardrobe: what pairs, near-duplicates, gaps | her own data; "already own one" is deliberately strict |
 | Worth (`budget.py`, `longevity.py`) | cost-per-wear from closet pairings; lifespan from fibre, construction, trend words | estimates, labelled |
+| Sizing memory (`sizing_memory.py`) | her own "did it fit" taps per brand, from the card after a buy | her data; from two consistent events on, it outranks reviewers' sizing hints. The seed of a Zalando-style size model at one-person scale |
+| Shade catalogue (`shades.py`) | every shade chip the extension sees on a makeup page, as the brand's own swatch hex | ΔE to her skin; "closest shade in this range"; grows as she browses, never scraped, never Perfect Corp's |
+| Capture quality (`cv-service/capture_quality.py`) | the selfie's light: dark, blown out, colour cast, resolution | a dark or clipped photo is refused before an undertone is stored; a cast is corrected from the eye whites and flagged |
 | Trust (`trust_signals.py`, `reputation.py`, reviews) | site type, refund policy, care, Reddit complaints, on-site review patterns (clothes and makeup vocabularies) | read, not inferred |
 
 The verdict is a **risk count** over named signals (cut at 1 and 4); the match % is a weighted blend of
@@ -43,7 +46,10 @@ product quality, body fit and colouring fit. Both are uncalibrated and every res
 source ~/ASTRAWEAR/cv-service/venv/bin/activate
 cd ~/ASTRAWEAR/personal-stylist
 uvicorn api:app --port 8090 --reload          # the extension talks to http://localhost:8090
-python -m tests.test_verdict                  # 10 offline tests: colour maths, contrast, longevity, makeup, routing
+python -m tests.test_verdict                  # 12 offline tests: colour maths, contrast, longevity, makeup, routing, fit memory, shades
+
+# Body measurement, two routes side by side against a tape (3D route needs SHAPY + SMPL-X, non-commercial):
+python ../cv-service/compare_body.py --front front.jpg --side side.jpg --height 165 --tape bust=88,waist=70,hip=96
 ```
 
 Her profile (`profile.json`) comes from one photo through the CV service (`cv-service/main.py /analyze`):

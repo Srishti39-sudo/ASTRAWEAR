@@ -106,7 +106,7 @@ TOOLS = [{"functionDeclarations": [
 # ---------- tools (all deterministic; the LLM never sees raw images or decides anything) ----------
 
 def _personalize(p: dict, prof: dict) -> dict:
-    for k in ("body", "style", "wardrobe", "budget", "priorities"):
+    for k in ("body", "style", "wardrobe", "budget", "priorities", "fit_log"):
         p.setdefault(k, prof.get(k))
     return p
 
@@ -170,10 +170,15 @@ def _patterns(skipped: list) -> list:
     return out[:2]
 
 
-def log_decision(decision: str, product: dict, prof: dict, save, title=None, category=None, price=None) -> dict:
-    """Deterministic record of a skip / buy. Used by the agent tool AND the one-tap buttons (no LLM)."""
+def log_decision(decision: str, product: dict, prof: dict, save, title=None, category=None, price=None,
+                 fit=None, size=None) -> dict:
+    """Deterministic record of a skip / buy. Used by the agent tool AND the one-tap buttons (no LLM).
+    `fit` ('fit' | 'small' | 'big') after a buy is the seed of her own size model (sizing_memory)."""
     product = product or {}
-    entry = {"decision": decision,
+    if decision == "bought" and fit:
+        import sizing_memory
+        sizing_memory.record_fit(prof, product, fit, size)
+    entry = {"decision": decision, "fit_feedback": fit, "size": size,
              "title": title or product.get("title"),
              "category": category or guess_category(product),
              "price": _price(price if price is not None else product.get("price")),
@@ -247,6 +252,11 @@ def _analyze_photo(image: str, prof: dict, save) -> dict:
     a = requests.post(f"{_CV_URL}/analyze", json={"user_image": image}, timeout=120).json()
     if not (a.get("user") or {}).get("detected"):
         return {"error": "no face found — ask for a clear, front-facing photo in daylight"}
+    cq = a.get("capture_quality") or {}
+    if cq.get("blocking"):
+        # a dark or blown-out selfie would store a wrong undertone; refuse and say how to retake
+        return {"error": "the light in this photo is not good enough to read colour from",
+                "capture_quality": cq, "advice": cq.get("advice")}
     body = requests.post(f"{_CV_URL}/analyze-avatar", json={"front_image": image}, timeout=120).json()
     prof["style"] = a.get("style_profile")
     if body.get("body_profile"):
@@ -261,7 +271,9 @@ def _analyze_photo(image: str, prof: dict, save) -> dict:
     save(prof)
     ca = a.get("color_analysis") or {}
     return {"saved": True, "undertone": ca.get("undertone"), "season": ca.get("season_lean"),
-            "contrast": ca.get("contrast"), "note": ca.get("note"), **_profile_summary(prof)}
+            "contrast": ca.get("contrast"), "depth": ca.get("depth"), "note": ca.get("note"),
+            "capture_quality": {"flags": cq.get("flags", []), "advice": cq.get("advice")},
+            **_profile_summary(prof)}
 
 
 def _run_tool(name, args, ctx):

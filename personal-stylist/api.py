@@ -128,6 +128,8 @@ def verdict(p: ProductIn):
     prod.setdefault("wardrobe", prof.get("wardrobe"))       # cross-check against her real closet
     prod.setdefault("budget", prof.get("budget"))           # cost-per-wear vs her budget
     prod.setdefault("priorities", prof.get("priorities"))   # what she won't compromise on
+    prod.setdefault("fit_log", prof.get("fit_log"))         # her own "did it fit" history per brand
+    prod.setdefault("skin_hex", (prof.get("style") or {}).get("skin_hex"))
     return engine.analyze(prod)
 
 
@@ -194,6 +196,7 @@ def verdict_url(u: UrlIn):
     p.setdefault("wardrobe", prof.get("wardrobe"))          # cross-check against her real closet
     p.setdefault("budget", prof.get("budget"))              # cost-per-wear vs her budget
     p.setdefault("priorities", prof.get("priorities"))      # what she won't compromise on
+    p.setdefault("fit_log", prof.get("fit_log"))
     return engine.analyze(p)
 
 
@@ -256,6 +259,8 @@ def agent_chat(a: AgentIn):
 class DecisionIn(BaseModel):
     decision: str                                        # "skipped" | "bought"
     product: Optional[Dict[str, Any]] = None             # the page's product (from the extension)
+    fit: Optional[str] = None                            # after a buy: "fit" | "small" | "big"
+    size: Optional[str] = None
 
 
 @app.post("/decision")
@@ -263,7 +268,65 @@ def decision(d: DecisionIn):
     """One-tap Skip / Bought from the card — logged straight into the engine, no LLM in the loop."""
     if d.decision not in ("skipped", "bought"):
         return {"error": "decision must be 'skipped' or 'bought'"}
-    return agent.log_decision(d.decision, d.product or {}, _load_profile(), _save_profile)
+    if d.fit and d.fit not in ("fit", "small", "big"):
+        return {"error": "fit must be 'fit', 'small' or 'big'"}
+    return agent.log_decision(d.decision, d.product or {}, _load_profile(), _save_profile, fit=d.fit, size=d.size)
+
+
+class FitIn(BaseModel):
+    product: Optional[Dict[str, Any]] = None
+    fit: str                                             # "fit" | "small" | "big"
+    size: Optional[str] = None
+
+
+@app.post("/fit")
+def fit_feedback(f: FitIn):
+    """'Did it fit?' — one tap after a buy. Her own size history per brand, used by the next verdict
+    before any stranger's review. The seed of a Zalando-style size model at the scale of one person."""
+    import sizing_memory
+    if f.fit not in ("fit", "small", "big"):
+        return {"error": "fit must be 'fit', 'small' or 'big'"}
+    prof = _load_profile()
+    entry = sizing_memory.record_fit(prof, f.product or {}, f.fit, f.size)
+    _save_profile(prof)
+    hint, detail = sizing_memory.brand_hint(prof.get("fit_log"), entry.get("brand"))
+    return {"recorded": entry, "brand_hint": hint, "detail": detail, "summary": sizing_memory.summary(prof.get("fit_log"))}
+
+
+@app.get("/fit-memory")
+def fit_memory():
+    import sizing_memory
+    return sizing_memory.summary(_load_profile().get("fit_log"))
+
+
+class ShadesIn(BaseModel):
+    brand: Optional[str] = None
+    product: Optional[str] = None
+    shades: List[Dict[str, Any]]                         # [{name, hex}] read off the page's shade chips
+
+
+@app.post("/shades")
+def shades_add(sh: ShadesIn):
+    """The extension sends every shade chip it can see on a makeup page; the catalogue grows as she
+    browses. Nothing is scraped and nothing is Perfect Corp's — it is the brand's own swatches."""
+    import shades as SH
+    cat = SH.load()
+    added = SH.add_shades(cat, sh.brand, sh.product, sh.shades)
+    if added:
+        SH.save(cat)
+    return {"added": added, **SH.stats(cat)}
+
+
+@app.get("/shades/match")
+def shades_match(brand: Optional[str] = None, k: int = 5):
+    """Which shades in the catalogue are closest to HER skin (ΔE), optionally within one brand."""
+    import shades as SH
+    skin = ((_load_profile().get("style") or {}).get("skin_hex"))
+    if not skin:
+        return {"error": "no skin colour in the profile yet — add a daylight selfie", "matches": []}
+    cat = SH.load()
+    return {"skin_hex": skin, "matches": SH.nearest(cat, skin, k=k, brand=brand), **SH.stats(cat),
+            "honesty": "ΔE between her white-balanced skin and the brand's own swatch colour. Swatches approximate the real shade; confirm at the jaw in daylight."}
 
 
 @app.get("/impact")

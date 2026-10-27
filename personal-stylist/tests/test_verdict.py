@@ -158,6 +158,48 @@ def test_makeup_reviews_use_makeup_vocabulary():
     print("  ok  review scanning switches vocabulary: oxidises/patchy for makeup, sizing/gaping for clothes")
 
 
+# ---------------------------------------------------------------- sizing memory + shade catalogue
+def test_fit_feedback_becomes_her_own_size_hint():
+    import sizing_memory as SM
+    prof = {}
+    SM.record_fit(prof, {"brand": "H&M", "category": "top"}, "small")
+    hint, d = SM.brand_hint(prof["fit_log"], "H&M")
+    assert hint is None and d["events"] == 1, "one event must not move the size advice"
+    SM.record_fit(prof, {"brand": "h&m", "category": "dress"}, "small")
+    hint, d = SM.brand_hint(prof["fit_log"], "H&M")
+    assert hint == "small" and "ran small" in d["note"]
+    SM.record_fit(prof, {"brand": "Zara"}, "fit"); SM.record_fit(prof, {"brand": "Zara"}, "fit")
+    assert SM.brand_hint(prof["fit_log"], "Zara")[0] is None and "fit" in SM.brand_hint(prof["fit_log"], "Zara")[1]["note"]
+    try:
+        SM.record_fit(prof, {}, "huge"); raise AssertionError("bad fit value accepted")
+    except ValueError:
+        pass
+    assert SM.summary(prof["fit_log"])["events"] == 4
+    v = engine.analyze({"title": "H&M fitted top", "brand": "H&M", "color": "Honey", "material": "Cotton", "fit": "fitted",
+                        "body": BODY, "style": STYLE, "fit_log": prof["fit_log"]})
+    assert v["structure"]["size"]["verdict"] == "size up" and v["structure"]["size"]["source"] == "your own fit history"
+    assert "your own history" in v["structure"]["size"]["note"] and "Reviews say" not in v["structure"]["size"]["note"]
+    print("  ok  two consistent 'ran small' taps on a brand make the verdict say size up, from HER history (one tap does nothing)")
+
+
+def test_shade_catalogue_finds_her_nearest_shade():
+    import shades as SH
+    cat = {"shades": []}
+    chips = [{"name": "110 Porcelain", "hex": "#f3d9c4"}, {"name": "220 Natural Beige", "hex": "#cfa07f"},
+             {"name": "228 Soft Tan", "hex": "#c99b7b"}, {"name": "330 Toffee", "hex": "#9c6a4a"}, {"name": "bad", "hex": "nope"}]
+    assert SH.add_shades(cat, "Maybelline", "Fit Me", chips) == 4
+    assert SH.add_shades(cat, "maybelline", "fit me", chips) == 0, "re-adding must dedupe"
+    best = SH.nearest(cat, STYLE["skin_hex"], k=2)
+    assert best[0]["name"] == "228 Soft Tan" and best[0]["verdict"] in ("match", "close"), best
+    assert best[0]["delta_e"] <= best[1]["delta_e"]
+    only = SH.nearest(cat, STYLE["skin_hex"], brand="Maybelline")
+    assert len(only) == 4 and SH.nearest(cat, STYLE["skin_hex"], brand="Lakme") == []
+    mk = MK.makeup_read(STYLE, {"title": "Fit Me foundation", "shade_hex": "#f3d9c4", "shade_name": "110 Porcelain", "shades": chips})
+    assert mk["match"]["verdict"] == "off" and mk["closest_in_range"]["name"] == "228 Soft Tan"
+    assert any("Closest shade in this range" in n for n in mk["notes"])
+    print(f"  ok  shade catalogue: 228 Soft Tan is her nearest (ΔE {best[0]['delta_e']}); a wrong selected shade names the right one in the range")
+
+
 if __name__ == "__main__":
     failures = 0
     for name in sorted(n for n in dir() if n.startswith("test_")):
